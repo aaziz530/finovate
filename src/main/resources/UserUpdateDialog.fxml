@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" prefHeight="600.0" prefWidth="500.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.esprit.finovate.controllers.AdminDashboardController">
+   <padding>
+      <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+   </padding>
+   <children>
+      <!-- Header -->
+      <Label text="Update User" textFill="#237f4e">
+         <font>
+            <Font name="System Bold" size="24.0" />
+         </font>
+         <VBox.margin>
+            <Insets bottom="25.0" />
+         </VBox.margin>
+      </Label>
+      
+      <!-- First Name and Last Name -->
+      <HBox spacing="15.0">
+         <children>
+            <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label text="First Name" textFill="#495057">
+                     <font>
+                        <Font name="System Bold" size="13.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="updateFirstNameField" promptText="First name" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10;" />
+               </children>
+            </VBox>
+            
+            <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label text="Last Name" textFill="#495057">
+                     <font>
+                        <Font name="System Bold" size="13.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="updateLastNameField" promptText="Last name" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10;" />
+               </children>
+            </VBox>
+         </children>
+         <VBox.margin>
+            <Insets bottom="15.0" />
+         </VBox.margin>
+      </HBox>
+      
+      <!-- Email -->
+      <VBox spacing="8.0">
+         <children>
+            <Label text="Email Address" textFill="#495057">
+               <font>
+                  <Font name="System Bold" size="13.0" />
+               </font>
+            </Label>
+            <TextField fx:id="updateEmailField" promptText="Email address" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10;" />
+         </children>
+         <VBox.margin>
+            <Insets bottom="15.0" />
+         </VBox.margin>
+      </VBox>
+      
+      <!-- Birthdate -->
+      <VBox spacing="8.0">
+         <children>
+            <Label text="Date of Birth" textFill="#495057">
+               <font>
+                  <Font name="System Bold" size="13.0" />
+               </font>
+            </Label>
+            <DatePicker fx:id="updateBirthdatePicker" promptText="Select birthdate" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5;" maxWidth="Infinity" />
+         </children>
+         <VBox.margin>
+            <Insets bottom="15.0" />
+         </VBox.margin>
+      </VBox>
+      
+      <!-- Role -->
+      <VBox spacing="8.0">
+         <children>
+            <Label text="Role" textFill="#495057">
+               <font>
+                  <Font name="System Bold" size="13.0" />
+               </font>
+            </Label>
+            <ComboBox fx:id="updateRoleComboBox" promptText="Select role" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5;" maxWidth="Infinity" />
+         </children>
+         <VBox.margin>
+            <Insets bottom="15.0" />
+         </VBox.margin>
+      </VBox>
+      
+      <!-- Points and Solde -->
+      <HBox spacing="15.0">
+         <children>
+            <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label text="Points" textFill="#495057">
+                     <font>
+                        <Font name="System Bold" size="13.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="updatePointsField" promptText="Points" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10;" />
+               </children>
+            </VBox>
+            
+            <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label text="Balance" textFill="#495057">
+                     <font>
+                        <Font name="System Bold" size="13.0" />
+                     </font>
+                  </Label>
+                  <TextField fx:id="updateSoldeField" promptText="Balance" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10;" />
+               </children>
+            </VBox>
+         </children>
+         <VBox.margin>
+            <Insets bottom="15.0" />
+         </VBox.margin>
+      </HBox>
+      
+      <!-- Error Label -->
+      <Label fx:id="updateErrorLabel" textFill="#dc3545" wrapText="true">
+         <font>
+            <Font size="12.0" />
+         </font>
+         <VBox.margin>
+            <Insets bottom="20.0" />
+         </VBox.margin>
+      </Label>
+      
+      <!-- Action Buttons -->
+      <HBox alignment="CENTER" spacing="15.0">
+         <children>
+            <Button fx:id="updateCancelButton" mnemonicParsing="false" onAction="#handleUpdateCancel" style="-fx-background-color: #6c757d; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand; -fx-font-weight: bold;" text="Cancel" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+               <padding>
+                  <Insets bottom="12.0" left="30.0" right="30.0" top="12.0" />
+               </padding>
+            </Button>
+            
+            <Button fx:id="updateSaveButton" mnemonicParsing="false" onAction="#handleUpdateSave" style="-fx-background-color: #237f4e; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand; -fx-font-weight: bold; -fx-font-family: 'Poppins';" text="Save Changes" HBox.hgrow="ALWAYS" maxWidth="Infinity">
+               <padding>
+                  <Insets bottom="12.0" left="30.0" right="30.0" top="12.0" />
+               </padding>
+            </Button>
+         </children>
+      </HBox>
+   </children>
+</VBox>

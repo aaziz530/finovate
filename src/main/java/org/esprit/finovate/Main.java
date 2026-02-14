@@ -1,10 +1,19 @@
+package org.esprit.finovate;
+
+import javafx.application.Application;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import org.esprit.finovate.entities.User;
 import org.esprit.finovate.services.IUserService;
 import org.esprit.finovate.services.UserService;
 import org.esprit.finovate.utils.Session;
 
-public class Main {
-    public static void main(String[] args) {
+import java.io.IOException;
+
+public class Main extends Application {
+    /*public static void main(String[] args) {
         IUserService userService = new UserService();
 
         try {
@@ -30,5 +39,22 @@ public class Main {
             System.out.println("Test failed: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    }*/
+
+
+
+    public static void main(String[] args) {
+        launch();
+    }
+
+    @Override
+    public void start(Stage stage) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));
+        Parent root = loader.load();
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.show();
     }
 }
