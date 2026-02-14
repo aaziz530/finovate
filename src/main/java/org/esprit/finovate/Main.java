@@ -5,56 +5,66 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.esprit.finovate.entities.User;
-import org.esprit.finovate.services.IUserService;
-import org.esprit.finovate.services.UserService;
-import org.esprit.finovate.utils.Session;
 
 import java.io.IOException;
 
+/**
+ * Main entry point for Finovate JavaFX Application
+ */
 public class Main extends Application {
-    /*public static void main(String[] args) {
-        IUserService userService = new UserService();
-
-        try {
-//            System.out.println("=== REGISTER ===");
-//            User created = userService.register("test@finovate.com", "test123", "Test", "User", java.sql.Date.valueOf(LocalDate.of(2003, 11, 30)));
-//            System.out.println("User created: id=" + created.getId() + " email=" + created.getEmail());
-//            System.out.println("Defaults: points=" + created.getPoints() + " solde=" + created.getSolde() + " carte=" + created.getNumeroCarte());
-
-            System.out.println("=== LOGIN ===");
-            User logged = userService.login("dev@finovate.tn", "dev123");
-            if (logged == null) {
-                System.out.println("Login failed");
-            } else {
-                System.out.println("Login OK: " + logged.getEmail());
-                System.out.println("Session.currentUser: " + (Session.currentUser != null ? Session.currentUser.getEmail() : null));
-            }
-
-            System.out.println("=== LOGOUT ===");
-            userService.logout();
-            System.out.println("Session.currentUser after logout: " + Session.currentUser);
-
-        } catch (Exception e) {
-            System.out.println("Test failed: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    }*/
-
-
 
     public static void main(String[] args) {
-        launch();
+        launch(args);
     }
 
     @Override
-    public void start(Stage stage) throws IOException {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("Login.fxml"));
-        Parent root = loader.load();
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.show();
+    public void start(Stage primaryStage) {
+        try {
+            // Load Login FXML
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Login.fxml"));
+            Parent root = loader.load();
+
+            // Create scene
+            Scene scene = new Scene(root);
+
+            // Configure primary stage
+            primaryStage.setTitle("Finovate - Login");
+            primaryStage.setScene(scene);
+            primaryStage.setMinWidth(1200);
+            primaryStage.setMinHeight(800);
+            primaryStage.centerOnScreen();
+
+            // Show the stage
+            primaryStage.show();
+
+            System.out.println("Finovate application started successfully!");
+
+        } catch (IOException e) {
+            System.err.println("Failed to load Login.fxml");
+            e.printStackTrace();
+            showErrorAndExit("Failed to load the login page. Please check if Login.fxml exists in resources folder.");
+        } catch (Exception e) {
+            System.err.println("Unexpected error during application startup");
+            e.printStackTrace();
+            showErrorAndExit("Unexpected error occurred: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Display error message and exit application
+     */
+    private void showErrorAndExit(String message) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.ERROR);
+        alert.setTitle("Application Error");
+        alert.setHeaderText("Failed to start Finovate");
+        alert.setContentText(message);
+        alert.showAndWait();
+        System.exit(1);
+    }
+
+    @Override
+    public void stop() {
+        System.out.println("Finovate application stopped.");
     }
 }

@@ -262,7 +262,10 @@ public class AdminDashboardController implements Initializable {
         try {
             List<User> users = userService.getAllUsers();
             usersList.clear();
-            usersList.addAll(users);
+            // Filter out ADMIN users
+            usersList.addAll(users.stream()
+                    .filter(user -> !"ADMIN".equalsIgnoreCase(user.getRole()))
+                    .toList());
             setupStatistics(); // Refresh statistics
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Error loading users: " + e.getMessage());
@@ -280,20 +283,14 @@ public class AdminDashboardController implements Initializable {
         try {
             List<User> users = userService.searchUsers(searchTerm);
             usersList.clear();
-            usersList.addAll(users);
+            // Filter out ADMIN users
+            usersList.addAll(users.stream()
+                    .filter(user -> !"ADMIN".equalsIgnoreCase(user.getRole()))
+                    .toList());
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Search error: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Handle add user button (navigate to register)
-     */
-    @FXML
-    private void handleAddUser() {
-        showAlert(Alert.AlertType.INFORMATION,
-                "To add a new user, please use the registration page or create directly from here in future versions.");
     }
 
     /**
@@ -339,7 +336,8 @@ public class AdminDashboardController implements Initializable {
             updateSoldeField.setText(String.valueOf(user.getSolde()));
 
         if (updateBirthdatePicker != null && user.getBirthdate() != null) {
-            updateBirthdatePicker.setValue(user.getBirthdate().toInstant()
+            updateBirthdatePicker.setValue(new Date(user.getBirthdate().getTime())
+                    .toInstant()
                     .atZone(ZoneId.systemDefault()).toLocalDate());
         }
 
@@ -393,8 +391,6 @@ public class AdminDashboardController implements Initializable {
 
             // Close dialog
             closeUpdateDialog();
-
-            showAlert(Alert.AlertType.INFORMATION, "User updated successfully!");
 
         } catch (SQLException e) {
             showUpdateError("Database error: " + e.getMessage());
@@ -476,8 +472,6 @@ public class AdminDashboardController implements Initializable {
 
             // Close dialog
             closeDeleteDialog();
-
-            showAlert(Alert.AlertType.INFORMATION, "User deleted successfully!");
 
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Failed to delete user: " + e.getMessage());

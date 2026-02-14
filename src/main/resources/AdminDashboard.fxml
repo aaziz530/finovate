@@ -161,7 +161,7 @@
                   <Insets bottom="25.0" left="25.0" right="25.0" top="25.0" />
                </padding>
                <children>
-                  <!-- Header with Search and Add Button -->
+                  <!-- Header with Search -->
                   <HBox alignment="CENTER_LEFT" spacing="15.0">
                      <children>
                         <Label text="User Management" textFill="#495057">
@@ -174,18 +174,7 @@
                         <HBox HBox.hgrow="ALWAYS" />
                         
                         <!-- Search Field -->
-                        <TextField fx:id="searchField" onKeyReleased="#handleSearch" promptText="Search users..." style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 10;" prefWidth="250.0">
-                           <HBox.margin>
-                              <Insets right="10.0" />
-                           </HBox.margin>
-                        </TextField>
-                        
-                        <!-- Add User Button -->
-                        <Button fx:id="addUserButton" mnemonicParsing="false" onAction="#handleAddUser" style="-fx-background-color: #237f4e; -fx-text-fill: white; -fx-background-radius: 5; -fx-cursor: hand; -fx-font-weight: bold; -fx-font-family: 'Poppins';" text="+ Add User">
-                           <padding>
-                              <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
-                           </padding>
-                        </Button>
+                        <TextField fx:id="searchField" onKeyReleased="#handleSearch" promptText="Search users..." style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 10;" prefWidth="300.0" />
                      </children>
                      <VBox.margin>
                         <Insets bottom="15.0" />
