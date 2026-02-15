@@ -7,8 +7,8 @@ public class MyDataBase {
     private static MyDataBase instance;
 
     private final String URL = "jdbc:mysql://localhost:3306/finovate";
-    private final String USER = "admin";
-    private final String PSR = "admin";
+    private final String USER = "root";
+    private final String PSR = "";
     private Connection connection;
 
     private MyDataBase() {

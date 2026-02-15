@@ -8,8 +8,6 @@ import org.esprit.finovate.utils.Session;
 
 import java.sql.*;
 import java.util.Date;
-import java.util.List;
-import java.util.ArrayList;
 
 public class UserService implements IUserService {
 
@@ -63,7 +61,7 @@ public class UserService implements IUserService {
             throw new SQLException("Connexion DB est null. Vérifie MyDataBase");
         }
 
-        if (emailExists(connection, user.getEmail())) {
+        if (emailExists(user.getEmail())) {
             throw new IllegalStateException("Email existe déjà");
         }
 
@@ -100,9 +98,13 @@ public class UserService implements IUserService {
         return user;
     }
 
-    private boolean emailExists(Connection cnx, String email) throws SQLException {
+    @Override
+    public boolean emailExists(String email) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
         String sql = "SELECT 1 FROM `user` WHERE email=?";
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
@@ -294,5 +296,25 @@ public class UserService implements IUserService {
         }
 
         return users;
+    }
+
+    @Override
+    public void updatePassword(String email, String newPassword) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+
+        String hashedPassword = PasswordUtils.sha256(newPassword);
+        String sql = "UPDATE `user` SET password=? WHERE email=?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, hashedPassword);
+            ps.setString(2, email);
+
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new SQLException("Password update failed, user not found with email: " + email);
+            }
+        }
     }
 }

@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.esprit.finovate.entities.User;
+import org.esprit.finovate.services.EmailService;
 import org.esprit.finovate.services.IUserService;
 import org.esprit.finovate.services.UserService;
 
@@ -70,11 +71,43 @@ public class AuthController {
     @FXML
     private Hyperlink loginLink;
 
+    // Forgot Password FXML fields
+    @FXML
+    private TextField resetEmailField;
+
+    @FXML
+    private Label resetErrorLabel;
+
+    @FXML
+    private Button sendCodeButton;
+
+    // Reset Password FXML fields
+    @FXML
+    private TextField codeField;
+
+    @FXML
+    private PasswordField newPasswordField;
+
+    @FXML
+    private PasswordField confirmNewPasswordField;
+
+    @FXML
+    private Label resetPassErrorLabel;
+
+    @FXML
+    private Button resetPasswordButton;
+
     // Service
     private final IUserService userService;
+    private final EmailService emailService;
+
+    // Session-like variables for reset process
+    private static String currentResetEmail;
+    private static String currentResetCode;
 
     public AuthController() {
         this.userService = new UserService();
+        this.emailService = new EmailService();
     }
 
     /**
@@ -209,6 +242,94 @@ public class AuthController {
     }
 
     /**
+     * Handle Forgot Password Link
+     */
+    @FXML
+    private void handleForgotPasswordLink() {
+        navigateToPage("/ForgotPassword.fxml", "Forgot Password - Finovate");
+    }
+
+    /**
+     * Handle Send Reset Code
+     */
+    @FXML
+    private void handleSendResetCode() {
+        String email = resetEmailField.getText().trim();
+
+        if (email.isEmpty()) {
+            showResetError("Please enter your email");
+            return;
+        }
+
+        try {
+            // Check if user exists
+            if (!userService.emailExists(email)) {
+                showResetError("This email address is not registered");
+                return;
+            }
+
+            // Generate 6-digit code
+            currentResetCode = String.valueOf((int) (Math.random() * 900000) + 100000);
+            currentResetEmail = email;
+
+            // Send Email (in a real app, do this in a thread)
+            emailService.sendEmail(email, "Finovate - Password Reset Code",
+                    "Your password reset code is: " + currentResetCode);
+
+            navigateToPage("/ResetPassword.fxml", "Reset Password - Finovate");
+
+        } catch (Exception e) {
+            showResetError("Error sending email: " + e.getMessage() + ". Please check your configuration.");
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Handle Reset Password
+     */
+    @FXML
+    private void handleResetPassword() {
+        String code = codeField.getText().trim();
+        String newPassword = newPasswordField.getText();
+        String confirmPassword = confirmNewPasswordField.getText();
+
+        if (code.isEmpty() || newPassword.isEmpty() || confirmPassword.isEmpty()) {
+            showResetPassError("All fields are required");
+            return;
+        }
+
+        if (!code.equals(currentResetCode)) {
+            showResetPassError("Invalid reset code");
+            return;
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            showResetPassError("Passwords do not match");
+            return;
+        }
+
+        if (newPassword.length() < 6) {
+            showResetPassError("Password must be at least 6 characters");
+            return;
+        }
+
+        try {
+            userService.updatePassword(currentResetEmail, newPassword);
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Success");
+            alert.setHeaderText(null);
+            alert.setContentText("Your password has been reset successfully!");
+            alert.showAndWait();
+
+            handleLoginLink();
+
+        } catch (SQLException e) {
+            showResetPassError("Database error: " + e.getMessage());
+        }
+    }
+
+    /**
      * Navigate to a different FXML page
      */
     private void navigateToPage(String fxmlPath, String title) {
@@ -217,6 +338,10 @@ public class AuthController {
             Parent root = loader.load();
 
             Stage stage = getCurrentStage();
+            if (stage == null) {
+                System.err.println("Error: Could not determine current stage for navigation.");
+                return;
+            }
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.setTitle(title);
@@ -232,10 +357,14 @@ public class AuthController {
      * Get current stage
      */
     private Stage getCurrentStage() {
-        if (loginButton != null) {
+        if (loginButton != null && loginButton.getScene() != null) {
             return (Stage) loginButton.getScene().getWindow();
-        } else if (registerButton != null) {
+        } else if (registerButton != null && registerButton.getScene() != null) {
             return (Stage) registerButton.getScene().getWindow();
+        } else if (sendCodeButton != null && sendCodeButton.getScene() != null) {
+            return (Stage) sendCodeButton.getScene().getWindow();
+        } else if (resetPasswordButton != null && resetPasswordButton.getScene() != null) {
+            return (Stage) resetPasswordButton.getScene().getWindow();
         }
         return null;
     }
@@ -277,6 +406,26 @@ public class AuthController {
         if (registerErrorLabel != null) {
             registerErrorLabel.setText("");
             registerErrorLabel.setVisible(false);
+        }
+    }
+
+    /**
+     * Show error on forgot password page
+     */
+    private void showResetError(String message) {
+        if (resetErrorLabel != null) {
+            resetErrorLabel.setText(message);
+            resetErrorLabel.setVisible(true);
+        }
+    }
+
+    /**
+     * Show error on reset password page
+     */
+    private void showResetPassError(String message) {
+        if (resetPassErrorLabel != null) {
+            resetPassErrorLabel.setText(message);
+            resetPassErrorLabel.setVisible(true);
         }
     }
 }

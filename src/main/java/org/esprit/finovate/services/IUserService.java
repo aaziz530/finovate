@@ -14,6 +14,8 @@ public interface IUserService {
 
     User register(String email, String password, String firstName, String lastName, Date birthdate) throws SQLException;
 
+    boolean emailExists(String email) throws SQLException;
+
     // Admin user management methods
     List<User> getAllUsers() throws SQLException;
 
@@ -30,4 +32,7 @@ public interface IUserService {
 
     // Search method
     List<User> searchUsers(String searchTerm) throws SQLException;
+
+    // Password reset method
+    void updatePassword(String email, String newPassword) throws SQLException;
 }
