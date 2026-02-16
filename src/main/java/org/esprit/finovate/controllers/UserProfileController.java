@@ -26,7 +26,7 @@ public class UserProfileController implements Initializable {
     @FXML
     private TextField cinField;
     @FXML
-    private TextField cardNumberField;
+    private TextField numeroCarteField;
     @FXML
     private DatePicker birthDatePicker;
     @FXML
@@ -46,7 +46,7 @@ public class UserProfileController implements Initializable {
             lastNameField.setText(user.getLastName());
             emailField.setText(user.getEmail());
             cinField.setText(user.getCinNumber());
-            cardNumberField.setText(user.getCardNumber());
+            numeroCarteField.setText(user.getNumeroCarte().toString());
 
             if (user.getBirthdate() != null) {
                 // Wrap in java.util.Date to avoid UnsupportedOperationException from

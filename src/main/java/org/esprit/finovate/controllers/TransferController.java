@@ -107,7 +107,8 @@ public class TransferController implements Initializable {
 
         try {
             float amount = Float.parseFloat(amountStr);
-            transactionService.transferMoney(Session.currentUser.getId().intValue(), card, cin, amount,
+            Long numeroCarte = Long.parseLong(card);
+            transactionService.transferMoney(Session.currentUser.getId().intValue(), numeroCarte, cin, amount,
                     description);
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);

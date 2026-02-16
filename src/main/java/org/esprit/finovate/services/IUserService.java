@@ -12,18 +12,16 @@ public interface IUserService {
 
         void logout();
 
-        User register(String email, String password, String firstName, String lastName, Date birthdate,
-                        String cardNumber)
+        User register(String email, String password, String firstName, String lastName, Date birthdate)
                         throws SQLException;
 
         User register(String email, String password, String firstName, String lastName, Date birthdate,
-                        String cardNumber,
                         String cinNumber)
                         throws SQLException;
 
         boolean emailExists(String email) throws SQLException;
 
-        boolean cardNumberExists(String cardNumber) throws SQLException;
+        boolean numeroCarteExists(Long numeroCarte) throws SQLException;
 
         boolean cinExists(String cin) throws SQLException;
 

@@ -15,7 +15,7 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public void transferMoney(int senderId, String cardNumber, String cin, float amount, String description)
+    public void transferMoney(int senderId, Long numeroCarte, String cin, float amount, String description)
             throws SQLException {
         if (amount <= 0) {
             throw new SQLException("Amount must be positive");
@@ -26,9 +26,9 @@ public class TransactionService implements ITransactionService {
 
             // 1. Get Receiver ID
             int receiverId = -1;
-            String getReceiverSql = "SELECT id FROM user WHERE cardNumber = ? AND cin = ?";
+            String getReceiverSql = "SELECT id FROM user WHERE numeroCarte = ? AND cin = ?";
             try (PreparedStatement pstReceiver = connection.prepareStatement(getReceiverSql)) {
-                pstReceiver.setString(1, cardNumber);
+                pstReceiver.setLong(1, numeroCarte);
                 pstReceiver.setString(2, cin);
                 try (ResultSet rs = pstReceiver.executeQuery()) {
                     if (rs.next()) {

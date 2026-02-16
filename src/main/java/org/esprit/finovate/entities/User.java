@@ -1,5 +1,6 @@
 package org.esprit.finovate.entities;
 
+import java.security.SecureRandom;
 import java.util.Date;
 
 public class User {
@@ -13,31 +14,31 @@ public class User {
     private Date createdAt;
     private float solde;
     private Date birthdate;
-    private String cardNumber;
+    private Long numeroCarte;
     private String cinNumber;
 
     public User() {
 
     }
 
-    public User(String email, String password, String firstName, String lastName, Date birthdate, String cardNumber,
+    public User(String email, String password, String firstName, String lastName, Date birthdate,
             String cinNumber) {
         this.email = email;
         this.password = password;
         this.firstname = firstName;
         this.lastname = lastName;
         this.birthdate = birthdate;
-        this.cardNumber = cardNumber;
         this.cinNumber = cinNumber;
 
         this.role = "USER";
         this.points = 0;
         this.solde = 500;
         this.createdAt = new Date();
+        this.numeroCarte = generateMastercardNumber();
     }
 
     public User(Long id, String email, String password, String firstName, String lastName, String role, int points,
-            Date createdAt, float solde, Date birthdate, String cardNumber, String cinNumber) {
+            Date createdAt, float solde, Date birthdate, Long numeroCarte, String cinNumber) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -48,14 +49,46 @@ public class User {
         this.createdAt = createdAt;
         this.solde = solde;
         this.birthdate = birthdate;
-        this.cardNumber = cardNumber;
+        this.numeroCarte = numeroCarte;
         this.cinNumber = cinNumber;
     }
 
-    // private static Long generateMastercardNumber() removed as unused
+    private static Long generateMastercardNumber() {
+        SecureRandom random = new SecureRandom();
 
-    // private static int luhnCheckDigit(String numberWithoutCheckDigit) removed as
-    // unused
+        String prefix;
+        if (random.nextBoolean()) {
+            prefix = String.valueOf(51 + random.nextInt(5));
+        } else {
+            prefix = String.valueOf(2221 + random.nextInt(2720 - 2221 + 1));
+        }
+
+        StringBuilder sb = new StringBuilder(prefix);
+        while (sb.length() < 15) {
+            sb.append(random.nextInt(10));
+        }
+
+        int checkDigit = luhnCheckDigit(sb.toString());
+        sb.append(checkDigit);
+
+        return Long.parseLong(sb.toString());
+    }
+
+    private static int luhnCheckDigit(String numberWithoutCheckDigit) {
+        int sum = 0;
+        boolean doubleDigit = true;
+        for (int i = numberWithoutCheckDigit.length() - 1; i >= 0; i--) {
+            int d = numberWithoutCheckDigit.charAt(i) - '0';
+            if (doubleDigit) {
+                d *= 2;
+                if (d > 9)
+                    d -= 9;
+            }
+            sum += d;
+            doubleDigit = !doubleDigit;
+        }
+        return (10 - (sum % 10)) % 10;
+    }
 
     public Long getId() {
         return id;
@@ -137,12 +170,12 @@ public class User {
         this.birthdate = birthdate;
     }
 
-    public String getCardNumber() {
-        return cardNumber;
+    public Long getNumeroCarte() {
+        return numeroCarte;
     }
 
-    public void setCardNumber(String cardNumber) {
-        this.cardNumber = cardNumber;
+    public void setNumeroCarte(Long numeroCarte) {
+        this.numeroCarte = numeroCarte;
     }
 
     public String getCinNumber() {
@@ -164,7 +197,7 @@ public class User {
                 ", points=" + points +
                 ", solde=" + solde +
                 ", birthdate=" + birthdate +
-                ", cardNumber='" + cardNumber + '\'' +
+                ", numeroCarte=" + numeroCarte +
                 ", cinNumber='" + cinNumber + '\'' +
                 ", createdAt=" + createdAt +
                 '}';

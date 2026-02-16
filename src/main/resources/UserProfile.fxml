@@ -65,7 +65,7 @@
                       <Label text="Card Number:" textFill="#525f7f" GridPane.rowIndex="4">
                          <font><Font name="System Bold" size="14.0" /></font>
                       </Label>
-                      <TextField fx:id="cardNumberField" editable="false" style="-fx-background-color: #e9ecef; -fx-border-color: #dee2e6; -fx-text-fill: #32325d;" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                      <TextField fx:id="numeroCarteField" editable="false" style="-fx-background-color: #e9ecef; -fx-border-color: #dee2e6; -fx-text-fill: #32325d;" GridPane.columnIndex="1" GridPane.rowIndex="4" />
                       
                       <Label text="Birth Date:" textFill="#525f7f" GridPane.rowIndex="5">
                          <font><Font name="System Bold" size="14.0" /></font>

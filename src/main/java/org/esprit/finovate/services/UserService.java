@@ -52,17 +52,16 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public User register(String email, String password, String firstName, String lastName, Date birthdate,
-            String cardNumber)
+    public User register(String email, String password, String firstName, String lastName, Date birthdate)
             throws SQLException {
-        return register(email, password, firstName, lastName, birthdate, cardNumber, null);
+        return register(email, password, firstName, lastName, birthdate, null);
     }
 
     @Override
     public User register(String email, String password, String firstName, String lastName, Date birthdate,
-            String cardNumber, String cinNumber)
+            String cinNumber)
             throws SQLException {
-        User user = new User(email, password, firstName, lastName, birthdate, cardNumber, cinNumber);
+        User user = new User(email, password, firstName, lastName, birthdate, cinNumber);
         user.setPassword(PasswordUtils.sha256(password));
 
         if (connection == null) {
@@ -72,14 +71,15 @@ public class UserService implements IUserService {
         if (emailExists(user.getEmail())) {
             throw new IllegalStateException("Email already exists");
         }
-        if (cardNumberExists(user.getCardNumber())) {
-            throw new IllegalStateException("Card Number already exists");
+        if (numeroCarteExists(user.getNumeroCarte())) {
+            // Regeneration logic if conflict occurs
+            user.setNumeroCarte(user.getNumeroCarte() + 1); // Simple retry or use entity method again
         }
         if (cinExists(user.getCinNumber())) {
             throw new IllegalStateException("CIN already exists");
         }
 
-        String sql = "INSERT INTO `user` (email, password, firstname, lastname, role, points, createdAt, solde, birthdate, cardNumber, cin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO `user` (email, password, firstname, lastname, role, points, createdAt, solde, birthdate, numeroCarte, cin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getPassword());
@@ -95,7 +95,7 @@ public class UserService implements IUserService {
             else
                 ps.setDate(9, new java.sql.Date(user.getBirthdate().getTime()));
 
-            ps.setString(10, user.getCardNumber());
+            ps.setLong(10, user.getNumeroCarte());
 
             ps.setString(11, user.getCinNumber());
 
@@ -126,13 +126,13 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public boolean cardNumberExists(String cardNumber) throws SQLException {
+    public boolean numeroCarteExists(Long numeroCarte) throws SQLException {
         if (connection == null) {
             throw new SQLException("Database connection is null");
         }
-        String sql = "SELECT 1 FROM `user` WHERE cardNumber=?";
+        String sql = "SELECT 1 FROM `user` WHERE numeroCarte=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
-            ps.setString(1, cardNumber);
+            ps.setLong(1, numeroCarte);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
             }
@@ -166,7 +166,7 @@ public class UserService implements IUserService {
         u.setSolde(rs.getFloat("solde"));
 
         u.setBirthdate(rs.getDate("birthdate"));
-        u.setCardNumber(rs.getString("cardNumber"));
+        u.setNumeroCarte(rs.getLong("numeroCarte"));
         u.setCinNumber(rs.getString("cin"));
         return u;
     }
@@ -220,10 +220,10 @@ public class UserService implements IUserService {
         }
 
         // Uniqueness checks for update
-        String checkSql = "SELECT id FROM `user` WHERE (email = ? OR cardNumber = ? OR cin = ?) AND id != ?";
+        String checkSql = "SELECT id FROM `user` WHERE (email = ? OR numeroCarte = ? OR cin = ?) AND id != ?";
         try (PreparedStatement psCheck = connection.prepareStatement(checkSql)) {
             psCheck.setString(1, user.getEmail());
-            psCheck.setString(2, user.getCardNumber());
+            psCheck.setLong(2, user.getNumeroCarte());
             psCheck.setString(3, user.getCinNumber());
             psCheck.setLong(4, user.getId());
             try (ResultSet rs = psCheck.executeQuery()) {
@@ -233,7 +233,7 @@ public class UserService implements IUserService {
             }
         }
 
-        String sql = "UPDATE `user` SET email=?, firstname=?, lastname=?, role=?, points=?, solde=?, birthdate=?, cardNumber=?, cin=? WHERE id=?";
+        String sql = "UPDATE `user` SET email=?, firstname=?, lastname=?, role=?, points=?, solde=?, birthdate=?, numeroCarte=?, cin=? WHERE id=?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getEmail());
@@ -249,7 +249,7 @@ public class UserService implements IUserService {
                 ps.setDate(7, new java.sql.Date(user.getBirthdate().getTime()));
             }
 
-            ps.setString(8, user.getCardNumber());
+            ps.setLong(8, user.getNumeroCarte());
             ps.setString(9, user.getCinNumber());
             ps.setLong(10, user.getId());
 
