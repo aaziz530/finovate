@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.esprit.finovate.view.MyProjectsController"
+            prefHeight="600" prefWidth="900"
+            styleClass="root" stylesheets="@../css/style.css">
+    <top>
+        <VBox alignment="CENTER_LEFT" styleClass="form-header">
+            <padding>
+                <Insets left="24" right="24" top="20" bottom="20"/>
+            </padding>
+            <Label text="My Projects" styleClass="form-title"/>
+            <Label text="Projects you created — edit or delete only if no one has invested yet" styleClass="form-subtitle"/>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="20" alignment="TOP_LEFT" styleClass="form-content">
+            <padding>
+                <Insets left="32" right="32" bottom="32"/>
+            </padding>
+            <Label text="Your projects" styleClass="section-title"/>
+            <ScrollPane fitToWidth="true" styleClass="projects-scroll" VBox.vgrow="ALWAYS">
+                <VBox fx:id="projectsContainer" spacing="12"/>
+            </ScrollPane>
+            <Button text="Back to Dashboard" onAction="#handleBack" styleClass="btn-secondary" prefWidth="180"/>
+        </VBox>
+    </center>
+</BorderPane>

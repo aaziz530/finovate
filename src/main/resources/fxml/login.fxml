@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.esprit.finovate.view.LoginController"
+            prefHeight="500" prefWidth="450"
+            styleClass="root" stylesheets="@../css/style.css">
+    <center>
+        <VBox alignment="CENTER" spacing="20" styleClass="login-box">
+            <padding>
+                <Insets bottom="40" left="50" right="50" top="40"/>
+            </padding>
+            <Label text="FINOVATE" styleClass="logo-title"/>
+            <Label text="Crowdfunding Platform" styleClass="subtitle"/>
+            <VBox spacing="16" alignment="CENTER">
+                <VBox spacing="6" alignment="CENTER_LEFT">
+                    <Label text="Email" styleClass="input-label"/>
+                    <TextField fx:id="txtEmail" promptText="your@email.com" prefWidth="300"/>
+                </VBox>
+                <VBox spacing="6" alignment="CENTER_LEFT">
+                    <Label text="Password" styleClass="input-label"/>
+                    <PasswordField fx:id="txtPassword" promptText="Enter password" prefWidth="300"/>
+                </VBox>
+                <Label fx:id="lblError" styleClass="error-label" managed="false" visible="false"/>
+                <Button text="Sign In" onAction="#handleLogin" styleClass="btn-primary" prefWidth="300"/>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>
