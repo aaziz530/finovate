@@ -64,12 +64,13 @@ public class UserDashboardController implements Initializable {
     @FXML
     private void handleGoals() {
         loadView("/Goals.fxml");
+        updateButtonStyles(btnGoals);
     }
 
     @FXML
     private void handleTransfer() {
-        // Placeholder
-        // loadView("/Transfer.fxml");
+        loadView("/Transfer.fxml");
+        updateButtonStyles(btnTransfer);
     }
 
     @FXML
@@ -108,6 +109,21 @@ public class UserDashboardController implements Initializable {
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Could not load view: " + fxmlPath);
+        }
+    }
+
+    private void updateButtonStyles(Button activeBtn) {
+        Button[] buttons = { btnHome, btnGoals, btnTransfer, btnBills, btnProfile };
+        for (Button btn : buttons) {
+            if (btn == null)
+                continue;
+            if (btn == activeBtn) {
+                btn.setStyle(
+                        "-fx-background-color: #f0fdf4; -fx-text-fill: #237f4e; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-weight: bold;");
+            } else {
+                btn.setStyle(
+                        "-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand; -fx-font-weight: normal;");
+            }
         }
     }
 }

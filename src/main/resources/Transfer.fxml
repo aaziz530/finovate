@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="950.0" style="-fx-background-color: transparent;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.esprit.finovate.controllers.TransferController">
+   <top>
+      <VBox spacing="20.0" BorderPane.alignment="CENTER">
+         <children>
+            <HBox alignment="CENTER_LEFT" spacing="20.0">
+               <children>
+                  <VBox>
+                     <children>
+                        <Label text="Money Transfer" textFill="#32325d">
+                           <font>
+                              <Font name="System Bold" size="28.0" />
+                           </font>
+                        </Label>
+                        <Label text="Send money to friends and family instantly." textFill="#8898aa">
+                           <font>
+                              <Font size="16.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+            
+            <HBox spacing="30.0">
+               <children>
+                  <!-- Transfer Form -->
+                  <VBox prefWidth="400.0" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);">
+                     <children>
+                        <Label text="New Transfer" textFill="#32325d">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                        </Label>
+                        
+                        <VBox spacing="5.0">
+                           <children>
+                              <Label text="Recipient Email" textFill="#6c757d">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="recipientEmailField" promptText="email@example.com" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10;" />
+                           </children>
+                        </VBox>
+                        
+                        <VBox spacing="5.0">
+                           <children>
+                              <Label text="Amount (TND)" textFill="#6c757d">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="amountField" promptText="0.00" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10;" />
+                           </children>
+                        </VBox>
+                        
+                        <VBox spacing="5.0">
+                           <children>
+                              <Label text="Description (Optional)" textFill="#6c757d">
+                                 <font>
+                                    <Font name="System Bold" size="12.0" />
+                                 </font>
+                              </Label>
+                              <TextField fx:id="descriptionField" promptText="e.g. Dinner" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10;" />
+                           </children>
+                        </VBox>
+                        
+                        <Label fx:id="errorLabel" text="" textFill="#dc3545" visible="false" wrapText="true" />
+                        
+                        <Button fx:id="btnSend" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleSend" style="-fx-background-color: #237f4e; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: bold;" text="Send Money">
+                           <padding>
+                              <Insets bottom="12.0" top="12.0" />
+                           </padding>
+                        </Button>
+                     </children>
+                  </VBox>
+                  
+                  <!-- Balance Summary -->
+                  <VBox prefWidth="250.0" spacing="15.0">
+                      <children>
+                          <VBox style="-fx-background-color: #237f4e; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(35,127,78,0.3), 10, 0, 0, 4);">
+                             <children>
+                                <Label text="Available Balance" textFill="white" opacity="0.8">
+                                   <font>
+                                      <Font size="14.0" />
+                                   </font>
+                                </Label>
+                                <Label fx:id="balanceLabel" text="0.00 TND" textFill="white">
+                                   <font>
+                                      <Font name="System Bold" size="28.0" />
+                                   </font>
+                                </Label>
+                             </children>
+                          </VBox>
+                      </children>
+                  </VBox>
+               </children>
+            </HBox>
+         </children>
+         <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+         </padding>
+      </VBox>
+   </top>
+   <center>
+      <VBox spacing="15.0" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="10.0" />
+         </padding>
+         <children>
+            <Label text="Recent Transactions" textFill="#32325d">
+               <font>
+                  <Font name="System Bold" size="18.0" />
+               </font>
+            </Label>
+            <TableView fx:id="transactionTable" VBox.vgrow="ALWAYS" style="-fx-background-radius: 10; -fx-overflow-x: hidden;">
+               <columns>
+                  <TableColumn fx:id="colDate" prefWidth="150.0" text="Date" />
+                  <TableColumn fx:id="colType" prefWidth="100.0" text="Type" />
+                  <TableColumn fx:id="colRecipient" prefWidth="200.0" text="To/From" />
+                  <TableColumn fx:id="colAmount" prefWidth="120.0" text="Amount" />
+                  <TableColumn fx:id="colDescription" prefWidth="320.0" text="Description" />
+               </columns>
+            </TableView>
+         </children>
+      </VBox>
+   </center>
+</BorderPane>
