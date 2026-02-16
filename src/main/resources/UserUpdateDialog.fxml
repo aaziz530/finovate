@@ -71,15 +71,15 @@
          </VBox.margin>
       </VBox>
 
-      <!-- Card Number -->
+      <!-- CIN Number -->
       <VBox spacing="8.0">
          <children>
-            <Label text="Card Number" textFill="#495057">
+            <Label text="CIN Number" textFill="#495057">
                <font>
                   <Font name="System Bold" size="13.0" />
                </font>
             </Label>
-            <TextField fx:id="updateCardNumberField" promptText="20-digit Card Number" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10;" />
+            <TextField fx:id="updateCinField" promptText="8-digit CIN Number" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10;" />
          </children>
          <VBox.margin>
             <Insets bottom="15.0" />

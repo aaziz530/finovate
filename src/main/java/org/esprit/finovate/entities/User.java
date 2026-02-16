@@ -15,19 +15,19 @@ public class User {
     private float solde;
     private Long numeroCarte;
     private Date birthdate;
-    private String cardNumber;
+    private String cinNumber;
 
     public User() {
 
     }
 
-    public User(String email, String password, String firstName, String lastName, Date birthdate, String cardNumber) {
+    public User(String email, String password, String firstName, String lastName, Date birthdate, String cinNumber) {
         this.email = email;
         this.password = password;
         this.firstname = firstName;
         this.lastname = lastName;
         this.birthdate = birthdate;
-        this.cardNumber = cardNumber;
+        this.cinNumber = cinNumber;
 
         this.role = "USER";
         this.points = 0;
@@ -37,7 +37,7 @@ public class User {
     }
 
     public User(Long id, String email, String password, String firstName, String lastName, String role, int points,
-            Date createdAt, float solde, Long numeroCarte, Date birthdate, String cardNumber) {
+            Date createdAt, float solde, Long numeroCarte, Date birthdate, String cinNumber) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -49,7 +49,7 @@ public class User {
         this.solde = solde;
         this.numeroCarte = numeroCarte;
         this.birthdate = birthdate;
-        this.cardNumber = cardNumber;
+        this.cinNumber = cinNumber;
     }
 
     private static Long generateMastercardNumber() {
@@ -177,12 +177,12 @@ public class User {
         this.birthdate = birthdate;
     }
 
-    public String getCardNumber() {
-        return cardNumber;
+    public String getCinNumber() {
+        return cinNumber;
     }
 
-    public void setCardNumber(String cardNumber) {
-        this.cardNumber = cardNumber;
+    public void setCinNumber(String cinNumber) {
+        this.cinNumber = cinNumber;
     }
 
     @Override
@@ -197,7 +197,7 @@ public class User {
                 ", solde=" + solde +
                 ", numeroCarte=" + numeroCarte +
                 ", birthdate=" + birthdate +
-                ", cardNumber='" + cardNumber + '\'' +
+                ", cinNumber='" + cinNumber + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
     }

@@ -53,20 +53,20 @@ public class UserService implements IUserService {
 
     @Override
     public User register(String email, String password, String firstName, String lastName, Date birthdate,
-            String cardNumber)
+            String cinNumber)
             throws SQLException {
-        User user = new User(email, password, firstName, lastName, birthdate, cardNumber);
+        User user = new User(email, password, firstName, lastName, birthdate, cinNumber);
         user.setPassword(PasswordUtils.sha256(password));
 
         if (connection == null) {
             throw new SQLException("Connexion DB est null. Vérifie MyDataBase");
         }
 
-        if (emailExists(user.getEmail())) {
-            throw new IllegalStateException("Email existe déjà");
+        if (cinExists(user.getCinNumber())) {
+            throw new IllegalStateException("CIN already exists");
         }
 
-        String sql = "INSERT INTO `user` (email, password, firstname, lastname, role, points, createdAt, solde, numeroCarte, birthdate, cardNumber) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO `user` (email, password, firstname, lastname, role, points, createdAt, solde, numeroCarte, birthdate, cin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getPassword());
@@ -87,7 +87,7 @@ public class UserService implements IUserService {
             else
                 ps.setDate(10, new java.sql.Date(user.getBirthdate().getTime()));
 
-            ps.setString(11, user.getCardNumber());
+            ps.setString(11, user.getCinNumber());
 
             ps.executeUpdate();
 
@@ -99,6 +99,20 @@ public class UserService implements IUserService {
         }
 
         return user;
+    }
+
+    @Override
+    public boolean cinExists(String cin) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+        String sql = "SELECT 1 FROM `user` WHERE cin=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, cin);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
     }
 
     @Override
@@ -131,7 +145,7 @@ public class UserService implements IUserService {
         u.setNumeroCarte(rs.wasNull() ? null : nc);
 
         u.setBirthdate(rs.getDate("birthdate"));
-        u.setCardNumber(rs.getString("cardNumber"));
+        u.setCinNumber(rs.getString("cin"));
         return u;
     }
 
@@ -183,7 +197,7 @@ public class UserService implements IUserService {
             throw new IllegalArgumentException("User ID cannot be null for update");
         }
 
-        String sql = "UPDATE `user` SET email=?, firstname=?, lastname=?, role=?, points=?, solde=?, birthdate=?, cardNumber=? WHERE id=?";
+        String sql = "UPDATE `user` SET email=?, firstname=?, lastname=?, role=?, points=?, solde=?, birthdate=?, cin=? WHERE id=?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getEmail());
@@ -199,7 +213,7 @@ public class UserService implements IUserService {
                 ps.setDate(7, new java.sql.Date(user.getBirthdate().getTime()));
             }
 
-            ps.setString(8, user.getCardNumber());
+            ps.setString(8, user.getCinNumber());
             ps.setLong(9, user.getId());
 
             int rowsAffected = ps.executeUpdate();
