@@ -1,7 +1,6 @@
 package org.esprit.finovate.entities;
 
 import java.util.Date;
-import java.security.SecureRandom;
 
 public class User {
     private Long id;
@@ -13,31 +12,32 @@ public class User {
     private int points;
     private Date createdAt;
     private float solde;
-    private Long numeroCarte;
     private Date birthdate;
     private String cardNumber;
+    private String cinNumber;
 
     public User() {
 
     }
 
-    public User(String email, String password, String firstName, String lastName, Date birthdate, String cardNumber) {
+    public User(String email, String password, String firstName, String lastName, Date birthdate, String cardNumber,
+            String cinNumber) {
         this.email = email;
         this.password = password;
         this.firstname = firstName;
         this.lastname = lastName;
         this.birthdate = birthdate;
         this.cardNumber = cardNumber;
+        this.cinNumber = cinNumber;
 
         this.role = "USER";
         this.points = 0;
-        this.solde = 0;
+        this.solde = 500;
         this.createdAt = new Date();
-        this.numeroCarte = generateMastercardNumber();
     }
 
     public User(Long id, String email, String password, String firstName, String lastName, String role, int points,
-            Date createdAt, float solde, Long numeroCarte, Date birthdate, String cardNumber) {
+            Date createdAt, float solde, Date birthdate, String cardNumber, String cinNumber) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -47,47 +47,15 @@ public class User {
         this.points = points;
         this.createdAt = createdAt;
         this.solde = solde;
-        this.numeroCarte = numeroCarte;
         this.birthdate = birthdate;
         this.cardNumber = cardNumber;
+        this.cinNumber = cinNumber;
     }
 
-    private static Long generateMastercardNumber() {
-        SecureRandom random = new SecureRandom();
+    // private static Long generateMastercardNumber() removed as unused
 
-        String prefix;
-        if (random.nextBoolean()) {
-            prefix = String.valueOf(51 + random.nextInt(5));
-        } else {
-            prefix = String.valueOf(2221 + random.nextInt(2720 - 2221 + 1));
-        }
-
-        StringBuilder sb = new StringBuilder(prefix);
-        while (sb.length() < 15) {
-            sb.append(random.nextInt(10));
-        }
-
-        int checkDigit = luhnCheckDigit(sb.toString());
-        sb.append(checkDigit);
-
-        return Long.parseLong(sb.toString());
-    }
-
-    private static int luhnCheckDigit(String numberWithoutCheckDigit) {
-        int sum = 0;
-        boolean doubleDigit = true;
-        for (int i = numberWithoutCheckDigit.length() - 1; i >= 0; i--) {
-            int d = numberWithoutCheckDigit.charAt(i) - '0';
-            if (doubleDigit) {
-                d *= 2;
-                if (d > 9)
-                    d -= 9;
-            }
-            sum += d;
-            doubleDigit = !doubleDigit;
-        }
-        return (10 - (sum % 10)) % 10;
-    }
+    // private static int luhnCheckDigit(String numberWithoutCheckDigit) removed as
+    // unused
 
     public Long getId() {
         return id;
@@ -161,14 +129,6 @@ public class User {
         this.solde = solde;
     }
 
-    public Long getNumeroCarte() {
-        return numeroCarte;
-    }
-
-    public void setNumeroCarte(Long numeroCarte) {
-        this.numeroCarte = numeroCarte;
-    }
-
     public Date getBirthdate() {
         return birthdate;
     }
@@ -185,6 +145,14 @@ public class User {
         this.cardNumber = cardNumber;
     }
 
+    public String getCinNumber() {
+        return cinNumber;
+    }
+
+    public void setCinNumber(String cinNumber) {
+        this.cinNumber = cinNumber;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -195,9 +163,9 @@ public class User {
                 ", role='" + role + '\'' +
                 ", points=" + points +
                 ", solde=" + solde +
-                ", numeroCarte=" + numeroCarte +
                 ", birthdate=" + birthdate +
                 ", cardNumber='" + cardNumber + '\'' +
+                ", cinNumber='" + cinNumber + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
     }

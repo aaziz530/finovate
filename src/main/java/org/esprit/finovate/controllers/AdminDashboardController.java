@@ -82,6 +82,9 @@ public class AdminDashboardController implements Initializable {
     private TableColumn<User, String> createdAtColumn;
 
     @FXML
+    private TableColumn<User, String> cardNumberColumn;
+
+    @FXML
     private TableColumn<User, String> cinColumn;
 
     @FXML
@@ -111,6 +114,9 @@ public class AdminDashboardController implements Initializable {
 
     @FXML
     private TextField updateCardNumberField;
+
+    @FXML
+    private TextField updateCinNumberField;
 
     @FXML
     private Label updateErrorLabel;
@@ -197,7 +203,12 @@ public class AdminDashboardController implements Initializable {
         roleColumn.setCellValueFactory(new PropertyValueFactory<>("role"));
         pointsColumn.setCellValueFactory(new PropertyValueFactory<>("points"));
         soldeColumn.setCellValueFactory(new PropertyValueFactory<>("solde"));
-        cinColumn.setCellValueFactory(new PropertyValueFactory<>("cardNumber"));
+        if (cinColumn != null) {
+            cinColumn.setCellValueFactory(new PropertyValueFactory<>("cinNumber"));
+        }
+        if (cardNumberColumn != null) {
+            cardNumberColumn.setCellValueFactory(new PropertyValueFactory<>("cardNumber"));
+        }
 
         // Format createdAt column
         createdAtColumn.setCellValueFactory(cellData -> {
@@ -334,6 +345,8 @@ public class AdminDashboardController implements Initializable {
             updateSoldeField.setText(String.valueOf(user.getSolde()));
         if (updateCardNumberField != null)
             updateCardNumberField.setText(user.getCardNumber());
+        if (updateCinNumberField != null)
+            updateCinNumberField.setText(user.getCinNumber());
 
         if (updateBirthdatePicker != null && user.getBirthdate() != null) {
             updateBirthdatePicker.setValue(new Date(user.getBirthdate().getTime())
@@ -360,7 +373,8 @@ public class AdminDashboardController implements Initializable {
             if (updateFirstNameField.getText().trim().isEmpty() ||
                     updateLastNameField.getText().trim().isEmpty() ||
                     updateEmailField.getText().trim().isEmpty() ||
-                    updateCardNumberField.getText().trim().isEmpty()) {
+                    updateCardNumberField.getText().trim().isEmpty() ||
+                    updateCinNumberField.getText().trim().isEmpty()) {
                 showUpdateError("All required fields must be filled");
                 return;
             }
@@ -371,12 +385,19 @@ public class AdminDashboardController implements Initializable {
                 return;
             }
 
+            String cinNumber = updateCinNumberField.getText().trim();
+            if (!cinNumber.matches("\\d{8}")) {
+                showUpdateError("CIN Number must be exactly 8 digits");
+                return;
+            }
+
             // Update user object
             selectedUserForUpdate.setFirstName(updateFirstNameField.getText().trim());
             selectedUserForUpdate.setLastName(updateLastNameField.getText().trim());
             selectedUserForUpdate.setEmail(updateEmailField.getText().trim());
             selectedUserForUpdate.setRole(updateRoleComboBox.getValue());
             selectedUserForUpdate.setCardNumber(updateCardNumberField.getText().trim());
+            selectedUserForUpdate.setCinNumber(updateCinNumberField.getText().trim());
 
             try {
                 selectedUserForUpdate.setPoints(Integer.parseInt(updatePointsField.getText().trim()));

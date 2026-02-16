@@ -55,7 +55,14 @@ public class UserService implements IUserService {
     public User register(String email, String password, String firstName, String lastName, Date birthdate,
             String cardNumber)
             throws SQLException {
-        User user = new User(email, password, firstName, lastName, birthdate, cardNumber);
+        return register(email, password, firstName, lastName, birthdate, cardNumber, null);
+    }
+
+    @Override
+    public User register(String email, String password, String firstName, String lastName, Date birthdate,
+            String cardNumber, String cinNumber)
+            throws SQLException {
+        User user = new User(email, password, firstName, lastName, birthdate, cardNumber, cinNumber);
         user.setPassword(PasswordUtils.sha256(password));
 
         if (connection == null) {
@@ -66,7 +73,7 @@ public class UserService implements IUserService {
             throw new IllegalStateException("Email existe déjà");
         }
 
-        String sql = "INSERT INTO `user` (email, password, firstname, lastname, role, points, createdAt, solde, numeroCarte, birthdate, cardNumber) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO `user` (email, password, firstname, lastname, role, points, createdAt, solde, birthdate, cardNumber, cin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getPassword());
@@ -77,17 +84,14 @@ public class UserService implements IUserService {
             ps.setTimestamp(7, new Timestamp(user.getCreatedAt().getTime()));
             ps.setFloat(8, user.getSolde());
 
-            if (user.getNumeroCarte() == null)
-                ps.setNull(9, Types.BIGINT);
-            else
-                ps.setLong(9, user.getNumeroCarte());
-
             if (user.getBirthdate() == null)
-                ps.setNull(10, Types.DATE);
+                ps.setNull(9, Types.DATE);
             else
-                ps.setDate(10, new java.sql.Date(user.getBirthdate().getTime()));
+                ps.setDate(9, new java.sql.Date(user.getBirthdate().getTime()));
 
-            ps.setString(11, user.getCardNumber());
+            ps.setString(10, user.getCardNumber());
+
+            ps.setString(11, user.getCinNumber());
 
             ps.executeUpdate();
 
@@ -127,11 +131,9 @@ public class UserService implements IUserService {
         u.setCreatedAt(rs.getTimestamp("createdAt"));
         u.setSolde(rs.getFloat("solde"));
 
-        long nc = rs.getLong("numeroCarte");
-        u.setNumeroCarte(rs.wasNull() ? null : nc);
-
         u.setBirthdate(rs.getDate("birthdate"));
         u.setCardNumber(rs.getString("cardNumber"));
+        u.setCinNumber(rs.getString("cin"));
         return u;
     }
 
@@ -183,7 +185,7 @@ public class UserService implements IUserService {
             throw new IllegalArgumentException("User ID cannot be null for update");
         }
 
-        String sql = "UPDATE `user` SET email=?, firstname=?, lastname=?, role=?, points=?, solde=?, birthdate=?, cardNumber=? WHERE id=?";
+        String sql = "UPDATE `user` SET email=?, firstname=?, lastname=?, role=?, points=?, solde=?, birthdate=?, cardNumber=?, cin=? WHERE id=?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getEmail());
@@ -200,7 +202,8 @@ public class UserService implements IUserService {
             }
 
             ps.setString(8, user.getCardNumber());
-            ps.setLong(9, user.getId());
+            ps.setString(9, user.getCinNumber());
+            ps.setLong(10, user.getId());
 
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected == 0) {
