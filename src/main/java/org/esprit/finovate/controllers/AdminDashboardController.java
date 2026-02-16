@@ -85,6 +85,9 @@ public class AdminDashboardController implements Initializable {
     private TableColumn<User, String> cinColumn;
 
     @FXML
+    private TableColumn<User, Long> numeroCarteColumn;
+
+    @FXML
     private TableColumn<User, Void> actionsColumn;
 
     // Update Dialog fields
@@ -111,6 +114,9 @@ public class AdminDashboardController implements Initializable {
 
     @FXML
     private TextField updateCinField;
+
+    @FXML
+    private TextField updateNumeroCarteField;
 
     @FXML
     private Label updateErrorLabel;
@@ -198,6 +204,7 @@ public class AdminDashboardController implements Initializable {
         pointsColumn.setCellValueFactory(new PropertyValueFactory<>("points"));
         soldeColumn.setCellValueFactory(new PropertyValueFactory<>("solde"));
         cinColumn.setCellValueFactory(new PropertyValueFactory<>("cinNumber"));
+        numeroCarteColumn.setCellValueFactory(new PropertyValueFactory<>("numeroCarte"));
 
         // Format createdAt column
         createdAtColumn.setCellValueFactory(cellData -> {
@@ -334,6 +341,8 @@ public class AdminDashboardController implements Initializable {
             updateSoldeField.setText(String.valueOf(user.getSolde()));
         if (updateCinField != null)
             updateCinField.setText(user.getCinNumber());
+        if (updateNumeroCarteField != null)
+            updateNumeroCarteField.setText(user.getNumeroCarte() != null ? String.valueOf(user.getNumeroCarte()) : "");
 
         if (updateBirthdatePicker != null && user.getBirthdate() != null) {
             updateBirthdatePicker.setValue(new Date(user.getBirthdate().getTime())

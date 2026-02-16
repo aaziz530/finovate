@@ -163,6 +163,7 @@
                         <TableColumn fx:id="soldeColumn" prefWidth="120.0" text="Balance" />
                         <TableColumn fx:id="createdAtColumn" prefWidth="140.0" text="Created At" />
                         <TableColumn fx:id="cinColumn" prefWidth="180.0" text="CIN" />
+                        <TableColumn fx:id="numeroCarteColumn" prefWidth="180.0" text="Card Number" />
                         <TableColumn fx:id="actionsColumn" prefWidth="180.0" text="Actions" />
                      </columns>
                   </TableView>
