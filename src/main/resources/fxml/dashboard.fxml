@@ -10,7 +10,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.esprit.finovate.view.DashboardController"
+            fx:controller="org.esprit.finovate.controllers.DashboardController"
             prefHeight="600" prefWidth="900"
             styleClass="root" stylesheets="@../css/style.css">
     <top>

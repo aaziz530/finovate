@@ -10,7 +10,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.esprit.finovate.view.LoginController"
+            fx:controller="org.esprit.finovate.controllers.LoginController"
             prefHeight="500" prefWidth="450"
             styleClass="root" stylesheets="@../css/style.css">
     <center>

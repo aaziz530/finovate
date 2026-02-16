@@ -9,7 +9,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.esprit.finovate.view.PendingInvestmentsController"
+            fx:controller="org.esprit.finovate.controllers.PendingInvestmentsController"
             prefHeight="550" prefWidth="750"
             styleClass="root" stylesheets="@../css/style.css">
     <top>

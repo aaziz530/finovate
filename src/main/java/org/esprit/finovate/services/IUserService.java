@@ -1,6 +1,6 @@
 package org.esprit.finovate.services;
 
-import org.esprit.finovate.entities.User;
+import org.esprit.finovate.models.User;
 
 import java.sql.SQLException;
 import java.util.Date;

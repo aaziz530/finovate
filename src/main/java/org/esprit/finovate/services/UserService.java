@@ -1,6 +1,6 @@
 package org.esprit.finovate.services;
 
-import org.esprit.finovate.entities.User;
+import org.esprit.finovate.models.User;
 import org.esprit.finovate.utils.MyDataBase;
 import org.esprit.finovate.utils.DevAccount;
 import org.esprit.finovate.utils.PasswordUtils;

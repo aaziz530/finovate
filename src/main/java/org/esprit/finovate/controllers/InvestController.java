@@ -1,4 +1,4 @@
-package org.esprit.finovate.view;
+package org.esprit.finovate.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -12,7 +12,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.esprit.finovate.controllers.InvestissementController;
 import org.esprit.finovate.controllers.ProjectController;
-import org.esprit.finovate.entities.Project;
+import org.esprit.finovate.models.Project;
 import org.esprit.finovate.utils.ValidationUtils;
 
 import java.io.IOException;
@@ -86,7 +86,8 @@ public class InvestController implements Initializable {
         }
 
         String amountStr = txtAmount.getText() == null ? "" : txtAmount.getText().trim();
-        String err = ValidationUtils.validateInvestmentAmount(amountStr);
+        double remaining = selected.getGoal_amount() - selected.getCurrent_amount();
+        String err = ValidationUtils.validateInvestmentAmount(amountStr, remaining > 0 ? remaining : null);
         if (err != null) { showError(err); return; }
 
         double amount = ValidationUtils.parseAmount(amountStr);

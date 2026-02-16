@@ -1,6 +1,6 @@
 package org.esprit.finovate.services;
 
-import org.esprit.finovate.entities.Project;
+import org.esprit.finovate.models.Project;
 import org.esprit.finovate.utils.MyDataBase;
 import org.esprit.finovate.utils.Session;
 
@@ -17,16 +17,17 @@ public class ProjectService {
     }
 
     /**
-     * Create - Add a new project (owner = current logged user)
+     * Create - Add a new project (owner = current logged user).
+     * @return Generated project_id, or null if DB does not return keys.
      */
-    public void addProject(Project p) throws SQLException {
+    public Long addProject(Project p) throws SQLException {
         if (Session.currentUser == null) {
             throw new IllegalStateException("❌ No user logged in!");
         }
 
         String sql = "INSERT INTO project (title, description, goal_amount, current_amount, created_at, deadline, status, owner_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, p.getTitle());
             ps.setString(2, p.getDescription());
             ps.setDouble(3, p.getGoal_amount());
@@ -36,8 +37,16 @@ public class ProjectService {
             ps.setString(7, p.getStatus() != null ? p.getStatus() : "OPEN");
             ps.setLong(8, Session.currentUser.getId());
             ps.executeUpdate();
-            System.out.println("✅ Project added for user ID: " + Session.currentUser.getId());
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) {
+                    long id = keys.getLong(1);
+                    p.setProject_id(id);
+                    System.out.println("✅ Project added with ID: " + id + " for user ID: " + Session.currentUser.getId());
+                    return id;
+                }
+            }
         }
+        return null;
     }
 
     /**

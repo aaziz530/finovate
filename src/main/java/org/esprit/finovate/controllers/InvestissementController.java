@@ -1,6 +1,6 @@
 package org.esprit.finovate.controllers;
 
-import org.esprit.finovate.entities.Investissement;
+import org.esprit.finovate.models.Investissement;
 import org.esprit.finovate.services.InvestissementService;
 
 import java.sql.SQLException;

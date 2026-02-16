@@ -1,4 +1,4 @@
-package org.esprit.finovate.view;
+package org.esprit.finovate.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;

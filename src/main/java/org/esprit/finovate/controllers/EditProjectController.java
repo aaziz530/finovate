@@ -1,4 +1,4 @@
-package org.esprit.finovate.view;
+package org.esprit.finovate.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,7 +11,7 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.esprit.finovate.controllers.ProjectController;
-import org.esprit.finovate.entities.Project;
+import org.esprit.finovate.models.Project;
 import org.esprit.finovate.utils.ValidationUtils;
 
 import java.io.IOException;
@@ -60,6 +60,11 @@ public class EditProjectController {
         if (err != null) { showError(err); return; }
         err = ValidationUtils.validateGoalAmount(goalStr);
         if (err != null) { showError(err); return; }
+
+        if (dateDeadline.getValue() != null) {
+            String deadlineErr = ValidationUtils.validateDeadline(dateDeadline.getValue(), "Deadline");
+            if (deadlineErr != null) { showError(deadlineErr); return; }
+        }
 
         double goalAmount = ValidationUtils.parseAmount(goalStr);
 

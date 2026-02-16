@@ -11,7 +11,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="org.esprit.finovate.view.InvestController"
+            fx:controller="org.esprit.finovate.controllers.InvestController"
             prefHeight="550" prefWidth="600"
             styleClass="root" stylesheets="@../css/style.css">
     <top>

@@ -30,6 +30,13 @@
             <artifactId>javafx-fxml</artifactId>
             <version>17.0.9</version>
         </dependency>
+        <!-- JUnit 5 for unit tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

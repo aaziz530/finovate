@@ -1,16 +1,12 @@
 package org.esprit.finovate.controllers;
 
-import org.esprit.finovate.entities.Project;
+import org.esprit.finovate.models.Project;
 import org.esprit.finovate.services.ProjectService;
 
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
-/**
- * MVC Controller for Project operations.
- * Handles user input and delegates to ProjectService.
- */
 public class ProjectController {
 
     private final ProjectService projectService = new ProjectService();

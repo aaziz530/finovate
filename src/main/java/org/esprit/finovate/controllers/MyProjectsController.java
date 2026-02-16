@@ -1,4 +1,4 @@
-package org.esprit.finovate.view;
+package org.esprit.finovate.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,7 +11,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.esprit.finovate.controllers.InvestissementController;
 import org.esprit.finovate.controllers.ProjectController;
-import org.esprit.finovate.entities.Project;
+import org.esprit.finovate.models.Project;
 import org.esprit.finovate.utils.Session;
 
 import java.io.IOException;

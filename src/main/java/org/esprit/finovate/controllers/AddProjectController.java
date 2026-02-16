@@ -1,4 +1,4 @@
-package org.esprit.finovate.view;
+package org.esprit.finovate.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -54,9 +54,13 @@ public class AddProjectController {
         err = ValidationUtils.validateGoalAmount(goalStr);
         if (err != null) { showError(err); return; }
 
-        double goalAmount = ValidationUtils.parseAmount(goalStr);
-
         LocalDate deadlineDate = dateDeadline.getValue();
+        if (deadlineDate != null) {
+            err = ValidationUtils.validateDeadline(deadlineDate, "Deadline");
+            if (err != null) { showError(err); return; }
+        }
+
+        double goalAmount = ValidationUtils.parseAmount(goalStr);
         Date deadline = deadlineDate != null
                 ? Date.from(deadlineDate.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant())
                 : new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(30));

@@ -1,7 +1,7 @@
 package org.esprit.finovate.services;
 
-import org.esprit.finovate.entities.Investissement;
-import org.esprit.finovate.entities.Project;
+import org.esprit.finovate.models.Investissement;
+import org.esprit.finovate.models.Project;
 import org.esprit.finovate.utils.MyDataBase;
 import org.esprit.finovate.utils.Session;
 
@@ -20,10 +20,10 @@ public class InvestissementService {
     }
 
     /**
-     * Create - Add an investment (investor = current logged user)
-     * Also updates the project's current_amount
+     * Create - Add an investment (investor = current logged user).
+     * @return Generated investissement_id, or null if DB does not return keys.
      */
-    public void addInvestissement(Investissement inv) throws SQLException {
+    public Long addInvestissement(Investissement inv) throws SQLException {
         if (Session.currentUser == null) {
             throw new IllegalStateException("❌ No user logged in!");
         }
@@ -38,7 +38,7 @@ public class InvestissementService {
 
         String sql = "INSERT INTO investissement (project_id, investor_id, amount, investment_date, status) VALUES (?, ?, ?, ?, ?)";
 
-        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, inv.getProject_id());
             ps.setLong(2, Session.currentUser.getId());
             ps.setDouble(3, inv.getAmount());
@@ -49,8 +49,16 @@ public class InvestissementService {
 
             ps.executeUpdate();
 
-            System.out.println("✅ Investment request sent for project ID: " + inv.getProject_id() + " (awaiting owner approval)");
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) {
+                    long id = keys.getLong(1);
+                    inv.setInvestissement_id(id);
+                    System.out.println("✅ Investment request sent with ID: " + id + " for project ID: " + inv.getProject_id() + " (awaiting owner approval)");
+                    return id;
+                }
+            }
         }
+        return null;
     }
 
     /**

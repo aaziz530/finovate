@@ -1,4 +1,4 @@
-package org.esprit.finovate.view;
+package org.esprit.finovate.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,8 +11,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.esprit.finovate.controllers.InvestissementController;
 import org.esprit.finovate.controllers.ProjectController;
-import org.esprit.finovate.entities.Investissement;
-import org.esprit.finovate.entities.Project;
+import org.esprit.finovate.models.Investissement;
+import org.esprit.finovate.models.Project;
 import org.esprit.finovate.utils.Session;
 
 import java.io.IOException;
@@ -24,9 +24,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 
-public class MyInvestmentsController implements Initializable {
+public class PendingInvestmentsController implements Initializable {
 
-    @FXML private VBox investmentsContainer;
+    @FXML private VBox pendingContainer;
 
     private Stage stage;
     private final InvestissementController investissementController = new InvestissementController();
@@ -36,44 +36,40 @@ public class MyInvestmentsController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        loadInvestments();
+        loadPending();
     }
 
-    public void refresh() {
-        loadInvestments();
-    }
-
-    private void loadInvestments() {
-        investmentsContainer.getChildren().clear();
+    private void loadPending() {
+        pendingContainer.getChildren().clear();
         if (Session.currentUser == null) return;
 
         try {
-            List<Investissement> invs = investissementController.getInvestissementsByInvestorId(Session.currentUser.getId());
+            List<Investissement> pending = investissementController.getPendingInvestmentsForOwner(Session.currentUser.getId());
             Map<Long, String> projectTitles = new HashMap<>();
             for (Project p : projectController.getAllProjects()) {
                 projectTitles.put(p.getProject_id(), p.getTitle());
             }
 
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-            if (invs.isEmpty()) {
-                Label empty = new Label("No investments yet. Invest in a project!");
+            if (pending.isEmpty()) {
+                Label empty = new Label("No pending investment requests.");
                 empty.getStyleClass().add("project-meta");
-                investmentsContainer.getChildren().add(empty);
+                pendingContainer.getChildren().add(empty);
             } else {
-                for (Investissement inv : invs) {
-                    HBox card = createInvestmentCard(inv, projectTitles, sdf);
-                    investmentsContainer.getChildren().add(card);
+                for (Investissement inv : pending) {
+                    HBox card = createPendingCard(inv, projectTitles, sdf);
+                    pendingContainer.getChildren().add(card);
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            Label err = new Label("Error loading investments.");
+            Label err = new Label("Error loading requests.");
             err.getStyleClass().add("error-label");
-            investmentsContainer.getChildren().add(err);
+            pendingContainer.getChildren().add(err);
         }
     }
 
-    private HBox createInvestmentCard(Investissement inv, Map<Long, String> projectTitles, SimpleDateFormat sdf) {
+    private HBox createPendingCard(Investissement inv, Map<Long, String> projectTitles, SimpleDateFormat sdf) {
         HBox card = new HBox(16);
         card.getStyleClass().add("investment-card");
         card.setPrefWidth(680);
@@ -85,39 +81,42 @@ public class MyInvestmentsController implements Initializable {
         titleLabel.setWrapText(true);
 
         String date = inv.getInvestment_date() != null ? sdf.format(inv.getInvestment_date()) : "—";
-        Label meta = new Label(String.format("%.2f TND  •  %s  •  %s", inv.getAmount(), inv.getStatus(), date));
+        Label meta = new Label(String.format("%.2f TND  •  %s", inv.getAmount(), date));
         meta.getStyleClass().add("project-meta");
 
         info.getChildren().addAll(titleLabel, meta);
         HBox.setHgrow(info, javafx.scene.layout.Priority.ALWAYS);
 
-        card.getChildren().add(info);
+        Button btnAccept = new Button("Accept");
+        btnAccept.getStyleClass().addAll("btn-primary", "btn-small");
+        btnAccept.setOnAction(e -> handleAccept(inv));
 
-        boolean isPending = "PENDING".equals(inv.getStatus());
-        if (isPending) {
-            Button btnCancel = new Button("Cancel");
-            btnCancel.getStyleClass().addAll("btn-danger", "btn-small");
-            btnCancel.setOnAction(e -> handleDeleteInvestment(inv));
-            card.getChildren().add(btnCancel);
-        }
+        Button btnDecline = new Button("Decline");
+        btnDecline.getStyleClass().addAll("btn-danger", "btn-small");
+        btnDecline.setOnAction(e -> handleDecline(inv));
 
+        card.getChildren().addAll(info, btnAccept, btnDecline);
         card.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         return card;
     }
 
-    private void handleDeleteInvestment(Investissement inv) {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Cancel Investment");
-        confirm.setHeaderText("Cancel this investment request?");
-        confirm.setContentText("Your " + inv.getAmount() + " TND request will be withdrawn.");
-        if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-            try {
-                investissementController.deleteInvestissement(inv.getInvestissement_id());
-                new Alert(Alert.AlertType.INFORMATION, "Investment withdrawn.").showAndWait();
-                loadInvestments();
-            } catch (Exception ex) {
-                new Alert(Alert.AlertType.ERROR, "Failed: " + ex.getMessage()).showAndWait();
-            }
+    private void handleAccept(Investissement inv) {
+        try {
+            investissementController.acceptInvestissement(inv.getInvestissement_id());
+            new Alert(Alert.AlertType.INFORMATION, "Investment accepted. Amount added to project.").showAndWait();
+            loadPending();
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "Failed: " + e.getMessage()).showAndWait();
+        }
+    }
+
+    private void handleDecline(Investissement inv) {
+        try {
+            investissementController.declineInvestissement(inv.getInvestissement_id());
+            new Alert(Alert.AlertType.INFORMATION, "Investment declined.").showAndWait();
+            loadPending();
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "Failed: " + e.getMessage()).showAndWait();
         }
     }
 
