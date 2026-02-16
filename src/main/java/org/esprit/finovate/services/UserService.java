@@ -70,7 +70,13 @@ public class UserService implements IUserService {
         }
 
         if (emailExists(user.getEmail())) {
-            throw new IllegalStateException("Email existe déjà");
+            throw new IllegalStateException("Email already exists");
+        }
+        if (cardNumberExists(user.getCardNumber())) {
+            throw new IllegalStateException("Card Number already exists");
+        }
+        if (cinExists(user.getCinNumber())) {
+            throw new IllegalStateException("CIN already exists");
         }
 
         String sql = "INSERT INTO `user` (email, password, firstname, lastname, role, points, createdAt, solde, birthdate, cardNumber, cin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -113,6 +119,34 @@ public class UserService implements IUserService {
         String sql = "SELECT 1 FROM `user` WHERE email=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    @Override
+    public boolean cardNumberExists(String cardNumber) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+        String sql = "SELECT 1 FROM `user` WHERE cardNumber=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, cardNumber);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    @Override
+    public boolean cinExists(String cin) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+        String sql = "SELECT 1 FROM `user` WHERE cin=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, cin);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
             }
@@ -183,6 +217,20 @@ public class UserService implements IUserService {
 
         if (user.getId() == null) {
             throw new IllegalArgumentException("User ID cannot be null for update");
+        }
+
+        // Uniqueness checks for update
+        String checkSql = "SELECT id FROM `user` WHERE (email = ? OR cardNumber = ? OR cin = ?) AND id != ?";
+        try (PreparedStatement psCheck = connection.prepareStatement(checkSql)) {
+            psCheck.setString(1, user.getEmail());
+            psCheck.setString(2, user.getCardNumber());
+            psCheck.setString(3, user.getCinNumber());
+            psCheck.setLong(4, user.getId());
+            try (ResultSet rs = psCheck.executeQuery()) {
+                if (rs.next()) {
+                    throw new SQLException("Conflict: Email, Card Number, or CIN already used by another account.");
+                }
+            }
         }
 
         String sql = "UPDATE `user` SET email=?, firstname=?, lastname=?, role=?, points=?, solde=?, birthdate=?, cardNumber=?, cin=? WHERE id=?";

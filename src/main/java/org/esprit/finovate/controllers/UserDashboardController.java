@@ -44,21 +44,22 @@ public class UserDashboardController implements Initializable {
     @FXML
     private Button btnLogout;
 
+    public static UserDashboardController instance;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        if (Session.currentUser != null) {
-            userNameLabel.setText(Session.currentUser.getFirstName() + " " + Session.currentUser.getLastName());
-            userRoleLabel.setText(Session.currentUser.getRole());
-        }
+        instance = this;
+        refreshUserInfo();
 
-        // Load default view (Goals for now, as requested to start with)
-        loadView("/Goals.fxml");
+        // Load default view (User Home)
+        loadView("/UserHome.fxml");
+        updateButtonStyles(btnHome);
     }
 
     @FXML
     private void handleHome() {
-        // Placeholder for Home/Overview
-        // loadView("/UserHome.fxml");
+        loadView("/UserHome.fxml");
+        updateButtonStyles(btnHome);
     }
 
     @FXML
@@ -75,14 +76,21 @@ public class UserDashboardController implements Initializable {
 
     @FXML
     private void handleBills() {
-        // Placeholder
-        // loadView("/Bills.fxml");
+        loadView("/Bills.fxml");
+        updateButtonStyles(btnBills);
     }
 
     @FXML
     private void handleProfile() {
-        // Placeholder
-        // loadView("/UserProfile.fxml");
+        loadView("/UserProfile.fxml");
+        updateButtonStyles(btnProfile);
+    }
+
+    public void refreshUserInfo() {
+        if (Session.currentUser != null) {
+            userNameLabel.setText(Session.currentUser.getFirstName() + " " + Session.currentUser.getLastName());
+            userRoleLabel.setText(Session.currentUser.getRole());
+        }
     }
 
     @FXML

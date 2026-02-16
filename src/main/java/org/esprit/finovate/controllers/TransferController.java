@@ -21,7 +21,9 @@ import java.util.ResourceBundle;
 public class TransferController implements Initializable {
 
     @FXML
-    private TextField recipientEmailField;
+    private TextField recipientCardField;
+    @FXML
+    private TextField recipientCinField;
     @FXML
     private TextField amountField;
     @FXML
@@ -68,9 +70,9 @@ public class TransferController implements Initializable {
         colRecipient.setCellValueFactory(cellData -> {
             Transaction t = cellData.getValue();
             if (t.getSenderId() == Session.currentUser.getId().intValue()) {
-                return new SimpleStringProperty("To: User ID " + t.getReceiverId());
+                return new SimpleStringProperty("To: " + t.getReceiverName());
             } else {
-                return new SimpleStringProperty("From: User ID " + t.getSenderId());
+                return new SimpleStringProperty("From: " + t.getSenderName());
             }
         });
 
@@ -93,25 +95,28 @@ public class TransferController implements Initializable {
     @FXML
     private void handleSend() {
         errorLabel.setVisible(false);
-        String email = recipientEmailField.getText().trim();
+        String card = recipientCardField.getText().trim();
+        String cin = recipientCinField.getText().trim();
         String amountStr = amountField.getText().trim();
         String description = descriptionField.getText().trim();
 
-        if (email.isEmpty() || amountStr.isEmpty()) {
-            showError("Email and amount are required");
+        if (card.isEmpty() || cin.isEmpty() || amountStr.isEmpty()) {
+            showError("All fields except description are required");
             return;
         }
 
         try {
             float amount = Float.parseFloat(amountStr);
-            transactionService.transferMoney(Session.currentUser.getId().intValue(), email, amount, description);
+            transactionService.transferMoney(Session.currentUser.getId().intValue(), card, cin, amount,
+                    description);
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Success");
             alert.setContentText("Transfer successful!");
             alert.showAndWait();
 
-            recipientEmailField.clear();
+            recipientCardField.clear();
+            recipientCinField.clear();
             amountField.clear();
             descriptionField.clear();
             refreshData();

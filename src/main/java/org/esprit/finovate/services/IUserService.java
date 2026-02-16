@@ -7,37 +7,43 @@ import java.util.Date;
 import java.util.List;
 
 public interface IUserService {
-    // Authentication methods
-    User login(String email, String password) throws SQLException;
+        // Authentication methods
+        User login(String email, String password) throws SQLException;
 
-    void logout();
+        void logout();
 
-    User register(String email, String password, String firstName, String lastName, Date birthdate, String cardNumber)
-            throws SQLException;
+        User register(String email, String password, String firstName, String lastName, Date birthdate,
+                        String cardNumber)
+                        throws SQLException;
 
-    User register(String email, String password, String firstName, String lastName, Date birthdate, String cardNumber,
-            String cinNumber)
-            throws SQLException;
+        User register(String email, String password, String firstName, String lastName, Date birthdate,
+                        String cardNumber,
+                        String cinNumber)
+                        throws SQLException;
 
-    boolean emailExists(String email) throws SQLException;
+        boolean emailExists(String email) throws SQLException;
 
-    // Admin user management methods
-    List<User> getAllUsers() throws SQLException;
+        boolean cardNumberExists(String cardNumber) throws SQLException;
 
-    User getUserById(Long id) throws SQLException;
+        boolean cinExists(String cin) throws SQLException;
 
-    void updateUser(User user) throws SQLException;
+        // Admin user management methods
+        List<User> getAllUsers() throws SQLException;
 
-    void deleteUser(Long id) throws SQLException;
+        User getUserById(Long id) throws SQLException;
 
-    // Statistics methods
-    int getTotalUsersCount() throws SQLException;
+        void updateUser(User user) throws SQLException;
 
-    int getActiveUsersCount() throws SQLException;
+        void deleteUser(Long id) throws SQLException;
 
-    // Search method
-    List<User> searchUsers(String searchTerm) throws SQLException;
+        // Statistics methods
+        int getTotalUsersCount() throws SQLException;
 
-    // Password reset method
-    void updatePassword(String email, String newPassword) throws SQLException;
+        int getActiveUsersCount() throws SQLException;
+
+        // Search method
+        List<User> searchUsers(String searchTerm) throws SQLException;
+
+        // Password reset method
+        void updatePassword(String email, String newPassword) throws SQLException;
 }

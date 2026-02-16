@@ -12,60 +12,51 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<ScrollPane fitToWidth="true" style="-fx-background: #f7f9fc; -fx-background-color: #f7f9fc; -fx-border-color: transparent;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.esprit.finovate.controllers.TransferController">
+<ScrollPane fitToWidth="true" style="-fx-background: #f7f9fc; -fx-background-color: #f7f9fc; -fx-border-color: transparent;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.esprit.finovate.controllers.BillController">
    <content>
       <VBox spacing="20.0" style="-fx-background-color: #f7f9fc;">
          <padding>
             <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
          </padding>
          <children>
-            <VBox>
+            <HBox alignment="CENTER_LEFT" spacing="20.0">
                <children>
-                  <Label text="Money Transfer" textFill="#32325d">
-                     <font>
-                        <Font name="System Bold" size="28.0" />
-                     </font>
-                  </Label>
-                  <Label text="Send money to friends and family instantly." textFill="#8898aa">
-                     <font>
-                        <Font size="16.0" />
-                     </font>
-                  </Label>
+                  <VBox>
+                     <children>
+                        <Label text="Bill Payments" textFill="#32325d">
+                           <font>
+                              <Font name="System Bold" size="28.0" />
+                           </font>
+                        </Label>
+                        <Label text="Pay your utility bills and services securely." textFill="#8898aa">
+                           <font>
+                              <Font size="16.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
                </children>
-            </VBox>
+            </HBox>
             
             <HBox spacing="30.0">
                <children>
-                  <!-- Transfer Form -->
-                  <VBox HBox.hgrow="ALWAYS" maxWidth="500.0" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);">
+                  <!-- Bill Form -->
+                  <VBox HBox.hgrow="ALWAYS" maxWidth="400.0" spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);">
                      <children>
-                        <Label text="New Transfer" textFill="#32325d">
+                        <Label text="Pay New Bill" textFill="#32325d">
                            <font>
                               <Font name="System Bold" size="18.0" />
                            </font>
                         </Label>
                         
-
-                        
                         <VBox spacing="5.0">
                            <children>
-                              <Label text="Recipient Card Number" textFill="#6c757d">
+                              <Label text="Bill Reference" textFill="#6c757d">
                                  <font>
                                     <Font name="System Bold" size="12.0" />
                                  </font>
                               </Label>
-                              <TextField fx:id="recipientCardField" promptText="20-digit card number" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-text-fill: #32325d;" />
-                           </children>
-                        </VBox>
-                        
-                        <VBox spacing="5.0">
-                           <children>
-                              <Label text="Recipient CIN" textFill="#6c757d">
-                                 <font>
-                                    <Font name="System Bold" size="12.0" />
-                                 </font>
-                              </Label>
-                              <TextField fx:id="recipientCinField" promptText="8-digit CIN" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-text-fill: #32325d;" />
+                              <TextField fx:id="referenceField" promptText="e.g. STEG-2024-001" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-text-fill: #32325d;" />
                            </children>
                         </VBox>
                         
@@ -80,20 +71,9 @@
                            </children>
                         </VBox>
                         
-                        <VBox spacing="5.0">
-                           <children>
-                              <Label text="Description (Optional)" textFill="#6c757d">
-                                 <font>
-                                    <Font name="System Bold" size="12.0" />
-                                 </font>
-                              </Label>
-                              <TextField fx:id="descriptionField" promptText="e.g. Dinner" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-text-fill: #32325d;" />
-                           </children>
-                        </VBox>
-                        
                         <Label fx:id="errorLabel" text="" textFill="#dc3545" visible="false" wrapText="true" />
                         
-                        <Button fx:id="btnSend" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleSend" style="-fx-background-color: #237f4e; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: bold;" text="Send Money">
+                        <Button fx:id="btnPay" maxWidth="Infinity" mnemonicParsing="false" onAction="#handlePay" style="-fx-background-color: #237f4e; -fx-text-fill: white; -fx-background-radius: 8; -fx-cursor: hand; -fx-font-weight: bold;" text="Pay Bill">
                            <padding>
                               <Insets bottom="12.0" top="12.0" />
                            </padding>
@@ -101,7 +81,7 @@
                      </children>
                   </VBox>
                   
-                  <!-- Balance Summary -->
+                  <!-- Info Sidebar -->
                   <VBox prefWidth="250.0" spacing="15.0">
                       <children>
                           <VBox style="-fx-background-color: #237f4e; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(35,127,78,0.3), 10, 0, 0, 4);">
@@ -123,20 +103,18 @@
                </children>
             </HBox>
 
-            <VBox spacing="15.0">
+            <VBox spacing="15.0" VBox.vgrow="ALWAYS">
                <children>
-                  <Label text="Recent Transactions" textFill="#32325d">
+                  <Label text="Payment History" textFill="#32325d">
                      <font>
                         <Font name="System Bold" size="18.0" />
                      </font>
                   </Label>
-                  <TableView fx:id="transactionTable" minHeight="300" style="-fx-background-radius: 10; -fx-overflow-x: hidden;">
+                  <TableView fx:id="billTable" minHeight="300.0" VBox.vgrow="ALWAYS" style="-fx-background-radius: 10;">
                      <columns>
-                        <TableColumn fx:id="colDate" prefWidth="150.0" text="Date" />
-                        <TableColumn fx:id="colType" prefWidth="100.0" text="Type" />
-                        <TableColumn fx:id="colRecipient" prefWidth="200.0" text="To/From" />
-                        <TableColumn fx:id="colAmount" prefWidth="100.0" text="Amount" />
-                        <TableColumn fx:id="colDescription" prefWidth="320.0" text="Description" />
+                        <TableColumn fx:id="colDate" prefWidth="180.0" text="Payment Date" />
+                        <TableColumn fx:id="colReference" prefWidth="300.0" text="Reference" />
+                        <TableColumn fx:id="colAmount" prefWidth="150.0" text="Amount Paid" />
                      </columns>
                      <columnResizePolicy>
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

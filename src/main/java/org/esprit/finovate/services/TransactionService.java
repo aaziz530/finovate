@@ -15,7 +15,7 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public void transferMoney(int senderId, String receiverEmail, float amount, String description)
+    public void transferMoney(int senderId, String cardNumber, String cin, float amount, String description)
             throws SQLException {
         if (amount <= 0) {
             throw new SQLException("Amount must be positive");
@@ -26,14 +26,15 @@ public class TransactionService implements ITransactionService {
 
             // 1. Get Receiver ID
             int receiverId = -1;
-            String getReceiverSql = "SELECT id FROM user WHERE email = ?";
+            String getReceiverSql = "SELECT id FROM user WHERE cardNumber = ? AND cin = ?";
             try (PreparedStatement pstReceiver = connection.prepareStatement(getReceiverSql)) {
-                pstReceiver.setString(1, receiverEmail);
+                pstReceiver.setString(1, cardNumber);
+                pstReceiver.setString(2, cin);
                 try (ResultSet rs = pstReceiver.executeQuery()) {
                     if (rs.next()) {
                         receiverId = rs.getInt("id");
                     } else {
-                        throw new SQLException("Receiver not found");
+                        throw new SQLException("Receiver not found with specified Card Number and CIN.");
                     }
                 }
             }
@@ -88,7 +89,14 @@ public class TransactionService implements ITransactionService {
     @Override
     public List<Transaction> getTransactionsByUserId(int userId) throws SQLException {
         List<Transaction> transactions = new ArrayList<>();
-        String sql = "SELECT * FROM transaction WHERE senderId = ? OR receiverId = ? ORDER BY date DESC";
+        String sql = "SELECT t.*, " +
+                "s.firstname as sender_fname, s.lastname as sender_lname, " +
+                "r.firstname as receiver_fname, r.lastname as receiver_lname " +
+                "FROM transaction t " +
+                "LEFT JOIN user s ON t.senderId = s.id " +
+                "LEFT JOIN user r ON t.receiverId = r.id " +
+                "WHERE (t.senderId = ? OR t.receiverId = ?) AND t.type = 'TRANSFER' " +
+                "ORDER BY t.date DESC";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setInt(1, userId);
             pst.setInt(2, userId);
@@ -102,6 +110,11 @@ public class TransactionService implements ITransactionService {
                             rs.getString("type"),
                             rs.getString("description"),
                             rs.getTimestamp("date"));
+
+                    t.setSenderName(rs.getString("sender_fname") + " " + rs.getString("sender_lname"));
+                    if (rs.getString("receiver_fname") != null) {
+                        t.setReceiverName(rs.getString("receiver_fname") + " " + rs.getString("receiver_lname"));
+                    }
                     transactions.add(t);
                 }
             }
