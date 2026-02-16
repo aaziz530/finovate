@@ -38,7 +38,8 @@ public class UserServiceTest {
     public void testRegisterUser() {
         String email = "test_create_" + System.currentTimeMillis() + "@finovate.com";
         try {
-            User newUser = userService.register(email, "password123", "Test", "User", new Date());
+            User newUser = userService.register(email, "password123", "Test", "User", new Date(),
+                    "12345678901234567890");
             assertNotNull(newUser, "Registered user returned null");
             assertNotNull(newUser.getId(), "Registered user ID is null");
 
@@ -60,7 +61,8 @@ public class UserServiceTest {
         String email = "test_update_" + System.currentTimeMillis() + "@finovate.com";
         try {
             // 1. Create a user to update
-            User newUser = userService.register(email, "password123", "Original", "Name", new Date());
+            User newUser = userService.register(email, "password123", "Original", "Name", new Date(),
+                    "12345678901234567891");
             assertNotNull(newUser.getId());
             this.createdUserId = newUser.getId();
 
@@ -97,7 +99,7 @@ public class UserServiceTest {
             // To be safer, let's create a temp user, assert list has it, them remove it
             // (via cleanup)
             String email = "test_list_" + System.currentTimeMillis() + "@finovate.com";
-            User tempUser = userService.register(email, "pass", "List", "Test", new Date());
+            User tempUser = userService.register(email, "pass", "List", "Test", new Date(), "12345678901234567892");
             this.createdUserId = tempUser.getId();
 
             users = userService.getAllUsers();

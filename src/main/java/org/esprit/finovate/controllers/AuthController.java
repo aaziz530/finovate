@@ -54,6 +54,9 @@ public class AuthController {
     private DatePicker birthdatePicker;
 
     @FXML
+    private TextField cardNumberField;
+
+    @FXML
     private PasswordField registerPasswordField;
 
     @FXML
@@ -156,14 +159,19 @@ public class AuthController {
 
         String firstName = firstNameField.getText().trim();
         String lastName = lastNameField.getText().trim();
-        String email = emailField.getText().trim();
         String password = registerPasswordField.getText();
         String confirmPassword = confirmPasswordField.getText();
+        String cardNumber = cardNumberField.getText().trim();
 
         // Validation
         if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() ||
-                password.isEmpty() || confirmPassword.isEmpty()) {
+                password.isEmpty() || confirmPassword.isEmpty() || cardNumber.isEmpty()) {
             showRegisterError("All fields are required");
+            return;
+        }
+
+        if (!cardNumber.matches("\\d{20}")) {
+            showRegisterError("Card Number must be exactly 20 digits");
             return;
         }
 
@@ -191,7 +199,7 @@ public class AuthController {
             Date birthdate = Date.from(birthdatePicker.getValue()
                     .atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-            User user = userService.register(email, password, firstName, lastName, birthdate);
+            User user = userService.register(email, password, firstName, lastName, birthdate, cardNumber);
 
             if (user != null) {
                 showSuccessAndNavigateToLogin();

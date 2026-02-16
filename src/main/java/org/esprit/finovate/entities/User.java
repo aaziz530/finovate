@@ -15,17 +15,19 @@ public class User {
     private float solde;
     private Long numeroCarte;
     private Date birthdate;
+    private String cardNumber;
 
-    public User(){
+    public User() {
 
     }
 
-    public User(String email, String password, String firstName, String lastName, Date birthdate) {
+    public User(String email, String password, String firstName, String lastName, Date birthdate, String cardNumber) {
         this.email = email;
         this.password = password;
         this.firstname = firstName;
         this.lastname = lastName;
         this.birthdate = birthdate;
+        this.cardNumber = cardNumber;
 
         this.role = "USER";
         this.points = 0;
@@ -34,9 +36,8 @@ public class User {
         this.numeroCarte = generateMastercardNumber();
     }
 
-
     public User(Long id, String email, String password, String firstName, String lastName, String role, int points,
-                Date createdAt, float solde, Long numeroCarte, Date birthdate) {
+            Date createdAt, float solde, Long numeroCarte, Date birthdate, String cardNumber) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -48,6 +49,7 @@ public class User {
         this.solde = solde;
         this.numeroCarte = numeroCarte;
         this.birthdate = birthdate;
+        this.cardNumber = cardNumber;
     }
 
     private static Long generateMastercardNumber() {
@@ -78,7 +80,8 @@ public class User {
             int d = numberWithoutCheckDigit.charAt(i) - '0';
             if (doubleDigit) {
                 d *= 2;
-                if (d > 9) d -= 9;
+                if (d > 9)
+                    d -= 9;
             }
             sum += d;
             doubleDigit = !doubleDigit;
@@ -174,6 +177,14 @@ public class User {
         this.birthdate = birthdate;
     }
 
+    public String getCardNumber() {
+        return cardNumber;
+    }
+
+    public void setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -186,6 +197,7 @@ public class User {
                 ", solde=" + solde +
                 ", numeroCarte=" + numeroCarte +
                 ", birthdate=" + birthdate +
+                ", cardNumber='" + cardNumber + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
     }

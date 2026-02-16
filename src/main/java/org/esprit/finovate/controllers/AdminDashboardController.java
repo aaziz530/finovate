@@ -45,9 +45,6 @@ public class AdminDashboardController implements Initializable {
     private Label totalUsersLabel;
 
     @FXML
-    private Label activeUsersLabel;
-
-    @FXML
     private Label totalReclamationsLabel;
 
     // User management
@@ -85,6 +82,9 @@ public class AdminDashboardController implements Initializable {
     private TableColumn<User, String> createdAtColumn;
 
     @FXML
+    private TableColumn<User, String> cinColumn;
+
+    @FXML
     private TableColumn<User, Void> actionsColumn;
 
     // Update Dialog fields
@@ -108,6 +108,9 @@ public class AdminDashboardController implements Initializable {
 
     @FXML
     private TextField updateSoldeField;
+
+    @FXML
+    private TextField updateCardNumberField;
 
     @FXML
     private Label updateErrorLabel;
@@ -164,14 +167,8 @@ public class AdminDashboardController implements Initializable {
     private void setupStatistics() {
         try {
             int totalUsers = userService.getTotalUsersCount();
-            int activeUsers = userService.getActiveUsersCount();
-
             if (totalUsersLabel != null) {
                 totalUsersLabel.setText(String.valueOf(totalUsers));
-            }
-
-            if (activeUsersLabel != null) {
-                activeUsersLabel.setText(String.valueOf(activeUsers));
             }
 
             // Reclamations is static as requested
@@ -200,6 +197,7 @@ public class AdminDashboardController implements Initializable {
         roleColumn.setCellValueFactory(new PropertyValueFactory<>("role"));
         pointsColumn.setCellValueFactory(new PropertyValueFactory<>("points"));
         soldeColumn.setCellValueFactory(new PropertyValueFactory<>("solde"));
+        cinColumn.setCellValueFactory(new PropertyValueFactory<>("cardNumber"));
 
         // Format createdAt column
         createdAtColumn.setCellValueFactory(cellData -> {
@@ -334,6 +332,8 @@ public class AdminDashboardController implements Initializable {
             updatePointsField.setText(String.valueOf(user.getPoints()));
         if (updateSoldeField != null)
             updateSoldeField.setText(String.valueOf(user.getSolde()));
+        if (updateCardNumberField != null)
+            updateCardNumberField.setText(user.getCardNumber());
 
         if (updateBirthdatePicker != null && user.getBirthdate() != null) {
             updateBirthdatePicker.setValue(new Date(user.getBirthdate().getTime())
@@ -359,8 +359,15 @@ public class AdminDashboardController implements Initializable {
             // Validation
             if (updateFirstNameField.getText().trim().isEmpty() ||
                     updateLastNameField.getText().trim().isEmpty() ||
-                    updateEmailField.getText().trim().isEmpty()) {
+                    updateEmailField.getText().trim().isEmpty() ||
+                    updateCardNumberField.getText().trim().isEmpty()) {
                 showUpdateError("All required fields must be filled");
+                return;
+            }
+
+            String cardNumber = updateCardNumberField.getText().trim();
+            if (!cardNumber.matches("\\d{20}")) {
+                showUpdateError("Card Number must be exactly 20 digits");
                 return;
             }
 
@@ -369,6 +376,7 @@ public class AdminDashboardController implements Initializable {
             selectedUserForUpdate.setLastName(updateLastNameField.getText().trim());
             selectedUserForUpdate.setEmail(updateEmailField.getText().trim());
             selectedUserForUpdate.setRole(updateRoleComboBox.getValue());
+            selectedUserForUpdate.setCardNumber(updateCardNumberField.getText().trim());
 
             try {
                 selectedUserForUpdate.setPoints(Integer.parseInt(updatePointsField.getText().trim()));

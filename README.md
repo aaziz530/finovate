@@ -23,3 +23,4 @@ Open your terminal in the project root directory and execute:
 mvn javafx:run
 ```
 
+ 
