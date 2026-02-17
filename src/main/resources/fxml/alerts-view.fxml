@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.controller.AlertsController"
+            styleClass="border-pane">
+
+    <!-- Header -->
+    <top>
+        <VBox styleClass="header-section">
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Label fx:id="titleLabel" text="🔔 Mes Alertes" styleClass="app-title"/>
+                
+                <Region HBox.hgrow="ALWAYS"/>
+                
+                <Button fx:id="clearAllBtn" 
+                        text="🗑️ Tout effacer" 
+                        onAction="#clearAllAlerts"
+                        styleClass="button-danger"
+                        visible="false"
+                        managed="false"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- Contenu principal -->
+    <center>
+        <VBox styleClass="content-area" spacing="20">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
+            <!-- Message si vide -->
+            <Label fx:id="emptyLabel" 
+                   text="Aucune alerte pour le moment" 
+                   styleClass="empty-label"
+                   visible="false"
+                   managed="false"/>
+
+            <!-- Liste des alertes -->
+            <ListView fx:id="alertsList" 
+                      styleClass="list-view"
+                      VBox.vgrow="ALWAYS">
+            </ListView>
+        </VBox>
+    </center>
+
+</BorderPane>

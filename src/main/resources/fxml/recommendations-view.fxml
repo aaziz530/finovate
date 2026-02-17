@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="org.example.controller.RecommendationsController"
+            styleClass="border-pane">
+
+    <!-- Header -->
+    <top>
+        <VBox styleClass="header-section">
+            <HBox alignment="CENTER_LEFT" spacing="15">
+                <Label fx:id="titleLabel" text="🤖 Recommandations AI pour vous" styleClass="app-title"/>
+                
+                <Region HBox.hgrow="ALWAYS"/>
+                
+                <Button fx:id="refreshBtn" 
+                        text="🔄 Actualiser" 
+                        onAction="#refreshRecommendations"
+                        styleClass="button"
+                        style="-fx-background-color: #4CAF50;"/>
+                
+                <Button text="🗑️ Tout supprimer" 
+                        onAction="#clearAllRecommendations"
+                        styleClass="button"
+                        style="-fx-background-color: #F44336;"/>
+            </HBox>
+            
+            <Label text="Forums suggérés selon vos intérêts et votre activité" 
+                   style="-fx-text-fill: white; -fx-font-size: 13px; -fx-padding: 5 0 0 0;"/>
+        </VBox>
+    </top>
+
+    <!-- Contenu principal -->
+    <center>
+        <VBox styleClass="content-area" spacing="20">
+            <padding>
+                <Insets top="20" right="20" bottom="20" left="20"/>
+            </padding>
+
+            <!-- Message si vide -->
+            <Label fx:id="emptyLabel" 
+                   text="Aucune recommandation disponible. Interagissez avec des forums pour obtenir des suggestions personnalisées !" 
+                   styleClass="empty-label"
+                   visible="false"
+                   managed="false"/>
+
+            <!-- Liste des recommandations -->
+            <ListView fx:id="recommendationsList" 
+                      styleClass="list-view"
+                      VBox.vgrow="ALWAYS">
+            </ListView>
+        </VBox>
+    </center>
+
+</BorderPane>

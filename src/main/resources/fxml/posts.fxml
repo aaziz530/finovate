@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.example.controller.PostsController"
+      prefWidth="800" prefHeight="600">
+
+
+
+<padding><Insets top="10" right="10" bottom="10" left="10"/></padding>
+
+    <!-- Header avec titre forum et bouton retour -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Button text="← Retour" onAction="#goBack" styleClass="back-button"/>
+        <Label fx:id="forumNameLabel" text="Nom du Forum" styleClass="forum-title"/>
+        <javafx.scene.layout.Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="createPostBtn" text="+ Ajouter un Post"
+                onAction="#openCreatePostDialog" styleClass="create-button"/>
+    </HBox>
+
+    <!-- Message si vide -->
+    <Label fx:id="emptyLabel" text="Aucun post dans ce forum"
+           styleClass="empty-message" visible="false" managed="false"/>
+
+    <!-- Liste des posts -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                styleClass="scroll-pane">
+        <ListView fx:id="postList" styleClass="posts-list"/>
+    </ScrollPane>
+
+</VBox>

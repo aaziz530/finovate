@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.example.controller.MainController"
+
+            prefWidth="800" prefHeight="600">
+
+    <top>
+        <VBox spacing="10" styleClass="header-section">
+            <padding><Insets top="15" right="15" bottom="15" left="15"/></padding>
+
+            <!-- Titre de l'application -->
+            <Label text="FinTech Forums" styleClass="app-title"/>
+
+            <!-- Barre de recherche et tri -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="searchField" promptText="🔍 Rechercher..."
+                           HBox.hgrow="ALWAYS" styleClass="search-field"/>
+                <ComboBox fx:id="sortBox" promptText="Trier par..."
+                          prefWidth="150" styleClass="sort-combo"/>
+            </HBox>
+
+            <!-- Navigation Tabs -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Button fx:id="accueilBtn" text="🏠 Accueil"
+                        onAction="#showAccueil" styleClass="nav-button"/>
+                <Button fx:id="mesForumsBtn" text="Mes Forums"
+                        onAction="#showMyForums" styleClass="nav-button"/>
+                <Button fx:id="forumsRejointsBtn" text="Forums Rejoints"
+                        onAction="#showJoinedForums" styleClass="nav-button"/>
+                <Button fx:id="postesPartagesBtn" text="📤 Postes Partagés"
+                        onAction="#showSharedPosts" styleClass="nav-button"/>
+                
+                <!-- Spacer pour pousser les boutons à droite -->
+                <Region HBox.hgrow="ALWAYS"/>
+                
+                <!-- Bouton Recommandations AI -->
+                <Button text="🤖 Recommandations"
+                        onAction="#showRecommendations" 
+                        styleClass="nav-button"
+                        style="-fx-background-color: rgba(76, 175, 80, 0.3);"/>
+                
+                <!-- Bouton Alertes -->
+                <Button text="🔔 Alertes"
+                        onAction="#showAlerts" 
+                        styleClass="nav-button"
+                        style="-fx-background-color: rgba(255, 255, 255, 0.3);"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <center>
+        <StackPane fx:id="contentArea" styleClass="content-area">
+            <padding><Insets top="10" right="15" bottom="10" left="15"/></padding>
+        </StackPane>
+    </center>
+
+    <bottom>
+        <HBox alignment="CENTER_LEFT" spacing="10" styleClass="status-bar">
+            <padding><Insets top="10" right="15" bottom="10" left="15"/></padding>
+            <Label fx:id="statusLabel" text="Prêt"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="userInfoLabel" text="Utilisateur: Admin"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

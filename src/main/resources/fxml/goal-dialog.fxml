@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="400.0" spacing="10.0" style="-fx-background-color: white; -fx-padding: 30;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.controller.GoalDialogController">
+   <children>
+      <Label fx:id="titleLabel" text="New Financial Goal" textFill="#237f4e">
+         <font>
+            <Font name="System Bold" size="20.0" />
+         </font>
+         <VBox.margin>
+            <Insets bottom="10.0" />
+         </VBox.margin>
+      </Label>
+      
+      <VBox spacing="5.0">
+         <children>
+            <Label text="Goal Title" textFill="#6c757d">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <TextField fx:id="titleField" promptText="e.g. Buy a Car" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10;" />
+         </children>
+      </VBox>
+      
+      <VBox spacing="5.0">
+         <children>
+            <Label text="Target Amount" textFill="#6c757d">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <TextField fx:id="amountField" promptText="e.g. 15000" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10;" />
+         </children>
+      </VBox>
+      
+      <VBox spacing="5.0">
+         <children>
+            <Label text="Deadline" textFill="#6c757d">
+               <font>
+                  <Font name="System Bold" size="12.0" />
+               </font>
+            </Label>
+            <DatePicker fx:id="deadlinePicker" maxWidth="Infinity" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef;" />
+         </children>
+         <VBox.margin>
+            <Insets bottom="10.0" />
+         </VBox.margin>
+      </VBox>
+      
+      <Label fx:id="errorLabel" text="" textFill="#dc3545" visible="false" wrapText="true" />
+      
+      <HBox alignment="CENTER" spacing="15.0">
+         <children>
+            <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#handleCancel" style="-fx-background-color: #f8f9fa; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="Cancel">
+               <padding>
+                  <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+               </padding>
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Button>
+            <Button fx:id="saveButton" mnemonicParsing="false" onAction="#handleSave" style="-fx-background-color: #237f4e; -fx-text-fill: white; -fx-cursor: hand; -fx-font-weight: bold;" text="Save Goal">
+               <padding>
+                  <Insets bottom="10.0" left="20.0" right="20.0" top="10.0" />
+               </padding>
+               <font>
+                  <Font size="14.0" />
+               </font>
+            </Button>
+         </children>
+         <VBox.margin>
+            <Insets top="10.0" />
+         </VBox.margin>
+      </HBox>
+   </children>
+</VBox>
