@@ -78,13 +78,58 @@ public class GoalService implements IGoalService {
 
     @Override
     public void deleteGoal(int goalId) throws SQLException {
-        // Return funds to user? For now just delete.
-        // Actually, if a goal has money, we should arguably check logic,
-        // but simple CRUD for now as requested.
-        String sql = "DELETE FROM goal WHERE id = ?";
-        try (PreparedStatement pst = connection.prepareStatement(sql)) {
-            pst.setInt(1, goalId);
-            pst.executeUpdate();
+        try {
+            connection.setAutoCommit(false);
+
+            int userId;
+            float goalAmount;
+            String selectSql = "SELECT idUser, currentAmount FROM goal WHERE id = ? FOR UPDATE";
+            try (PreparedStatement pst = connection.prepareStatement(selectSql)) {
+                pst.setInt(1, goalId);
+                try (ResultSet rs = pst.executeQuery()) {
+                    if (!rs.next()) {
+                        throw new SQLException("Goal not found with ID: " + goalId);
+                    }
+                    userId = rs.getInt("idUser");
+                    goalAmount = rs.getFloat("currentAmount");
+                }
+            }
+
+            if (goalAmount > 0) {
+                String refundSql = "UPDATE user SET solde = solde + ? WHERE id = ?";
+                try (PreparedStatement pstRefund = connection.prepareStatement(refundSql)) {
+                    pstRefund.setFloat(1, goalAmount);
+                    pstRefund.setInt(2, userId);
+                    int updated = pstRefund.executeUpdate();
+                    if (updated == 0) {
+                        throw new SQLException("User not found for refund. User ID: " + userId);
+                    }
+                }
+            }
+
+            String deleteSql = "DELETE FROM goal WHERE id = ?";
+            try (PreparedStatement pstDelete = connection.prepareStatement(deleteSql)) {
+                pstDelete.setInt(1, goalId);
+                int deleted = pstDelete.executeUpdate();
+                if (deleted == 0) {
+                    throw new SQLException("Delete failed. Goal not found with ID: " + goalId);
+                }
+            }
+
+            connection.commit();
+        } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                e.addSuppressed(ex);
+            }
+            throw e;
+        } finally {
+            try {
+                connection.setAutoCommit(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 
