@@ -38,4 +38,6 @@ public interface IUserService {
 
     // Password reset method
     void updatePassword(String email, String newPassword) throws SQLException;
+
+    void changePassword(Long userId, String oldPassword, String newPassword) throws SQLException;
 }

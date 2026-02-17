@@ -141,7 +141,7 @@ public class AuthController {
             if ("ADMIN".equalsIgnoreCase(user.getRole())) {
                 loadAdminDashboard();
             } else {
-                showError("Access denied. Admin privileges required.");
+                navigateToPage("/UserDashboard.fxml", "User Dashboard - Finovate");
             }
 
         } catch (SQLException e) {

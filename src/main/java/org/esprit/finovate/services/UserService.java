@@ -336,4 +336,44 @@ public class UserService implements IUserService {
             }
         }
     }
+
+    @Override
+    public void changePassword(Long userId, String oldPassword, String newPassword) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+        if (oldPassword == null || oldPassword.isBlank()) {
+            throw new IllegalArgumentException("Old password is required");
+        }
+        if (newPassword == null || newPassword.isBlank()) {
+            throw new IllegalArgumentException("New password is required");
+        }
+
+        String oldHash = PasswordUtils.sha256(oldPassword);
+
+        String checkSql = "SELECT 1 FROM `user` WHERE id=? AND password=?";
+        try (PreparedStatement ps = connection.prepareStatement(checkSql)) {
+            ps.setLong(1, userId);
+            ps.setString(2, oldHash);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    throw new IllegalStateException("Old password is incorrect");
+                }
+            }
+        }
+
+        String newHash = PasswordUtils.sha256(newPassword);
+        String updateSql = "UPDATE `user` SET password=? WHERE id=?";
+        try (PreparedStatement ps = connection.prepareStatement(updateSql)) {
+            ps.setString(1, newHash);
+            ps.setLong(2, userId);
+            int rows = ps.executeUpdate();
+            if (rows == 0) {
+                throw new SQLException("Password update failed, user not found with ID: " + userId);
+            }
+        }
+    }
 }

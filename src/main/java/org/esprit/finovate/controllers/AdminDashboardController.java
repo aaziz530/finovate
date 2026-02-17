@@ -255,7 +255,17 @@ public class AdminDashboardController implements Initializable {
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                setGraphic(empty ? null : container);
+                if (empty) {
+                    setGraphic(null);
+                    return;
+                }
+
+                User user = getTableView().getItems().get(getIndex());
+                if (user != null && "ADMIN".equalsIgnoreCase(user.getRole())) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(container);
+                }
             }
         });
     }
@@ -269,7 +279,6 @@ public class AdminDashboardController implements Initializable {
             usersList.clear();
             // Filter out ADMIN users
             usersList.addAll(users.stream()
-                    .filter(user -> !"ADMIN".equalsIgnoreCase(user.getRole()))
                     .toList());
             setupStatistics(); // Refresh statistics
         } catch (SQLException e) {
@@ -290,7 +299,6 @@ public class AdminDashboardController implements Initializable {
             usersList.clear();
             // Filter out ADMIN users
             usersList.addAll(users.stream()
-                    .filter(user -> !"ADMIN".equalsIgnoreCase(user.getRole()))
                     .toList());
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Search error: " + e.getMessage());
