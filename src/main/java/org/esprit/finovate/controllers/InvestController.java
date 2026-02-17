@@ -10,9 +10,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.esprit.finovate.controllers.InvestissementController;
-import org.esprit.finovate.controllers.ProjectController;
 import org.esprit.finovate.models.Project;
+import org.esprit.finovate.utils.LiveValidationHelper;
 import org.esprit.finovate.utils.ValidationUtils;
 
 import java.io.IOException;
@@ -39,6 +38,20 @@ public class InvestController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         loadProjects();
+        LiveValidationHelper.bindAmount(txtAmount, () -> {
+            Project sel = listProjects.getSelectionModel().getSelectedItem();
+            if (sel == null) return null;
+            double r = sel.getGoal_amount() - sel.getCurrent_amount();
+            return r > 0 ? r : null;
+        });
+        listProjects.getSelectionModel().selectedItemProperty().addListener((obs, o, n) -> {
+            // Re-validate amount when project selection changes (max remaining changes)
+            String t = txtAmount.getText() == null ? "" : txtAmount.getText().trim();
+            Double max = n != null ? Math.max(0.0, n.getGoal_amount() - n.getCurrent_amount()) : null;
+            String err = ValidationUtils.validateInvestmentAmount(t, max);
+            if (err != null && !txtAmount.getStyleClass().contains("validation-error")) txtAmount.getStyleClass().add("validation-error");
+            else if (err == null) txtAmount.getStyleClass().removeAll("validation-error");
+        });
         listProjects.setCellFactory(lv -> new javafx.scene.control.ListCell<>() {
             @Override
             protected void updateItem(Project item, boolean empty) {

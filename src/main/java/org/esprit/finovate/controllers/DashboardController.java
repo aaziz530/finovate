@@ -34,7 +34,7 @@ public class DashboardController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         if (Session.currentUser != null) {
-            lblWelcome.setText("Welcome, " + Session.currentUser.getFirstName() + "!");
+            lblWelcome.setText("Finovate");
         }
         loadProjects();
     }
@@ -211,7 +211,7 @@ public class DashboardController implements Initializable {
         Session.currentUser = null;
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
         Parent root = loader.load();
-        LoginController ctrl = loader.getController();
+        LoginPlaceholderController ctrl = loader.getController();
         ctrl.setStage(stage);
 
         Scene scene = new Scene(root);

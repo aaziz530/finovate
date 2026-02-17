@@ -2,11 +2,10 @@ package org.esprit.finovate;
 
 import org.esprit.finovate.models.Investissement;
 import org.esprit.finovate.models.Project;
-import org.esprit.finovate.models.User;
 import org.esprit.finovate.services.InvestissementService;
 import org.esprit.finovate.services.ProjectService;
-import org.esprit.finovate.services.UserService;
 import org.esprit.finovate.utils.Session;
+import org.esprit.finovate.utils.StubLoggedInUser;
 import org.junit.jupiter.api.*;
 
 import java.sql.SQLException;
@@ -18,29 +17,24 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for {@link InvestissementService}.
+ * Requires user IDs 1 and 2 in database (1=owner, 2=investor).
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class InvestissementServiceTest {
 
     static InvestissementService investissementService;
     static ProjectService projectService;
-    static UserService userService;
-    static User ownerUser;
-    static User investorUser;
+    static StubLoggedInUser ownerUser;
+    static StubLoggedInUser investorUser;
     private Long projectId = null;
     private Long investissementId = null;
 
     @BeforeAll
-    static void setup() throws SQLException {
+    static void setup() {
         investissementService = new InvestissementService();
         projectService = new ProjectService();
-        userService = new UserService();
-
-        String ts = String.valueOf(System.currentTimeMillis());
-        ownerUser = userService.register("owner_" + ts + "@finovate.test", "Pass123!", "Owner", "User", new Date());
-        investorUser = userService.register("investor_" + ts + "@finovate.test", "Pass456!", "Investor", "User", new Date());
-        assertNotNull(ownerUser.getId());
-        assertNotNull(investorUser.getId());
+        ownerUser = new StubLoggedInUser(1L);   // Requires user 1 in DB
+        investorUser = new StubLoggedInUser(2L); // Requires user 2 in DB
     }
 
     @AfterEach

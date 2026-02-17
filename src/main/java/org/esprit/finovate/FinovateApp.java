@@ -14,7 +14,7 @@ public class FinovateApp extends Application {
     public void start(Stage stage) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
         Parent root = loader.load();
-        org.esprit.finovate.controllers.LoginController ctrl = loader.getController();
+        org.esprit.finovate.controllers.LoginPlaceholderController ctrl = loader.getController();
         ctrl.setStage(stage);
 
         Scene scene = new Scene(root);

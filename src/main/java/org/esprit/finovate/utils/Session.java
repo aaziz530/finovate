@@ -1,9 +1,8 @@
 package org.esprit.finovate.utils;
 
-import org.esprit.finovate.models.User;
-
+/** Holds current logged-in user. Set currentUser after login. */
 public class Session {
-    public static User currentUser;
+    public static ILoggedInUser currentUser;
 
     private Session() {
     }

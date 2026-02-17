@@ -9,8 +9,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.esprit.finovate.controllers.InvestissementController;
-import org.esprit.finovate.controllers.ProjectController;
 import org.esprit.finovate.models.Project;
 import org.esprit.finovate.utils.Session;
 

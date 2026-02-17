@@ -18,9 +18,9 @@
             <padding>
                 <Insets left="24" right="24" top="16" bottom="16"/>
             </padding>
-            <Label fx:id="lblWelcome" text="Welcome" styleClass="header-title"/>
+            <Label fx:id="lblWelcome" text="Finovate" styleClass="header-title"/>
             <HBox HBox.hgrow="ALWAYS"/>
-            <Button text="Switch User" onAction="#handleSwitchUser" styleClass="btn-secondary"/>
+            <Button text="Logout" onAction="#handleSwitchUser" styleClass="btn-secondary"/>
         </HBox>
     </top>
     <center>

@@ -2,6 +2,7 @@ package org.esprit.finovate.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -10,15 +11,17 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import org.esprit.finovate.controllers.ProjectController;
+import org.esprit.finovate.utils.LiveValidationHelper;
 import org.esprit.finovate.utils.ValidationUtils;
 
 import java.io.IOException;
+import java.net.URL;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.ResourceBundle;
 import java.util.concurrent.TimeUnit;
 
-public class AddProjectController {
+public class AddProjectController implements Initializable {
 
     @FXML private TextField txtTitle;
     @FXML private TextArea txtDescription;
@@ -36,6 +39,14 @@ public class AddProjectController {
 
     public void setDashboardController(DashboardController ctrl) {
         this.dashboardController = ctrl;
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        LiveValidationHelper.bind(txtTitle, s -> ValidationUtils.validateTitle(s));
+        LiveValidationHelper.bind(txtDescription, s -> ValidationUtils.validateDescription(s));
+        LiveValidationHelper.bind(txtGoalAmount, s -> ValidationUtils.validateGoalAmount(s));
+        LiveValidationHelper.bind(dateDeadline, d -> d == null ? null : ValidationUtils.validateDeadline(d, "Deadline"));
     }
 
     @FXML

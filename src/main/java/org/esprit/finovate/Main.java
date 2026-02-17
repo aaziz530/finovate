@@ -4,8 +4,8 @@ import org.esprit.finovate.controllers.InvestissementController;
 import org.esprit.finovate.controllers.ProjectController;
 import org.esprit.finovate.models.Investissement;
 import org.esprit.finovate.models.Project;
-import org.esprit.finovate.services.UserService;
 import org.esprit.finovate.utils.Session;
+import org.esprit.finovate.utils.StubLoggedInUser;
 
 import java.util.Date;
 import java.util.List;
@@ -15,25 +15,15 @@ public class Main {
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        UserService userService = new UserService();
         ProjectController projectController = new ProjectController();
         InvestissementController investissementController = new InvestissementController();
 
         try {
-            // -------- LOGIN --------
-            System.out.println("Email:");
-            String email = sc.nextLine();
-            System.out.println("Password:");
-            String password = sc.nextLine();
+            System.out.println("Enter User ID:");
+            long userId = Long.parseLong(sc.nextLine().trim());
+            Session.currentUser = new StubLoggedInUser(userId);
+            System.out.println("✅ Logged in as user ID: " + userId);
 
-            if (userService.login(email, password) == null) {
-                System.out.println("❌ Login failed");
-                return;
-            }
-
-            System.out.println("✅ Welcome " + Session.currentUser.getFirstName());
-
-            // -------- MENU --------
             while (true) {
                 System.out.println("\n--- Finovate Menu ---");
                 System.out.println("1. Add Project");
@@ -82,11 +72,11 @@ public class Main {
                         investissementController.addInvestissement(projectId, amount);
                     }
                     case "4" -> {
-                        List<Investissement> invs = investissementController.getInvestissementsByInvestorId(Session.currentUser.getId());
-                        if (invs.isEmpty()) {
+                        List<Investissement> investments = investissementController.getInvestissementsByInvestorId(Session.currentUser.getId());
+                        if (investments.isEmpty()) {
                             System.out.println("You have no investments.");
                         } else {
-                            for (Investissement inv : invs) {
+                            for (Investissement inv : investments) {
                                 System.out.printf("[%d] Project %d - %.2f - %s%n",
                                         inv.getInvestissement_id(), inv.getProject_id(), inv.getAmount(), inv.getStatus());
                             }
@@ -100,7 +90,7 @@ public class Main {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
         }
     }
 }

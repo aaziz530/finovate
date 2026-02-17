@@ -1,10 +1,9 @@
 package org.esprit.finovate;
 
 import org.esprit.finovate.models.Project;
-import org.esprit.finovate.models.User;
 import org.esprit.finovate.services.ProjectService;
-import org.esprit.finovate.services.UserService;
 import org.esprit.finovate.utils.Session;
+import org.esprit.finovate.utils.StubLoggedInUser;
 import org.junit.jupiter.api.*;
 
 import java.sql.SQLException;
@@ -16,22 +15,19 @@ import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for {@link ProjectService}.
+ * Requires user ID 1 to exist in database.
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ProjectServiceTest {
 
     static ProjectService projectService;
-    static UserService userService;
-    static User testUser;
+    static StubLoggedInUser testUser;
     private Long projectId = null;
 
     @BeforeAll
-    static void setup() throws SQLException {
+    static void setup() {
         projectService = new ProjectService();
-        userService = new UserService();
-        String email = "projtest_" + System.currentTimeMillis() + "@finovate.test";
-        testUser = userService.register(email, "Test123!", "Project", "Tester", new Date());
-        assertNotNull(testUser.getId(), "Test user must be created");
+        testUser = new StubLoggedInUser(1L); // Requires user 1 in DB
     }
 
     @BeforeEach

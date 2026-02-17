@@ -265,6 +265,20 @@
     -fx-background-color: #f8fafc;
 }
 
+/* ========== Live validation (while typing) ========== */
+.text-field.validation-error,
+.password-field.validation-error,
+.text-area.validation-error {
+    -fx-border-color: #dc2626 !important;
+    -fx-border-width: 2;
+    -fx-border-radius: 10;
+}
+
+.date-picker.validation-error .text-field {
+    -fx-border-color: #dc2626 !important;
+    -fx-border-width: 2;
+}
+
 /* ========== Messages ========== */
 .error-label {
     -fx-text-fill: #dc2626;
