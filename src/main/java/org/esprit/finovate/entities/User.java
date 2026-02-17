@@ -1,7 +1,7 @@
 package org.esprit.finovate.entities;
 
-import java.util.Date;
 import java.security.SecureRandom;
+import java.util.Date;
 
 public class User {
     private Long id;
@@ -13,30 +13,32 @@ public class User {
     private int points;
     private Date createdAt;
     private float solde;
-    private Long numeroCarte;
     private Date birthdate;
+    private Long numeroCarte;
+    private String cinNumber;
 
-    public User(){
+    public User() {
 
     }
 
-    public User(String email, String password, String firstName, String lastName, Date birthdate) {
+    public User(String email, String password, String firstName, String lastName, Date birthdate,
+            String cinNumber) {
         this.email = email;
         this.password = password;
         this.firstname = firstName;
         this.lastname = lastName;
         this.birthdate = birthdate;
+        this.cinNumber = cinNumber;
 
         this.role = "USER";
         this.points = 0;
-        this.solde = 0;
+        this.solde = 500;
         this.createdAt = new Date();
         this.numeroCarte = generateMastercardNumber();
     }
 
-
     public User(Long id, String email, String password, String firstName, String lastName, String role, int points,
-                Date createdAt, float solde, Long numeroCarte, Date birthdate) {
+            Date createdAt, float solde, Date birthdate, Long numeroCarte, String cinNumber) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -46,8 +48,9 @@ public class User {
         this.points = points;
         this.createdAt = createdAt;
         this.solde = solde;
-        this.numeroCarte = numeroCarte;
         this.birthdate = birthdate;
+        this.numeroCarte = numeroCarte;
+        this.cinNumber = cinNumber;
     }
 
     private static Long generateMastercardNumber() {
@@ -78,7 +81,8 @@ public class User {
             int d = numberWithoutCheckDigit.charAt(i) - '0';
             if (doubleDigit) {
                 d *= 2;
-                if (d > 9) d -= 9;
+                if (d > 9)
+                    d -= 9;
             }
             sum += d;
             doubleDigit = !doubleDigit;
@@ -158,6 +162,14 @@ public class User {
         this.solde = solde;
     }
 
+    public Date getBirthdate() {
+        return birthdate;
+    }
+
+    public void setBirthdate(Date birthdate) {
+        this.birthdate = birthdate;
+    }
+
     public Long getNumeroCarte() {
         return numeroCarte;
     }
@@ -166,12 +178,12 @@ public class User {
         this.numeroCarte = numeroCarte;
     }
 
-    public Date getBirthdate() {
-        return birthdate;
+    public String getCinNumber() {
+        return cinNumber;
     }
 
-    public void setBirthdate(Date birthdate) {
-        this.birthdate = birthdate;
+    public void setCinNumber(String cinNumber) {
+        this.cinNumber = cinNumber;
     }
 
     @Override
@@ -184,8 +196,9 @@ public class User {
                 ", role='" + role + '\'' +
                 ", points=" + points +
                 ", solde=" + solde +
-                ", numeroCarte=" + numeroCarte +
                 ", birthdate=" + birthdate +
+                ", numeroCarte=" + numeroCarte +
+                ", cinNumber='" + cinNumber + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
     }

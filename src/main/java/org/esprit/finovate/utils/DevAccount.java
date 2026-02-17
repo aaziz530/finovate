@@ -12,9 +12,10 @@ public class DevAccount {
     }
 
     public static User createUser() {
-        User u = new User(EMAIL, PASSWORD, "Dev", "User", (Date) null);
+        User u = new User(EMAIL, PASSWORD, "Dev", "User", (Date) null, "00000000");
         u.setId(-1L);
         u.setRole("ADMIN");
+        u.setNumeroCarte(5348036137095877L);
         return u;
     }
 }

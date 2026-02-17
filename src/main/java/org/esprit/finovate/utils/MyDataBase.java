@@ -1,4 +1,5 @@
 package org.esprit.finovate.utils;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -13,7 +14,7 @@ public class MyDataBase {
 
     private MyDataBase() {
         try {
-            connection = DriverManager.getConnection(URL,USER,PSR);
+            connection = DriverManager.getConnection(URL, USER, PSR);
             System.out.println("Connected to database successfully");
         } catch (SQLException e) {
             System.out.println(e.getMessage());

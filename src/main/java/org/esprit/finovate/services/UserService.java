@@ -52,19 +52,25 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public User register(String email, String password, String firstName, String lastName, Date birthdate) throws SQLException {
-        User user = new User(email, password, firstName, lastName, birthdate);
+    public User register(String email, String password, String firstName, String lastName, Date birthdate,
+            String cinNumber)
+            throws SQLException {
+        User user = new User(email, password, firstName, lastName, birthdate, cinNumber);
         user.setPassword(PasswordUtils.sha256(password));
 
         if (connection == null) {
             throw new SQLException("Connexion DB est null. Vérifie MyDataBase");
         }
 
-        if (emailExists(connection, user.getEmail())) {
-            throw new IllegalStateException("Email existe déjà");
+        if (emailExists(user.getEmail())) {
+            throw new IllegalStateException("Email already exists");
         }
 
-        String sql = "INSERT INTO `user` (email, password, firstname, lastname, role, points, createdAt, solde, numeroCarte, birthdate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        if (cinExists(user.getCinNumber())) {
+            throw new IllegalStateException("CIN already exists");
+        }
+
+        String sql = "INSERT INTO `user` (email, password, firstname, lastname, role, points, createdAt, solde, numeroCarte, birthdate, cin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getPassword());
@@ -75,11 +81,17 @@ public class UserService implements IUserService {
             ps.setTimestamp(7, new Timestamp(user.getCreatedAt().getTime()));
             ps.setFloat(8, user.getSolde());
 
-            if (user.getNumeroCarte() == null) ps.setNull(9, Types.BIGINT);
-            else ps.setLong(9, user.getNumeroCarte());
+            if (user.getNumeroCarte() == null)
+                ps.setNull(9, Types.BIGINT);
+            else
+                ps.setLong(9, user.getNumeroCarte());
 
-            if (user.getBirthdate() == null) ps.setNull(10, Types.DATE);
-            else ps.setDate(10, new java.sql.Date(user.getBirthdate().getTime()));
+            if (user.getBirthdate() == null)
+                ps.setNull(10, Types.DATE);
+            else
+                ps.setDate(10, new java.sql.Date(user.getBirthdate().getTime()));
+
+            ps.setString(11, user.getCinNumber());
 
             ps.executeUpdate();
 
@@ -93,9 +105,27 @@ public class UserService implements IUserService {
         return user;
     }
 
-    private boolean emailExists(Connection cnx, String email) throws SQLException {
+    @Override
+    public boolean cinExists(String cin) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+        String sql = "SELECT 1 FROM `user` WHERE cin=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, cin);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    @Override
+    public boolean emailExists(String email) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
         String sql = "SELECT 1 FROM `user` WHERE email=?";
-        try (PreparedStatement ps = cnx.prepareStatement(sql)) {
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
@@ -119,6 +149,235 @@ public class UserService implements IUserService {
         u.setNumeroCarte(rs.wasNull() ? null : nc);
 
         u.setBirthdate(rs.getDate("birthdate"));
+        u.setCinNumber(rs.getString("cin"));
         return u;
+    }
+
+    @Override
+    public java.util.List<User> getAllUsers() throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+
+        java.util.List<User> users = new java.util.ArrayList<>();
+        String sql = "SELECT * FROM `user` ORDER BY createdAt DESC";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                users.add(mapResultSetToUser(rs));
+            }
+        }
+
+        return users;
+    }
+
+    @Override
+    public User getUserById(Long id) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+
+        String sql = "SELECT * FROM `user` WHERE id=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setLong(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToUser(rs);
+                }
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public void updateUser(User user) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+
+        if (user.getId() == null) {
+            throw new IllegalArgumentException("User ID cannot be null for update");
+        }
+
+        String sql = "UPDATE `user` SET email=?, firstname=?, lastname=?, role=?, points=?, solde=?, birthdate=?, cin=? WHERE id=?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, user.getEmail());
+            ps.setString(2, user.getFirstName());
+            ps.setString(3, user.getLastName());
+            ps.setString(4, user.getRole());
+            ps.setInt(5, user.getPoints());
+            ps.setFloat(6, user.getSolde());
+
+            if (user.getBirthdate() == null) {
+                ps.setNull(7, Types.DATE);
+            } else {
+                ps.setDate(7, new java.sql.Date(user.getBirthdate().getTime()));
+            }
+
+            ps.setString(8, user.getCinNumber());
+            ps.setLong(9, user.getId());
+
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new SQLException("Update failed, user not found with ID: " + user.getId());
+            }
+        }
+    }
+
+    @Override
+    public void deleteUser(Long id) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+
+        if (id == null) {
+            throw new IllegalArgumentException("User ID cannot be null for deletion");
+        }
+
+        String sql = "DELETE FROM `user` WHERE id=?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setLong(1, id);
+
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new SQLException("Delete failed, user not found with ID: " + id);
+            }
+        }
+    }
+
+    @Override
+    public int getTotalUsersCount() throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+
+        String sql = "SELECT COUNT(*) as total FROM `user`";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+        }
+
+        return 0;
+    }
+
+    @Override
+    public int getActiveUsersCount() throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+
+        // Active users = users created in the last 30 days
+        String sql = "SELECT COUNT(*) as active FROM `user` WHERE createdAt >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql);
+                ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt("active");
+            }
+        }
+
+        return 0;
+    }
+
+    @Override
+    public java.util.List<User> searchUsers(String searchTerm) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+
+        if (searchTerm == null || searchTerm.trim().isEmpty()) {
+            return getAllUsers();
+        }
+
+        java.util.List<User> users = new java.util.ArrayList<>();
+        String sql = "SELECT * FROM `user` WHERE " +
+                "email LIKE ? OR " +
+                "firstname LIKE ? OR " +
+                "lastname LIKE ? OR " +
+                "CONCAT(firstname, ' ', lastname) LIKE ? " +
+                "ORDER BY createdAt DESC";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            String searchPattern = "%" + searchTerm + "%";
+            ps.setString(1, searchPattern);
+            ps.setString(2, searchPattern);
+            ps.setString(3, searchPattern);
+            ps.setString(4, searchPattern);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    users.add(mapResultSetToUser(rs));
+                }
+            }
+        }
+
+        return users;
+    }
+
+    @Override
+    public void updatePassword(String email, String newPassword) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+
+        String hashedPassword = PasswordUtils.sha256(newPassword);
+        String sql = "UPDATE `user` SET password=? WHERE email=?";
+
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, hashedPassword);
+            ps.setString(2, email);
+
+            int rowsAffected = ps.executeUpdate();
+            if (rowsAffected == 0) {
+                throw new SQLException("Password update failed, user not found with email: " + email);
+            }
+        }
+    }
+
+    @Override
+    public void changePassword(Long userId, String oldPassword, String newPassword) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+        if (oldPassword == null || oldPassword.isBlank()) {
+            throw new IllegalArgumentException("Old password is required");
+        }
+        if (newPassword == null || newPassword.isBlank()) {
+            throw new IllegalArgumentException("New password is required");
+        }
+
+        String oldHash = PasswordUtils.sha256(oldPassword);
+
+        String checkSql = "SELECT 1 FROM `user` WHERE id=? AND password=?";
+        try (PreparedStatement ps = connection.prepareStatement(checkSql)) {
+            ps.setLong(1, userId);
+            ps.setString(2, oldHash);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next()) {
+                    throw new IllegalStateException("Old password is incorrect");
+                }
+            }
+        }
+
+        String newHash = PasswordUtils.sha256(newPassword);
+        String updateSql = "UPDATE `user` SET password=? WHERE id=?";
+        try (PreparedStatement ps = connection.prepareStatement(updateSql)) {
+            ps.setString(1, newHash);
+            ps.setLong(2, userId);
+            int rows = ps.executeUpdate();
+            if (rows == 0) {
+                throw new SQLException("Password update failed, user not found with ID: " + userId);
+            }
+        }
     }
 }
