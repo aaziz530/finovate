@@ -12,7 +12,7 @@ public class DevAccount {
     }
 
     public static User createUser() {
-        User u = new User(EMAIL, PASSWORD, "Dev", "User", (Date) null);
+        User u = new User(EMAIL, PASSWORD, "Dev", "User", (Date) null, "00000000000000000000");
         u.setId(-1L);
         u.setRole("ADMIN");
         return u;
