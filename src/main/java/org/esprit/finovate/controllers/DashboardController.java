@@ -20,7 +20,6 @@ import java.util.ResourceBundle;
 
 public class DashboardController implements Initializable {
 
-    @FXML private Label lblWelcome;
     @FXML private VBox projectsContainer;
 
     private Stage stage;
@@ -33,9 +32,6 @@ public class DashboardController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        if (Session.currentUser != null) {
-            lblWelcome.setText("Finovate");
-        }
         loadProjects();
     }
 
@@ -209,16 +205,16 @@ public class DashboardController implements Initializable {
     @FXML
     private void handleSwitchUser() throws IOException {
         Session.currentUser = null;
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/login.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/logged_out.fxml"));
         Parent root = loader.load();
-        LoginPlaceholderController ctrl = loader.getController();
+        LoggedOutController ctrl = loader.getController();
         ctrl.setStage(stage);
 
         Scene scene = new Scene(root);
         stage.setScene(scene);
-        stage.setTitle("Finovate - Sign In");
-        stage.setMinWidth(450);
-        stage.setMinHeight(500);
+        stage.setTitle("Finovate - Logged out");
+        stage.setMinWidth(500);
+        stage.setMinHeight(400);
         stage.centerOnScreen();
     }
 }

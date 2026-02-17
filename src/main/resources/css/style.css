@@ -29,7 +29,7 @@
 
 /* ========== Buttons ========== */
 .btn-primary {
-    -fx-background-color: #3b82f6;
+    -fx-background-color: #16a34a;
     -fx-text-fill: white;
     -fx-font-weight: bold;
     -fx-background-radius: 10;
@@ -38,7 +38,7 @@
 }
 
 .btn-primary:hover {
-    -fx-background-color: #2563eb;
+    -fx-background-color: #15803d;
 }
 
 .btn-secondary {
@@ -104,7 +104,7 @@
 }
 
 .text-field:focused, .password-field:focused, .text-area:focused {
-    -fx-border-color: #3b82f6;
+    -fx-border-color: #16a34a;
 }
 
 .date-picker {
@@ -158,9 +158,63 @@
     -fx-text-fill: #475569;
 }
 
+/* ========== Sidebar (like group UI) ========== */
+.sidebar {
+    -fx-background-color: #f1f5f9;
+    -fx-border-color: #e2e8f0;
+    -fx-border-width: 0 1 0 0;
+}
+
+.sidebar-logo {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #16a34a;
+    -fx-padding: 0 0 20 0;
+}
+
+.sidebar-section-title {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #94a3b8;
+    -fx-padding: 16 0 8 0;
+}
+
+.sidebar-menu {
+    -fx-padding: 0 0 8 0;
+}
+
+.sidebar-btn {
+    -fx-background-color: transparent;
+    -fx-text-fill: #475569;
+    -fx-font-size: 14px;
+    -fx-alignment: center-left;
+    -fx-padding: 10 12;
+    -fx-cursor: hand;
+    -fx-min-width: 180;
+}
+
+.sidebar-btn:hover {
+    -fx-background-color: #e2e8f0;
+    -fx-text-fill: #16a34a;
+}
+
+.sidebar-btn-signout {
+    -fx-background-color: transparent;
+    -fx-text-fill: #dc2626;
+    -fx-font-size: 14px;
+    -fx-alignment: center-left;
+    -fx-padding: 10 12;
+    -fx-cursor: hand;
+    -fx-min-width: 180;
+}
+
+.sidebar-btn-signout:hover {
+    -fx-background-color: #fee2e2;
+}
+
 /* ========== Dashboard ========== */
 .dashboard-content {
-    -fx-background-color: #f8fafc;
+    -fx-background-color: #ffffff;
 }
 
 .projects-scroll {
@@ -208,7 +262,7 @@
 }
 
 .project-progress-bar .bar {
-    -fx-background-color: #3b82f6;
+    -fx-background-color: #16a34a;
     -fx-background-radius: 4;
 }
 
@@ -257,8 +311,8 @@
 }
 
 .list-view .list-cell:filled:selected {
-    -fx-background-color: #eff6ff;
-    -fx-text-fill: #1e40af;
+    -fx-background-color: #dcfce7;
+    -fx-text-fill: #15803d;
 }
 
 .list-view .list-cell:filled:hover {

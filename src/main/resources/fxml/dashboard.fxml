@@ -5,37 +5,33 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.esprit.finovate.controllers.DashboardController"
-            prefHeight="600" prefWidth="900"
+            prefHeight="600" prefWidth="1000"
             styleClass="root" stylesheets="@../css/style.css">
-    <top>
-        <HBox alignment="CENTER_LEFT" styleClass="header">
-            <padding>
-                <Insets left="24" right="24" top="16" bottom="16"/>
-            </padding>
-            <Label fx:id="lblWelcome" text="Finovate" styleClass="header-title"/>
-            <HBox HBox.hgrow="ALWAYS"/>
-            <Button text="Logout" onAction="#handleSwitchUser" styleClass="btn-secondary"/>
-        </HBox>
-    </top>
+    <left>
+        <VBox styleClass="sidebar" prefWidth="220" spacing="0">
+            <padding><Insets top="24" right="16" bottom="24" left="24"/></padding>
+            <Label text="Finovate" styleClass="sidebar-logo"/>
+            <Label text="MAIN MENU" styleClass="sidebar-section-title"/>
+            <VBox styleClass="sidebar-menu" spacing="4">
+                <Button text="Add Project" onAction="#handleAddProject" styleClass="sidebar-btn"/>
+                <Button text="My Projects" onAction="#handleMyProjects" styleClass="sidebar-btn"/>
+                <Button text="Invest" onAction="#handleInvest" styleClass="sidebar-btn"/>
+                <Button text="My Investments" onAction="#handleMyInvestments" styleClass="sidebar-btn"/>
+                <Button text="Investment Requests" onAction="#handlePendingInvestments" styleClass="sidebar-btn"/>
+            </VBox>
+            <VBox VBox.vgrow="ALWAYS"/>
+            <Label text="ACCOUNT" styleClass="sidebar-section-title"/>
+            <Button text="Sign Out" onAction="#handleSwitchUser" styleClass="sidebar-btn-signout"/>
+        </VBox>
+    </left>
     <center>
         <VBox alignment="TOP_LEFT" spacing="24" styleClass="dashboard-content">
-            <padding>
-                <Insets top="24" right="32" bottom="32" left="32"/>
-            </padding>
-            <Label text="Quick Actions" styleClass="section-title"/>
-            <HBox spacing="12" alignment="CENTER_LEFT">
-                <Button text="Add Project" onAction="#handleAddProject" styleClass="btn-primary btn-large"/>
-                <Button text="My Projects" onAction="#handleMyProjects" styleClass="btn-secondary btn-large"/>
-                <Button text="Invest" onAction="#handleInvest" styleClass="btn-primary btn-large"/>
-                <Button text="My Investments" onAction="#handleMyInvestments" styleClass="btn-secondary btn-large"/>
-                <Button text="Investment Requests" onAction="#handlePendingInvestments" styleClass="btn-secondary btn-large"/>
-            </HBox>
+            <padding><Insets top="24" right="32" bottom="32" left="32"/></padding>
             <Label text="All Projects" styleClass="section-title"/>
             <ScrollPane fitToWidth="true" styleClass="projects-scroll" VBox.vgrow="ALWAYS">
                 <VBox fx:id="projectsContainer" spacing="12"/>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.esprit.finovate.controllers.LoggedOutController"
+            prefHeight="400" prefWidth="500"
+            styleClass="root" stylesheets="@../css/style.css">
+    <center>
+        <VBox alignment="CENTER" spacing="16" styleClass="login-box">
+            <padding><Insets top="48" right="48" bottom="48" left="48"/></padding>
+            <Label text="Finovate" styleClass="sidebar-logo"/>
+            <Label text="Logged out." styleClass="form-title"/>
+            <Label text="Integrate with your login module to sign in again." styleClass="subtitle" wrapText="true"/>
+        </VBox>
+    </center>
+</BorderPane>
