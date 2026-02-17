@@ -82,10 +82,10 @@ public class AdminDashboardController implements Initializable {
     private TableColumn<User, String> createdAtColumn;
 
     @FXML
-    private TableColumn<User, Long> numeroCarteColumn;
+    private TableColumn<User, String> cinColumn;
 
     @FXML
-    private TableColumn<User, String> cinColumn;
+    private TableColumn<User, Long> numeroCarteColumn;
 
     @FXML
     private TableColumn<User, Void> actionsColumn;
@@ -113,10 +113,10 @@ public class AdminDashboardController implements Initializable {
     private TextField updateSoldeField;
 
     @FXML
-    private TextField updateNumeroCarteField;
+    private TextField updateCinField;
 
     @FXML
-    private TextField updateCinNumberField;
+    private TextField updateNumeroCarteField;
 
     @FXML
     private Label updateErrorLabel;
@@ -203,12 +203,8 @@ public class AdminDashboardController implements Initializable {
         roleColumn.setCellValueFactory(new PropertyValueFactory<>("role"));
         pointsColumn.setCellValueFactory(new PropertyValueFactory<>("points"));
         soldeColumn.setCellValueFactory(new PropertyValueFactory<>("solde"));
-        if (cinColumn != null) {
-            cinColumn.setCellValueFactory(new PropertyValueFactory<>("cinNumber"));
-        }
-        if (numeroCarteColumn != null) {
-            numeroCarteColumn.setCellValueFactory(new PropertyValueFactory<>("numeroCarte"));
-        }
+        cinColumn.setCellValueFactory(new PropertyValueFactory<>("cinNumber"));
+        numeroCarteColumn.setCellValueFactory(new PropertyValueFactory<>("numeroCarte"));
 
         // Format createdAt column
         createdAtColumn.setCellValueFactory(cellData -> {
@@ -259,7 +255,17 @@ public class AdminDashboardController implements Initializable {
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                setGraphic(empty ? null : container);
+                if (empty) {
+                    setGraphic(null);
+                    return;
+                }
+
+                User user = getTableView().getItems().get(getIndex());
+                if (user != null && "ADMIN".equalsIgnoreCase(user.getRole())) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(container);
+                }
             }
         });
     }
@@ -273,7 +279,6 @@ public class AdminDashboardController implements Initializable {
             usersList.clear();
             // Filter out ADMIN users
             usersList.addAll(users.stream()
-                    .filter(user -> !"ADMIN".equalsIgnoreCase(user.getRole()))
                     .toList());
             setupStatistics(); // Refresh statistics
         } catch (SQLException e) {
@@ -294,7 +299,6 @@ public class AdminDashboardController implements Initializable {
             usersList.clear();
             // Filter out ADMIN users
             usersList.addAll(users.stream()
-                    .filter(user -> !"ADMIN".equalsIgnoreCase(user.getRole()))
                     .toList());
         } catch (SQLException e) {
             showAlert(Alert.AlertType.ERROR, "Search error: " + e.getMessage());
@@ -343,10 +347,10 @@ public class AdminDashboardController implements Initializable {
             updatePointsField.setText(String.valueOf(user.getPoints()));
         if (updateSoldeField != null)
             updateSoldeField.setText(String.valueOf(user.getSolde()));
+        if (updateCinField != null)
+            updateCinField.setText(user.getCinNumber());
         if (updateNumeroCarteField != null)
-            updateNumeroCarteField.setText(user.getNumeroCarte().toString());
-        if (updateCinNumberField != null)
-            updateCinNumberField.setText(user.getCinNumber());
+            updateNumeroCarteField.setText(user.getNumeroCarte() != null ? String.valueOf(user.getNumeroCarte()) : "");
 
         if (updateBirthdatePicker != null && user.getBirthdate() != null) {
             updateBirthdatePicker.setValue(new Date(user.getBirthdate().getTime())
@@ -373,19 +377,12 @@ public class AdminDashboardController implements Initializable {
             if (updateFirstNameField.getText().trim().isEmpty() ||
                     updateLastNameField.getText().trim().isEmpty() ||
                     updateEmailField.getText().trim().isEmpty() ||
-                    updateNumeroCarteField.getText().trim().isEmpty() ||
-                    updateCinNumberField.getText().trim().isEmpty()) {
+                    updateCinField.getText().trim().isEmpty()) {
                 showUpdateError("All required fields must be filled");
                 return;
             }
 
-            String numeroCarte = updateNumeroCarteField.getText().trim();
-            if (!numeroCarte.matches("\\d{15,16}")) {
-                showUpdateError("Card Number must be 15 or 16 digits");
-                return;
-            }
-
-            String cinNumber = updateCinNumberField.getText().trim();
+            String cinNumber = updateCinField.getText().trim();
             if (!cinNumber.matches("\\d{8}")) {
                 showUpdateError("CIN Number must be exactly 8 digits");
                 return;
@@ -396,8 +393,7 @@ public class AdminDashboardController implements Initializable {
             selectedUserForUpdate.setLastName(updateLastNameField.getText().trim());
             selectedUserForUpdate.setEmail(updateEmailField.getText().trim());
             selectedUserForUpdate.setRole(updateRoleComboBox.getValue());
-            selectedUserForUpdate.setNumeroCarte(Long.parseLong(updateNumeroCarteField.getText().trim()));
-            selectedUserForUpdate.setCinNumber(updateCinNumberField.getText().trim());
+            selectedUserForUpdate.setCinNumber(updateCinField.getText().trim());
 
             try {
                 selectedUserForUpdate.setPoints(Integer.parseInt(updatePointsField.getText().trim()));
