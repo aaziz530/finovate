@@ -1,28 +1,42 @@
 package org.esprit.finovate.controllers;
 
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.esprit.finovate.models.Investissement;
 import org.esprit.finovate.models.Project;
+
+import java.text.SimpleDateFormat;
+import org.esprit.finovate.utils.ImageUtils;
+import org.esprit.finovate.utils.SceneUtils;
 import org.esprit.finovate.utils.Session;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class MyProjectsController implements Initializable {
 
     @FXML private VBox projectsContainer;
+    @FXML private TextField txtSearchDynamic;
+    @FXML private ComboBox<String> comboStatus;
+    @FXML private ComboBox<String> comboTri;
 
     private Stage stage;
+    private List<Project> allProjects = List.of();
     private final ProjectController projectController = new ProjectController();
     private final InvestissementController investissementController = new InvestissementController();
 
@@ -30,37 +44,90 @@ public class MyProjectsController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        if (comboStatus != null) comboStatus.setItems(FXCollections.observableArrayList("Tous", "OPEN", "FUNDED", "CLOSED"));
+        if (comboTri != null) comboTri.setItems(FXCollections.observableArrayList("Titre (A-Z)", "Titre (Z-A)", "Montant ↑", "Montant ↓", "Date (récent)", "Date (ancien)"));
+        if (txtSearchDynamic != null) txtSearchDynamic.textProperty().addListener((o, ov, nv) -> applyFiltersAndRender());
+        if (comboTri != null) comboTri.valueProperty().addListener((o, ov, nv) -> applyFiltersAndRender());
         loadProjects();
     }
 
-    private void loadProjects() {
-        projectsContainer.getChildren().clear();
-        if (Session.currentUser == null) return;
+    @FXML
+    private void handleStaticSearch() {
+        applyFiltersAndRender();
+    }
 
+    private void loadProjects() {
+        if (Session.currentUser == null) return;
         try {
-            List<Project> projects = projectController.getProjectsByOwnerId(Session.currentUser.getId());
-            if (projects.isEmpty()) {
-                Label empty = new Label("You have no projects yet. Add one from the dashboard!");
-                empty.getStyleClass().add("project-meta");
-                projectsContainer.getChildren().add(empty);
-            } else {
-                for (Project p : projects) {
-                    VBox card = createProjectCard(p);
-                    projectsContainer.getChildren().add(card);
-                }
-            }
+            allProjects = projectController.getProjectsByOwnerId(Session.currentUser.getId());
+            applyFiltersAndRender();
         } catch (SQLException e) {
             e.printStackTrace();
-            Label err = new Label("Error loading projects.");
-            err.getStyleClass().add("error-label");
-            projectsContainer.getChildren().add(err);
+            allProjects = List.of();
+            showError();
         }
+    }
+
+    private void applyFiltersAndRender() {
+        projectsContainer.getChildren().clear();
+        String searchText = txtSearchDynamic != null && txtSearchDynamic.getText() != null ? txtSearchDynamic.getText().trim().toLowerCase() : "";
+        String statusFilter = comboStatus != null && comboStatus.getValue() != null ? comboStatus.getValue() : "Tous";
+        String sortOption = comboTri != null && comboTri.getValue() != null ? comboTri.getValue() : null;
+
+        List<Project> filtered = allProjects.stream()
+                .filter(p -> searchText.isEmpty() || matchesSearch(p, searchText))
+                .filter(p -> "Tous".equals(statusFilter) || statusFilter.equals(p.getStatus()))
+                .collect(Collectors.toList());
+
+        Comparator<Project> cmp = switch (sortOption != null ? sortOption : "") {
+            case "Titre (A-Z)" -> Comparator.comparing(p -> p.getTitle() != null ? p.getTitle().toLowerCase() : "", String.CASE_INSENSITIVE_ORDER);
+            case "Titre (Z-A)" -> Comparator.comparing(p -> p.getTitle() != null ? p.getTitle().toLowerCase() : "", String.CASE_INSENSITIVE_ORDER.reversed());
+            case "Montant ↑" -> Comparator.comparingDouble(Project::getCurrent_amount);
+            case "Montant ↓" -> Comparator.comparingDouble(Project::getCurrent_amount).reversed();
+            case "Date (récent)" -> Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0), Comparator.nullsLast(Comparator.reverseOrder()));
+            case "Date (ancien)" -> Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0), Comparator.nullsLast(Comparator.naturalOrder()));
+            default -> Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0), Comparator.nullsLast(Comparator.reverseOrder()));
+        };
+        filtered.sort(cmp);
+
+        if (filtered.isEmpty()) {
+            Label empty = new Label("No projects match your filters.");
+            empty.getStyleClass().add("project-meta");
+            projectsContainer.getChildren().add(empty);
+        } else {
+            for (Project p : filtered) {
+                projectsContainer.getChildren().add(createProjectCard(p));
+            }
+        }
+    }
+
+    private boolean matchesSearch(Project p, String search) {
+        String t = p.getTitle() != null ? p.getTitle().toLowerCase() : "";
+        String d = p.getDescription() != null ? p.getDescription().toLowerCase() : "";
+        return t.contains(search) || d.contains(search);
+    }
+
+    private void showError() {
+        Label err = new Label("Error loading projects.");
+        err.getStyleClass().add("error-label");
+        projectsContainer.getChildren().add(err);
     }
 
     private VBox createProjectCard(Project p) {
         VBox card = new VBox(10);
         card.getStyleClass().add("project-card");
         card.setPrefWidth(800);
+
+        String resolved = ImageUtils.resolveImagePath(p.getImagePath());
+        if (resolved != null) {
+            try {
+                ImageView iv = new ImageView(new Image("file:" + resolved));
+                iv.setFitWidth(120);
+                iv.setFitHeight(80);
+                iv.setPreserveRatio(true);
+                card.getChildren().add(iv);
+            } catch (Exception ignored) {}
+        }
 
         Label title = new Label(p.getTitle());
         title.getStyleClass().add("project-title");
@@ -89,6 +156,34 @@ public class MyProjectsController implements Initializable {
 
         try {
             boolean hasInvestments = investissementController.hasInvestments(p.getProject_id());
+            List<Investissement> pending = investissementController.getInvestissementsByProjectId(p.getProject_id()).stream()
+                    .filter(inv -> "PENDING".equals(inv.getStatus()))
+                    .collect(Collectors.toList());
+
+            if (!pending.isEmpty()) {
+                Label pendingLabel = new Label("Pending investment requests:");
+                pendingLabel.getStyleClass().add("field-label");
+                card.getChildren().add(pendingLabel);
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                for (Investissement inv : pending) {
+                    HBox invRow = new HBox(12);
+                    invRow.getStyleClass().add("investment-card");
+                    invRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                    String dateStr = inv.getInvestment_date() != null ? sdf.format(inv.getInvestment_date()) : "—";
+                    Label invInfo = new Label(String.format("Investor #%d  •  %.2f TND  •  %s", inv.getInvestor_id(), inv.getAmount(), dateStr));
+                    invInfo.getStyleClass().add("project-meta");
+                    Button btnAccept = new Button("Accept");
+                    btnAccept.getStyleClass().addAll("btn-primary", "btn-small");
+                    btnAccept.setOnAction(e -> handleAccept(inv));
+                    Button btnDecline = new Button("Decline");
+                    btnDecline.getStyleClass().addAll("btn-danger", "btn-small");
+                    btnDecline.setOnAction(e -> handleDecline(inv));
+                    invRow.getChildren().addAll(invInfo, btnAccept, btnDecline);
+                    HBox.setHgrow(invInfo, javafx.scene.layout.Priority.ALWAYS);
+                    card.getChildren().add(invRow);
+                }
+            }
+
             if (!hasInvestments) {
                 HBox actions = new HBox(8);
                 Button btnEdit = new Button("Edit");
@@ -111,6 +206,26 @@ public class MyProjectsController implements Initializable {
         return card;
     }
 
+    private void handleAccept(Investissement inv) {
+        try {
+            investissementController.acceptInvestissement(inv.getInvestissement_id());
+            new Alert(Alert.AlertType.INFORMATION, "Investment accepted. Amount added to project.").showAndWait();
+            loadProjects();
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "Failed: " + e.getMessage()).showAndWait();
+        }
+    }
+
+    private void handleDecline(Investissement inv) {
+        try {
+            investissementController.declineInvestissement(inv.getInvestissement_id());
+            new Alert(Alert.AlertType.INFORMATION, "Investment declined.").showAndWait();
+            loadProjects();
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "Failed: " + e.getMessage()).showAndWait();
+        }
+    }
+
     private void openEdit(Project p) {
         try {
             if (investissementController.hasInvestments(p.getProject_id())) {
@@ -124,9 +239,10 @@ public class MyProjectsController implements Initializable {
             ctrl.setProject(p);
             ctrl.setReturnToMyProjects(this);
 
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.setTitle("Finovate - Edit Project");
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle("Finovate - Edit Project");
+        SceneUtils.applyStageSize(stage);
         } catch (Exception e) {
             new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).showAndWait();
         }
@@ -168,5 +284,6 @@ public class MyProjectsController implements Initializable {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Finovate - Dashboard");
+        SceneUtils.applyStageSize(stage);
     }
 }

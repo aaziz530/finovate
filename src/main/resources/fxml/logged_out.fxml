@@ -8,7 +8,7 @@
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.esprit.finovate.controllers.LoggedOutController"
-            prefHeight="400" prefWidth="500"
+            prefHeight="600" prefWidth="1000"
             styleClass="root" stylesheets="@../css/style.css">
     <center>
         <VBox alignment="CENTER" spacing="16" styleClass="login-box">

@@ -1,28 +1,42 @@
 package org.esprit.finovate.controllers;
 
+import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.esprit.finovate.models.Project;
+import org.esprit.finovate.utils.ImageUtils;
+import org.esprit.finovate.utils.ValidationUtils;
+import org.esprit.finovate.utils.SceneUtils;
 import org.esprit.finovate.utils.Session;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class DashboardController implements Initializable {
 
     @FXML private VBox projectsContainer;
+    @FXML private TextField txtSearchDynamic;
+    @FXML private Button btnAdminDashboard;
+    @FXML private ComboBox<String> comboStatus;
+    @FXML private ComboBox<String> comboTri;
 
     private Stage stage;
+    private List<Project> allProjects = List.of();
     private final ProjectController projectController = new ProjectController();
     private final InvestissementController investissementController = new InvestissementController();
 
@@ -32,6 +46,15 @@ public class DashboardController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        comboStatus.setItems(FXCollections.observableArrayList("Tous", "OPEN", "FUNDED", "CLOSED"));
+        comboTri.setItems(FXCollections.observableArrayList("Titre (A-Z)", "Titre (Z-A)", "Montant ↑", "Montant ↓", "Date (récent)", "Date (ancien)"));
+        ChangeListener<String> dynamicListener = (o, ov, nv) -> applyFiltersAndRender();
+        txtSearchDynamic.textProperty().addListener(dynamicListener);
+        comboTri.valueProperty().addListener((o, ov, nv) -> applyFiltersAndRender());
+        if (btnAdminDashboard != null && Session.currentUser != null && "ADMIN".equals(Session.currentUser.getRole())) {
+            btnAdminDashboard.setVisible(true);
+            btnAdminDashboard.setManaged(true);
+        }
         loadProjects();
     }
 
@@ -40,31 +63,84 @@ public class DashboardController implements Initializable {
     }
 
     private void loadProjects() {
-        projectsContainer.getChildren().clear();
         try {
-            List<Project> projects = projectController.getAllProjects();
-            if (projects.isEmpty()) {
-                Label empty = new Label("No projects yet. Add one!");
-                empty.getStyleClass().add("project-meta");
-                projectsContainer.getChildren().add(empty);
-            } else {
-                for (Project p : projects) {
-                    VBox card = createProjectCard(p);
-                    projectsContainer.getChildren().add(card);
-                }
-            }
+            allProjects = projectController.getAllProjects();
+            applyFiltersAndRender();
         } catch (SQLException e) {
             e.printStackTrace();
-            Label err = new Label("Error loading projects.");
-            err.getStyleClass().add("error-label");
-            projectsContainer.getChildren().add(err);
+            allProjects = List.of();
+            showError("Error loading projects.");
         }
+    }
+
+    @FXML
+    private void handleStaticSearch() {
+        applyFiltersAndRender();
+    }
+
+    private void applyFiltersAndRender() {
+        projectsContainer.getChildren().clear();
+        String searchText = txtSearchDynamic != null && txtSearchDynamic.getText() != null
+                ? txtSearchDynamic.getText().trim().toLowerCase() : "";
+        String statusFilter = comboStatus != null && comboStatus.getValue() != null
+                ? comboStatus.getValue() : "Tous";
+        String sortOption = comboTri != null && comboTri.getValue() != null
+                ? comboTri.getValue() : null;
+
+        List<Project> filtered = allProjects.stream()
+                .filter(p -> (searchText.isEmpty() || matchesSearch(p, searchText)))
+                .filter(p -> "Tous".equals(statusFilter) || statusFilter.equals(p.getStatus()))
+                .collect(Collectors.toList());
+
+        Comparator<Project> cmp = switch (sortOption != null ? sortOption : "") {
+            case "Titre (A-Z)" -> Comparator.comparing(p -> p.getTitle() != null ? p.getTitle().toLowerCase() : "", String.CASE_INSENSITIVE_ORDER);
+            case "Titre (Z-A)" -> Comparator.comparing(p -> p.getTitle() != null ? p.getTitle().toLowerCase() : "", String.CASE_INSENSITIVE_ORDER.reversed());
+            case "Montant ↑" -> Comparator.comparingDouble(Project::getCurrent_amount);
+            case "Montant ↓" -> Comparator.comparingDouble(Project::getCurrent_amount).reversed();
+            case "Date (récent)" -> Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0), Comparator.nullsLast(Comparator.reverseOrder()));
+            case "Date (ancien)" -> Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0), Comparator.nullsLast(Comparator.naturalOrder()));
+            default -> Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0), Comparator.nullsLast(Comparator.reverseOrder()));
+        };
+        filtered.sort(cmp);
+
+        if (filtered.isEmpty()) {
+            Label empty = new Label("No projects match your filters.");
+            empty.getStyleClass().add("project-meta");
+            projectsContainer.getChildren().add(empty);
+        } else {
+            for (Project p : filtered) {
+                projectsContainer.getChildren().add(createProjectCard(p));
+            }
+        }
+    }
+
+    private boolean matchesSearch(Project p, String search) {
+        String t = p.getTitle() != null ? p.getTitle().toLowerCase() : "";
+        String d = p.getDescription() != null ? p.getDescription().toLowerCase() : "";
+        return t.contains(search) || d.contains(search);
+    }
+
+    private void showError(String msg) {
+        Label err = new Label(msg);
+        err.getStyleClass().add("error-label");
+        projectsContainer.getChildren().add(err);
     }
 
     private VBox createProjectCard(Project p) {
         VBox card = new VBox(10);
         card.getStyleClass().add("project-card");
         card.setPrefWidth(800);
+
+        String resolved = ImageUtils.resolveImagePath(p.getImagePath());
+        if (resolved != null) {
+            try {
+                ImageView iv = new ImageView(new Image("file:" + resolved));
+                iv.setFitWidth(120);
+                iv.setFitHeight(80);
+                iv.setPreserveRatio(true);
+                card.getChildren().add(iv);
+            } catch (Exception ignored) {}
+        }
 
         Label title = new Label(p.getTitle());
         title.getStyleClass().add("project-title");
@@ -91,7 +167,45 @@ public class DashboardController implements Initializable {
         card.getChildren().add(progressBar);
         card.getChildren().add(meta);
 
+        double remaining = p.getGoal_amount() - p.getCurrent_amount();
+        boolean canInvest = Session.currentUser != null
+                && (p.getOwner_id() == null || !p.getOwner_id().equals(Session.currentUser.getId()))
+                && "OPEN".equals(p.getStatus())
+                && remaining > 0;
+
+        if (canInvest) {
+            TextField txtAmount = new TextField();
+            txtAmount.setPromptText("Amount (TND)...");
+            txtAmount.setPrefWidth(120);
+            Button btnInvest = new Button("Invest");
+            btnInvest.getStyleClass().addAll("btn-primary", "btn-small");
+            btnInvest.setOnAction(e -> handleInvestFromCard(p, txtAmount));
+            HBox investRow = new HBox(8);
+            investRow.getChildren().addAll(txtAmount, btnInvest);
+            investRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            card.getChildren().add(investRow);
+        }
+
         return card;
+    }
+
+    private void handleInvestFromCard(Project p, TextField txtAmount) {
+        String amountStr = txtAmount.getText() == null ? "" : txtAmount.getText().trim();
+        double remaining = p.getGoal_amount() - p.getCurrent_amount();
+        String err = ValidationUtils.validateInvestmentAmount(amountStr, remaining > 0 ? remaining : null);
+        if (err != null) {
+            new Alert(Alert.AlertType.WARNING, err).showAndWait();
+            return;
+        }
+        double amount = ValidationUtils.parseAmount(amountStr);
+        try {
+            investissementController.addInvestissement(p.getProject_id(), amount);
+            new Alert(Alert.AlertType.INFORMATION, String.format("%.2f TND — Request sent. Check My Investments for status.", amount)).showAndWait();
+            txtAmount.clear();
+            loadProjects();
+        } catch (Exception ex) {
+            new Alert(Alert.AlertType.ERROR, "Failed: " + ex.getMessage()).showAndWait();
+        }
     }
 
     void handleEditProject(Project p) {
@@ -108,8 +222,9 @@ public class DashboardController implements Initializable {
             ctrl.setDashboardController(this);
 
             Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.setTitle("Finovate - Edit Project");
+        stage.setScene(scene);
+        stage.setTitle("Finovate - Edit Project");
+        SceneUtils.applyStageSize(stage);
         } catch (Exception e) {
             new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).showAndWait();
             e.printStackTrace();
@@ -152,6 +267,7 @@ public class DashboardController implements Initializable {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Finovate - Add Project");
+        SceneUtils.applyStageSize(stage);
     }
 
     @FXML
@@ -164,6 +280,7 @@ public class DashboardController implements Initializable {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Finovate - My Projects");
+        SceneUtils.applyStageSize(stage);
     }
 
     @FXML
@@ -176,6 +293,7 @@ public class DashboardController implements Initializable {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Finovate - Invest");
+        SceneUtils.applyStageSize(stage);
     }
 
     @FXML
@@ -188,6 +306,7 @@ public class DashboardController implements Initializable {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Finovate - Investment Requests");
+        SceneUtils.applyStageSize(stage);
     }
 
     @FXML
@@ -200,6 +319,23 @@ public class DashboardController implements Initializable {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Finovate - My Investments");
+        SceneUtils.applyStageSize(stage);
+    }
+
+    @FXML
+    private void handleAdminDashboard() throws IOException {
+        if (Session.currentUser == null || !"ADMIN".equals(Session.currentUser.getRole())) {
+            new Alert(Alert.AlertType.WARNING, "Access denied. Admin only.").showAndWait();
+            return;
+        }
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/admin_dashboard.fxml"));
+        Parent root = loader.load();
+        AdminDashboardController ctrl = loader.getController();
+        ctrl.setStage(stage);
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle("Finovate - Admin Dashboard");
+        SceneUtils.applyStageSize(stage);
     }
 
     @FXML
@@ -213,8 +349,6 @@ public class DashboardController implements Initializable {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Finovate - Logged out");
-        stage.setMinWidth(500);
-        stage.setMinHeight(400);
-        stage.centerOnScreen();
+        SceneUtils.applyStageSize(stage);
     }
 }

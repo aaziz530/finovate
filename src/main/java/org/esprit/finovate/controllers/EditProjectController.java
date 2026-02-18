@@ -8,13 +8,17 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.stage.FileChooser;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import org.esprit.finovate.models.Project;
+import org.esprit.finovate.utils.ImageUtils;
 import org.esprit.finovate.utils.LiveValidationHelper;
+import org.esprit.finovate.utils.SceneUtils;
 import org.esprit.finovate.utils.ValidationUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.ZoneId;
@@ -27,15 +31,18 @@ public class EditProjectController implements Initializable {
     @FXML private TextArea txtDescription;
     @FXML private TextField txtGoalAmount;
     @FXML private DatePicker dateDeadline;
+    @FXML private Label lblImagePath;
     @FXML private Label lblError;
 
     private Stage stage;
     private Project project;
     private DashboardController dashboardController;
     private MyProjectsController returnToMyProjects;
+    private Runnable adminReturnCallback;
     private final ProjectController projectController = new ProjectController();
 
     public void setStage(Stage stage) { this.stage = stage; }
+    public void setAdminReturnCallback(Runnable r) { this.adminReturnCallback = r; }
     public void setDashboardController(DashboardController ctrl) { this.dashboardController = ctrl; }
     public void setReturnToMyProjects(MyProjectsController ctrl) { this.returnToMyProjects = ctrl; }
 
@@ -46,6 +53,24 @@ public class EditProjectController implements Initializable {
         txtGoalAmount.setText(String.valueOf(p.getGoal_amount()));
         if (p.getDeadline() != null) {
             dateDeadline.setValue(p.getDeadline().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+        }
+        lblImagePath.setText(p.getImagePath() != null ? "Current: " + p.getImagePath() : "");
+    }
+
+    @FXML
+    private void handleChooseImage() {
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Select Project Image");
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif"));
+        File f = fc.showOpenDialog(stage);
+        if (f != null) {
+            String saved = ImageUtils.saveProjectImage(f.getAbsolutePath());
+            if (saved != null) {
+                project.setImagePath(saved);
+                lblImagePath.setText("Selected: " + f.getName());
+            } else {
+                lblImagePath.setText("Failed to save image");
+            }
         }
     }
 
@@ -88,6 +113,7 @@ public class EditProjectController implements Initializable {
         project.setDescription(desc);
         project.setGoal_amount(goalAmount);
         project.setDeadline(deadline);
+        // imagePath already set by handleChooseImage if user picked new image
 
         try {
             projectController.updateProject(project);
@@ -107,6 +133,10 @@ public class EditProjectController implements Initializable {
 
     @FXML
     private void handleCancel() throws IOException {
+        if (adminReturnCallback != null) {
+            adminReturnCallback.run();
+            return;
+        }
         if (returnToMyProjects != null) {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/my_projects.fxml"));
             Parent root = loader.load();
@@ -124,6 +154,7 @@ public class EditProjectController implements Initializable {
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.setTitle("Finovate - Dashboard");
+            SceneUtils.applyStageSize(stage);
         }
     }
 }

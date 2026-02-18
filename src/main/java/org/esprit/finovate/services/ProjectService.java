@@ -25,7 +25,7 @@ public class ProjectService {
             throw new IllegalStateException("❌ No user logged in!");
         }
 
-        String sql = "INSERT INTO project (title, description, goal_amount, current_amount, created_at, deadline, status, owner_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO project (title, description, goal_amount, current_amount, created_at, deadline, status, owner_id, image_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, p.getTitle());
@@ -36,12 +36,45 @@ public class ProjectService {
             ps.setTimestamp(6, p.getDeadline() != null ? new Timestamp(p.getDeadline().getTime()) : null);
             ps.setString(7, p.getStatus() != null ? p.getStatus() : "OPEN");
             ps.setLong(8, Session.currentUser.getId());
+            ps.setString(9, p.getImagePath());
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
                     long id = keys.getLong(1);
                     p.setProject_id(id);
                     System.out.println("✅ Project added with ID: " + id + " for user ID: " + Session.currentUser.getId());
+                    return id;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Admin: Add project with any owner_id (bypasses Session.currentUser as owner).
+     */
+    public Long addProjectAsAdmin(Project p) throws SQLException {
+        if (Session.currentUser == null || !"ADMIN".equals(Session.currentUser.getRole())) {
+            throw new IllegalStateException("Admin only.");
+        }
+        Long ownerId = p.getOwner_id() != null ? p.getOwner_id() : Session.currentUser.getId();
+
+        String sql = "INSERT INTO project (title, description, goal_amount, current_amount, created_at, deadline, status, owner_id, image_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, p.getTitle());
+            ps.setString(2, p.getDescription());
+            ps.setDouble(3, p.getGoal_amount());
+            ps.setDouble(4, p.getCurrent_amount() >= 0 ? p.getCurrent_amount() : 0);
+            ps.setTimestamp(5, p.getCreated_at() != null ? new Timestamp(p.getCreated_at().getTime()) : new Timestamp(System.currentTimeMillis()));
+            ps.setTimestamp(6, p.getDeadline() != null ? new Timestamp(p.getDeadline().getTime()) : null);
+            ps.setString(7, p.getStatus() != null ? p.getStatus() : "OPEN");
+            ps.setLong(8, ownerId);
+            ps.setString(9, p.getImagePath());
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) {
+                    long id = keys.getLong(1);
+                    p.setProject_id(id);
                     return id;
                 }
             }
@@ -103,7 +136,7 @@ public class ProjectService {
      * Update - Modify an existing project
      */
     public void updateProject(Project p) throws SQLException {
-        String sql = "UPDATE project SET title=?, description=?, goal_amount=?, current_amount=?, deadline=?, status=? WHERE project_id=?";
+        String sql = "UPDATE project SET title=?, description=?, goal_amount=?, current_amount=?, deadline=?, status=?, image_path=? WHERE project_id=?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, p.getTitle());
@@ -112,7 +145,8 @@ public class ProjectService {
             ps.setDouble(4, p.getCurrent_amount());
             ps.setDate(5, p.getDeadline() != null ? new java.sql.Date(p.getDeadline().getTime()) : null);
             ps.setString(6, p.getStatus());
-            ps.setLong(7, p.getProject_id());
+            ps.setString(7, p.getImagePath());
+            ps.setLong(8, p.getProject_id());
             int rows = ps.executeUpdate();
             if (rows > 0) {
                 System.out.println("✅ Project updated successfully");
@@ -165,6 +199,9 @@ public class ProjectService {
         p.setDeadline(deadline != null ? new java.util.Date(deadline.getTime()) : null);
         p.setStatus(rs.getString("status"));
         p.setOwner_id(rs.getLong("owner_id"));
+        try {
+            p.setImagePath(rs.getString("image_path"));
+        } catch (SQLException ignored) { /* column may not exist in old DB */ }
         return p;
     }
 }

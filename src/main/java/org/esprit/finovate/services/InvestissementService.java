@@ -62,6 +62,73 @@ public class InvestissementService {
     }
 
     /**
+     * Admin: Add investment with any project_id, investor_id, amount, status.
+     * If status is CONFIRMED, adds amount to project.
+     */
+    public Long addInvestissementAsAdmin(Investissement inv) throws SQLException {
+        if (Session.currentUser == null || !"ADMIN".equals(Session.currentUser.getRole())) {
+            throw new IllegalStateException("Admin only.");
+        }
+        Project project = projectService.getProjectById(inv.getProject_id());
+        if (project == null) {
+            throw new IllegalStateException("Project not found.");
+        }
+        String status = inv.getStatus() != null ? inv.getStatus() : "PENDING";
+
+        String sql = "INSERT INTO investissement (project_id, investor_id, amount, investment_date, status) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setLong(1, inv.getProject_id());
+            ps.setLong(2, inv.getInvestor_id());
+            ps.setDouble(3, inv.getAmount());
+            ps.setTimestamp(4, inv.getInvestment_date() != null ? new Timestamp(inv.getInvestment_date().getTime()) : new Timestamp(System.currentTimeMillis()));
+            ps.setString(5, status);
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) {
+                    long id = keys.getLong(1);
+                    inv.setInvestissement_id(id);
+                    if ("CONFIRMED".equals(status)) {
+                        projectService.addToCurrentAmount(inv.getProject_id(), inv.getAmount());
+                    }
+                    return id;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Admin: Update investment (amount, status). Adjusts project amount if needed.
+     */
+    public void updateInvestissementAsAdmin(Investissement inv) throws SQLException {
+        if (Session.currentUser == null || !"ADMIN".equals(Session.currentUser.getRole())) {
+            throw new IllegalStateException("Admin only.");
+        }
+        Investissement old = getInvestissementById(inv.getInvestissement_id());
+        if (old == null) throw new IllegalStateException("Investment not found.");
+
+        String newStatus = inv.getStatus() != null ? inv.getStatus() : old.getStatus();
+        double newAmount = inv.getAmount() >= 0 ? inv.getAmount() : old.getAmount();
+
+        String sql = "UPDATE investissement SET project_id=?, investor_id=?, amount=?, status=? WHERE investissement_id=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setLong(1, inv.getProject_id());
+            ps.setLong(2, inv.getInvestor_id());
+            ps.setDouble(3, newAmount);
+            ps.setString(4, newStatus);
+            ps.setLong(5, inv.getInvestissement_id());
+            ps.executeUpdate();
+        }
+
+        if ("CONFIRMED".equals(old.getStatus())) {
+            projectService.addToCurrentAmount(old.getProject_id(), -old.getAmount());
+        }
+        if ("CONFIRMED".equals(newStatus)) {
+            projectService.addToCurrentAmount(inv.getProject_id(), newAmount);
+        }
+    }
+
+    /**
      * Read - Get all investments
      */
     public List<Investissement> getAllInvestissements() throws SQLException {

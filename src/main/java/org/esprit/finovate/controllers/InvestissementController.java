@@ -59,4 +59,12 @@ public class InvestissementController {
     public void deleteInvestissement(Long id) throws SQLException {
         investissementService.deleteInvestissement(id);
     }
+
+    public void addInvestissementAsAdmin(Investissement inv) throws SQLException {
+        investissementService.addInvestissementAsAdmin(inv);
+    }
+
+    public void updateInvestissementAsAdmin(Investissement inv) throws SQLException {
+        investissementService.updateInvestissementAsAdmin(inv);
+    }
 }

@@ -12,6 +12,7 @@ public class Project {
     private Date deadline;
     private String status;
     private Long owner_id;
+    private String imagePath;
 
     public Project() {}
 
@@ -45,4 +46,6 @@ public class Project {
     public void setStatus(String status) { this.status = status; }
     public Long getOwner_id() { return owner_id; }
     public void setOwner_id(Long owner_id) { this.owner_id = owner_id; }
+    public String getImagePath() { return imagePath; }
+    public void setImagePath(String imagePath) { this.imagePath = imagePath; }
 }

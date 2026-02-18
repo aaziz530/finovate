@@ -5,13 +5,15 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.esprit.finovate.models.Project;
-import org.esprit.finovate.utils.LiveValidationHelper;
+import org.esprit.finovate.utils.ImageUtils;
+import org.esprit.finovate.utils.SceneUtils;
 import org.esprit.finovate.utils.ValidationUtils;
 
 import java.io.IOException;
@@ -19,15 +21,15 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class InvestController implements Initializable {
 
-    @FXML private ListView<Project> listProjects;
-    @FXML private TextField txtAmount;
-    @FXML private Label lblError;
-    @FXML private Label lblSuccess;
+    @FXML private VBox projectsContainer;
+    @FXML private TextField txtSearchDynamic;
 
     private Stage stage;
+    private List<Project> allProjects = List.of();
     private final ProjectController projectController = new ProjectController();
     private final InvestissementController investissementController = new InvestissementController();
 
@@ -37,99 +39,134 @@ public class InvestController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        if (txtSearchDynamic != null) {
+            txtSearchDynamic.textProperty().addListener((o, ov, nv) -> applyFiltersAndRender());
+        }
         loadProjects();
-        LiveValidationHelper.bindAmount(txtAmount, () -> {
-            Project sel = listProjects.getSelectionModel().getSelectedItem();
-            if (sel == null) return null;
-            double r = sel.getGoal_amount() - sel.getCurrent_amount();
-            return r > 0 ? r : null;
-        });
-        listProjects.getSelectionModel().selectedItemProperty().addListener((obs, o, n) -> {
-            // Re-validate amount when project selection changes (max remaining changes)
-            String t = txtAmount.getText() == null ? "" : txtAmount.getText().trim();
-            Double max = n != null ? Math.max(0.0, n.getGoal_amount() - n.getCurrent_amount()) : null;
-            String err = ValidationUtils.validateInvestmentAmount(t, max);
-            if (err != null && !txtAmount.getStyleClass().contains("validation-error")) txtAmount.getStyleClass().add("validation-error");
-            else if (err == null) txtAmount.getStyleClass().removeAll("validation-error");
-        });
-        listProjects.setCellFactory(lv -> new javafx.scene.control.ListCell<>() {
-            @Override
-            protected void updateItem(Project item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                } else {
-                    setText(String.format("%s  |  %.2f / %.2f TND  |  %s",
-                            item.getTitle(), item.getCurrent_amount(), item.getGoal_amount(), item.getStatus()));
-                }
-            }
-        });
     }
 
     private void loadProjects() {
         try {
             List<Project> all = projectController.getAllProjects();
-            listProjects.getItems().clear();
-            if (org.esprit.finovate.utils.Session.currentUser == null) {
-                listProjects.getItems().addAll(all);
-            } else {
+            if (org.esprit.finovate.utils.Session.currentUser != null) {
                 Long myId = org.esprit.finovate.utils.Session.currentUser.getId();
-                for (Project p : all) {
-                    if (p.getOwner_id() == null || !p.getOwner_id().equals(myId)) {
-                        listProjects.getItems().add(p);
-                    }
-                }
+                allProjects = all.stream()
+                        .filter(p -> p.getOwner_id() == null || !p.getOwner_id().equals(myId))
+                        .collect(Collectors.toList());
+            } else {
+                allProjects = all;
             }
+            applyFiltersAndRender();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
-    @FXML
-    private void handleInvest() {
-        lblError.setVisible(false);
-        lblError.setManaged(false);
-        lblSuccess.setVisible(false);
-        lblSuccess.setManaged(false);
+    private void applyFiltersAndRender() {
+        projectsContainer.getChildren().clear();
+        String search = txtSearchDynamic != null && txtSearchDynamic.getText() != null
+                ? txtSearchDynamic.getText().trim().toLowerCase() : "";
+        List<Project> filtered = allProjects.stream()
+                .filter(p -> search.isEmpty() || matchesSearch(p, search))
+                .collect(Collectors.toList());
 
-        Project selected = listProjects.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showError("Please select a project.");
-            return;
+        double remaining;
+        for (Project p : filtered) {
+            remaining = p.getGoal_amount() - p.getCurrent_amount();
+            boolean canInvest = "OPEN".equals(p.getStatus()) && remaining > 0;
+            VBox card = createProjectCard(p, canInvest);
+            projectsContainer.getChildren().add(card);
         }
 
-        String amountStr = txtAmount.getText() == null ? "" : txtAmount.getText().trim();
-        double remaining = selected.getGoal_amount() - selected.getCurrent_amount();
-        String err = ValidationUtils.validateInvestmentAmount(amountStr, remaining > 0 ? remaining : null);
-        if (err != null) { showError(err); return; }
-
-        double amount = ValidationUtils.parseAmount(amountStr);
-
-        try {
-            investissementController.addInvestissement(selected.getProject_id(), amount);
-            Alert success = new Alert(Alert.AlertType.INFORMATION);
-            success.setTitle("Success");
-            success.setHeaderText("Investment Request Sent");
-            success.setContentText(String.format("%.2f TND — Request sent to project owner. You'll see it in My Investments until they accept or decline.", amount));
-            success.showAndWait();
-            lblSuccess.setText("Investment successful! Project total updated.");
-            lblSuccess.setVisible(true);
-            lblSuccess.setManaged(true);
-            txtAmount.clear();
-            loadProjects();
-        } catch (Exception e) {
-            String msg = e.getMessage();
-            if (e.getCause() != null) msg = e.getCause().getMessage();
-            if (msg == null || msg.isEmpty()) msg = e.getClass().getSimpleName();
-            showError("Error: " + msg);
-            e.printStackTrace();
+        if (filtered.isEmpty()) {
+            Label empty = new Label("No projects to invest in.");
+            empty.getStyleClass().add("project-meta");
+            projectsContainer.getChildren().add(empty);
         }
     }
 
-    private void showError(String msg) {
-        lblError.setText(msg);
-        lblError.setVisible(true);
-        lblError.setManaged(true);
+    private boolean matchesSearch(Project p, String search) {
+        String t = p.getTitle() != null ? p.getTitle().toLowerCase() : "";
+        String d = p.getDescription() != null ? p.getDescription().toLowerCase() : "";
+        return t.contains(search) || d.contains(search);
+    }
+
+    private VBox createProjectCard(Project p, boolean canInvest) {
+        VBox card = new VBox(10);
+        card.getStyleClass().add("project-card");
+        card.setPrefWidth(900);
+
+        String resolved = ImageUtils.resolveImagePath(p.getImagePath());
+        if (resolved != null) {
+            try {
+                ImageView iv = new ImageView(new Image("file:" + resolved));
+                iv.setFitWidth(120);
+                iv.setFitHeight(80);
+                iv.setPreserveRatio(true);
+                card.getChildren().add(iv);
+            } catch (Exception ignored) {}
+        }
+
+        Label title = new Label(p.getTitle());
+        title.getStyleClass().add("project-title");
+        title.setWrapText(true);
+        card.getChildren().add(title);
+
+        String desc = p.getDescription();
+        if (desc != null && !desc.isEmpty()) {
+            String shortDesc = desc.length() > 120 ? desc.substring(0, 120) + "..." : desc;
+            Label descLabel = new Label(shortDesc);
+            descLabel.getStyleClass().add("project-desc");
+            descLabel.setWrapText(true);
+            card.getChildren().add(descLabel);
+        }
+
+        double progress = p.getGoal_amount() > 0 ? Math.min(1.0, p.getCurrent_amount() / p.getGoal_amount()) : 0;
+        ProgressBar progressBar = new ProgressBar(progress);
+        progressBar.getStyleClass().add("project-progress-bar");
+        progressBar.setMaxWidth(Double.MAX_VALUE);
+        Label meta = new Label(String.format("%.2f TND / %.2f TND  •  %s", p.getCurrent_amount(), p.getGoal_amount(), p.getStatus()));
+        meta.getStyleClass().add("project-meta");
+        card.getChildren().add(progressBar);
+        card.getChildren().add(meta);
+
+        if (canInvest) {
+            TextField txtAmount = new TextField();
+            txtAmount.setPromptText("Amount (TND)...");
+            txtAmount.setPrefWidth(120);
+            Button btnInvest = new Button("Invest");
+            btnInvest.getStyleClass().addAll("btn-primary", "btn-small");
+            btnInvest.setOnAction(e -> handleInvest(p, txtAmount));
+            HBox investRow = new HBox(8);
+            investRow.getChildren().addAll(txtAmount, btnInvest);
+            investRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            card.getChildren().add(investRow);
+        } else {
+            Label status = new Label("Fully funded or closed.");
+            status.getStyleClass().add("project-meta");
+            card.getChildren().add(status);
+        }
+
+        return card;
+    }
+
+    private void handleInvest(Project p, TextField txtAmount) {
+        String amountStr = txtAmount.getText() == null ? "" : txtAmount.getText().trim();
+        double remaining = p.getGoal_amount() - p.getCurrent_amount();
+        String err = ValidationUtils.validateInvestmentAmount(amountStr, remaining > 0 ? remaining : null);
+        if (err != null) {
+            new Alert(Alert.AlertType.WARNING, err).showAndWait();
+            return;
+        }
+        double amount = ValidationUtils.parseAmount(amountStr);
+        try {
+            investissementController.addInvestissement(p.getProject_id(), amount);
+            new Alert(Alert.AlertType.INFORMATION, String.format("%.2f TND — Request sent. Check My Investments for status.", amount)).showAndWait();
+            txtAmount.clear();
+            loadProjects();
+        } catch (Exception ex) {
+            new Alert(Alert.AlertType.ERROR, "Failed: " + ex.getMessage()).showAndWait();
+        }
     }
 
     @FXML
@@ -143,5 +180,6 @@ public class InvestController implements Initializable {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Finovate - Dashboard");
+        SceneUtils.applyStageSize(stage);
     }
 }

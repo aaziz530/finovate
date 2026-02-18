@@ -13,7 +13,7 @@
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.esprit.finovate.controllers.AddProjectController"
-            prefHeight="550" prefWidth="500"
+            prefHeight="600" prefWidth="1000"
             styleClass="root" stylesheets="@../css/style.css">
     <top>
         <VBox alignment="CENTER_LEFT" styleClass="form-header">
@@ -37,6 +37,11 @@
             <TextField fx:id="txtGoalAmount" promptText="e.g. 10000" prefWidth="200"/>
             <Label text="Deadline (optional)" styleClass="field-label"/>
             <DatePicker fx:id="dateDeadline" prefWidth="200"/>
+            <Label text="Project Image (optional)" styleClass="field-label"/>
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Button text="Choose Image..." onAction="#handleChooseImage" styleClass="btn-secondary"/>
+                <Label fx:id="lblImagePath" styleClass="project-meta" text=""/>
+            </HBox>
             <Label fx:id="lblError" styleClass="error-label" managed="false" visible="false"/>
             <HBox spacing="12">
                 <Button text="Create Project" onAction="#handleCreate" styleClass="btn-primary"/>

@@ -30,6 +30,12 @@
             <artifactId>javafx-fxml</artifactId>
             <version>17.0.9</version>
         </dependency>
+        <!-- PDF export -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>3.0.1</version>
+        </dependency>
         <!-- JUnit 5 for unit tests -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

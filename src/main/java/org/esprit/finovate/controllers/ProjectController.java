@@ -12,6 +12,10 @@ public class ProjectController {
     private final ProjectService projectService = new ProjectService();
 
     public void addProject(String title, String description, double goalAmount, Date deadline) throws SQLException {
+        addProject(title, description, goalAmount, deadline, null);
+    }
+
+    public void addProject(String title, String description, double goalAmount, Date deadline, String imagePath) throws SQLException {
         Project p = new Project();
         p.setTitle(title);
         p.setDescription(description);
@@ -20,6 +24,7 @@ public class ProjectController {
         p.setCreated_at(new Date());
         p.setDeadline(deadline);
         p.setStatus("OPEN");
+        p.setImagePath(imagePath);
         projectService.addProject(p);
     }
 
@@ -41,5 +46,9 @@ public class ProjectController {
 
     public void deleteProject(Long id) throws SQLException {
         projectService.deleteProject(id);
+    }
+
+    public void addProjectAsAdmin(Project p) throws SQLException {
+        projectService.addProjectAsAdmin(p);
     }
 }

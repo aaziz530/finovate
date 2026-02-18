@@ -11,6 +11,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.esprit.finovate.models.Investissement;
 import org.esprit.finovate.models.Project;
+import org.esprit.finovate.utils.SceneUtils;
 import org.esprit.finovate.utils.Session;
 
 import java.io.IOException;
@@ -21,12 +22,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class PendingInvestmentsController implements Initializable {
 
     @FXML private VBox pendingContainer;
+    @FXML private TextField txtSearchDynamic;
 
     private Stage stage;
+    private List<Investissement> allPending = List.of();
     private final InvestissementController investissementController = new InvestissementController();
     private final ProjectController projectController = new ProjectController();
 
@@ -34,37 +38,53 @@ public class PendingInvestmentsController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        if (txtSearchDynamic != null) txtSearchDynamic.textProperty().addListener((o, ov, nv) -> applyFiltersAndRender());
         loadPending();
     }
 
     private void loadPending() {
-        pendingContainer.getChildren().clear();
         if (Session.currentUser == null) return;
-
         try {
-            List<Investissement> pending = investissementController.getPendingInvestmentsForOwner(Session.currentUser.getId());
-            Map<Long, String> projectTitles = new HashMap<>();
+            allPending = investissementController.getPendingInvestmentsForOwner(Session.currentUser.getId());
+            applyFiltersAndRender();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            allPending = List.of();
+            showError();
+        }
+    }
+
+    private void applyFiltersAndRender() {
+        pendingContainer.getChildren().clear();
+        String search = txtSearchDynamic != null && txtSearchDynamic.getText() != null
+                ? txtSearchDynamic.getText().trim().toLowerCase() : "";
+        Map<Long, String> projectTitles = new HashMap<>();
+        try {
             for (Project p : projectController.getAllProjects()) {
                 projectTitles.put(p.getProject_id(), p.getTitle());
             }
+        } catch (SQLException ignored) {}
 
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-            if (pending.isEmpty()) {
-                Label empty = new Label("No pending investment requests.");
-                empty.getStyleClass().add("project-meta");
-                pendingContainer.getChildren().add(empty);
-            } else {
-                for (Investissement inv : pending) {
-                    HBox card = createPendingCard(inv, projectTitles, sdf);
-                    pendingContainer.getChildren().add(card);
-                }
+        List<Investissement> filtered = allPending.stream()
+                .filter(inv -> search.isEmpty() || projectTitles.getOrDefault(inv.getProject_id(), "").toLowerCase().contains(search))
+                .collect(Collectors.toList());
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        if (filtered.isEmpty()) {
+            Label empty = new Label("No pending requests match your search.");
+            empty.getStyleClass().add("project-meta");
+            pendingContainer.getChildren().add(empty);
+        } else {
+            for (Investissement inv : filtered) {
+                pendingContainer.getChildren().add(createPendingCard(inv, projectTitles, sdf));
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            Label err = new Label("Error loading requests.");
-            err.getStyleClass().add("error-label");
-            pendingContainer.getChildren().add(err);
         }
+    }
+
+    private void showError() {
+        Label err = new Label("Error loading requests.");
+        err.getStyleClass().add("error-label");
+        pendingContainer.getChildren().add(err);
     }
 
     private HBox createPendingCard(Investissement inv, Map<Long, String> projectTitles, SimpleDateFormat sdf) {
@@ -129,5 +149,6 @@ public class PendingInvestmentsController implements Initializable {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Finovate - Dashboard");
+        SceneUtils.applyStageSize(stage);
     }
 }

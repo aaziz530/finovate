@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.esprit.finovate.utils.SceneUtils;
 
 import java.io.IOException;
 
@@ -13,7 +14,7 @@ public class FinovateApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         // Login is handled by another module. For testing, use stub user ID 1. Replace this with your login when integrating.
-        org.esprit.finovate.utils.Session.currentUser = new org.esprit.finovate.utils.StubLoggedInUser(1L);
+        org.esprit.finovate.utils.Session.currentUser = new org.esprit.finovate.utils.StubLoggedInUser(7L, "USER");
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard.fxml"));
         Parent root = loader.load();
@@ -23,8 +24,7 @@ public class FinovateApp extends Application {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Finovate - Dashboard");
-        stage.setMinWidth(1000);
-        stage.setMinHeight(600);
+        SceneUtils.applyStageSize(stage);
         stage.centerOnScreen();
         stage.show();
     }

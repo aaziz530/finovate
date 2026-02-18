@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.esprit.finovate.controllers.AdminDashboardController"
+            prefHeight="600" prefWidth="1000"
+            styleClass="root" stylesheets="@../css/style.css">
+    <left>
+        <VBox styleClass="sidebar" prefWidth="220" spacing="0">
+            <padding><Insets top="24" right="16" bottom="24" left="24"/></padding>
+            <Label text="Finovate" styleClass="sidebar-logo"/>
+            <Label text="ADMIN" styleClass="sidebar-section-title"/>
+            <VBox styleClass="sidebar-menu" spacing="4">
+                <Button text="Back to Dashboard" onAction="#handleBackToDashboard" styleClass="sidebar-btn"/>
+                <Button text="Export PDF" onAction="#handleExportPdf" styleClass="btn-secondary"/>
+            </VBox>
+            <VBox VBox.vgrow="ALWAYS"/>
+            <Label text="ACCOUNT" styleClass="sidebar-section-title"/>
+            <Button text="Sign Out" onAction="#handleSignOut" styleClass="sidebar-btn-signout"/>
+        </VBox>
+    </left>
+    <center>
+        <ScrollPane fitToWidth="true" fitToHeight="true">
+            <VBox spacing="24">
+                <padding><Insets top="16" right="24" bottom="24" left="24"/></padding>
+
+                <!-- PROJECTS -->
+                <VBox spacing="8">
+                    <Label text="Projects" styleClass="section-title"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <TextField fx:id="txtSearchProjects" promptText="Recherche..." prefWidth="180"/>
+                        <ComboBox fx:id="comboSortProjects" promptText="Trier par" prefWidth="130"/>
+                        <Button text="Add Project" onAction="#handleAddProject" styleClass="btn-primary"/>
+                        <Button text="Edit" onAction="#handleEditProject" styleClass="btn-secondary"/>
+                        <Button text="Delete" onAction="#handleDeleteProject" styleClass="btn-danger"/>
+                    </HBox>
+                    <TableView fx:id="tableProjects" prefHeight="140" maxHeight="140"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Button text="◀ Prev" onAction="#handleProjectsPrev" styleClass="btn-secondary"/>
+                        <Label fx:id="lblProjectsPage" text="Page 1 / 1"/>
+                        <Button text="Next ▶" onAction="#handleProjectsNext" styleClass="btn-secondary"/>
+                    </HBox>
+                </VBox>
+
+                <!-- INVESTISSEMENTS -->
+                <VBox spacing="8">
+                    <Label text="Investissements" styleClass="section-title"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <TextField fx:id="txtSearchInvest" promptText="Recherche..." prefWidth="180"/>
+                        <ComboBox fx:id="comboSortInvest" promptText="Trier par" prefWidth="130"/>
+                        <Button text="Add Investment" onAction="#handleAddInvestment" styleClass="btn-primary"/>
+                        <Button text="Edit" onAction="#handleEditInvestment" styleClass="btn-secondary"/>
+                        <Button text="Delete" onAction="#handleDeleteInvestment" styleClass="btn-danger"/>
+                    </HBox>
+                    <TableView fx:id="tableInvestissements" prefHeight="140" maxHeight="140"/>
+                    <HBox spacing="8" alignment="CENTER_LEFT">
+                        <Button text="◀ Prev" onAction="#handleInvestPrev" styleClass="btn-secondary"/>
+                        <Label fx:id="lblInvestPage" text="Page 1 / 1"/>
+                        <Button text="Next ▶" onAction="#handleInvestNext" styleClass="btn-secondary"/>
+                    </HBox>
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

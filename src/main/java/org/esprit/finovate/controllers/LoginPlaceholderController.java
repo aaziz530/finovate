@@ -6,6 +6,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import org.esprit.finovate.utils.SceneUtils;
 import org.esprit.finovate.utils.Session;
 import org.esprit.finovate.utils.StubLoggedInUser;
 
@@ -35,8 +36,7 @@ public class LoginPlaceholderController {
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.setTitle("Finovate - Dashboard");
-            stage.setMinWidth(900);
-            stage.setMinHeight(600);
+            SceneUtils.applyStageSize(stage);
             stage.centerOnScreen();
         } catch (NumberFormatException e) {
             txtUserId.setStyle("-fx-border-color: #dc2626;");

@@ -11,6 +11,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.esprit.finovate.models.Investissement;
 import org.esprit.finovate.models.Project;
+import org.esprit.finovate.utils.SceneUtils;
 import org.esprit.finovate.utils.Session;
 
 import java.io.IOException;
@@ -21,12 +22,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class MyInvestmentsController implements Initializable {
 
     @FXML private VBox investmentsContainer;
+    @FXML private TextField txtSearchDynamic;
 
     private Stage stage;
+    private List<Investissement> allInvestments = List.of();
     private final InvestissementController investissementController = new InvestissementController();
     private final ProjectController projectController = new ProjectController();
 
@@ -34,6 +38,7 @@ public class MyInvestmentsController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        if (txtSearchDynamic != null) txtSearchDynamic.textProperty().addListener((o, ov, nv) -> applyFiltersAndRender());
         loadInvestments();
     }
 
@@ -42,33 +47,55 @@ public class MyInvestmentsController implements Initializable {
     }
 
     private void loadInvestments() {
-        investmentsContainer.getChildren().clear();
         if (Session.currentUser == null) return;
-
         try {
-            List<Investissement> invs = investissementController.getInvestissementsByInvestorId(Session.currentUser.getId());
-            Map<Long, String> projectTitles = new HashMap<>();
+            allInvestments = investissementController.getInvestissementsByInvestorId(Session.currentUser.getId());
+            applyFiltersAndRender();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            allInvestments = List.of();
+            showError();
+        }
+    }
+
+    private void applyFiltersAndRender() {
+        investmentsContainer.getChildren().clear();
+        String search = txtSearchDynamic != null && txtSearchDynamic.getText() != null
+                ? txtSearchDynamic.getText().trim().toLowerCase() : "";
+        Map<Long, String> projectTitles = new HashMap<>();
+        try {
             for (Project p : projectController.getAllProjects()) {
                 projectTitles.put(p.getProject_id(), p.getTitle());
             }
-
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-            if (invs.isEmpty()) {
-                Label empty = new Label("No investments yet. Invest in a project!");
-                empty.getStyleClass().add("project-meta");
-                investmentsContainer.getChildren().add(empty);
-            } else {
-                for (Investissement inv : invs) {
-                    HBox card = createInvestmentCard(inv, projectTitles, sdf);
-                    investmentsContainer.getChildren().add(card);
-                }
-            }
         } catch (SQLException e) {
-            e.printStackTrace();
-            Label err = new Label("Error loading investments.");
-            err.getStyleClass().add("error-label");
-            investmentsContainer.getChildren().add(err);
+            // ignore
         }
+
+        List<Investissement> filtered = allInvestments.stream()
+                .filter(inv -> search.isEmpty() || matchesSearch(inv, projectTitles, search))
+                .collect(Collectors.toList());
+
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+        if (filtered.isEmpty()) {
+            Label empty = new Label("No investments match your search.");
+            empty.getStyleClass().add("project-meta");
+            investmentsContainer.getChildren().add(empty);
+        } else {
+            for (Investissement inv : filtered) {
+                investmentsContainer.getChildren().add(createInvestmentCard(inv, projectTitles, sdf));
+            }
+        }
+    }
+
+    private boolean matchesSearch(Investissement inv, Map<Long, String> titles, String search) {
+        String t = titles.getOrDefault(inv.getProject_id(), "").toLowerCase();
+        return t.contains(search);
+    }
+
+    private void showError() {
+        Label err = new Label("Error loading investments.");
+        err.getStyleClass().add("error-label");
+        investmentsContainer.getChildren().add(err);
     }
 
     private HBox createInvestmentCard(Investissement inv, Map<Long, String> projectTitles, SimpleDateFormat sdf) {
@@ -130,5 +157,6 @@ public class MyInvestmentsController implements Initializable {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Finovate - Dashboard");
+        SceneUtils.applyStageSize(stage);
     }
 }

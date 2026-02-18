@@ -8,12 +8,16 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.stage.FileChooser;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import org.esprit.finovate.utils.ImageUtils;
 import org.esprit.finovate.utils.LiveValidationHelper;
+import org.esprit.finovate.utils.SceneUtils;
 import org.esprit.finovate.utils.ValidationUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -27,9 +31,12 @@ public class AddProjectController implements Initializable {
     @FXML private TextArea txtDescription;
     @FXML private TextField txtGoalAmount;
     @FXML private DatePicker dateDeadline;
+    @FXML private Label lblImagePath;
     @FXML private Label lblError;
 
     private Stage stage;
+    private String selectedImagePath;
+
     private DashboardController dashboardController;
     private final ProjectController projectController = new ProjectController();
 
@@ -47,6 +54,18 @@ public class AddProjectController implements Initializable {
         LiveValidationHelper.bind(txtDescription, s -> ValidationUtils.validateDescription(s));
         LiveValidationHelper.bind(txtGoalAmount, s -> ValidationUtils.validateGoalAmount(s));
         LiveValidationHelper.bind(dateDeadline, d -> d == null ? null : ValidationUtils.validateDeadline(d, "Deadline"));
+    }
+
+    @FXML
+    private void handleChooseImage() {
+        FileChooser fc = new FileChooser();
+        fc.setTitle("Select Project Image");
+        fc.getExtensionFilters().add(new FileChooser.ExtensionFilter("Images", "*.png", "*.jpg", "*.jpeg", "*.gif"));
+        File f = fc.showOpenDialog(stage);
+        if (f != null) {
+            selectedImagePath = ImageUtils.saveProjectImage(f.getAbsolutePath());
+            lblImagePath.setText(selectedImagePath != null ? f.getName() : "Failed to save image");
+        }
     }
 
     @FXML
@@ -77,7 +96,7 @@ public class AddProjectController implements Initializable {
                 : new Date(System.currentTimeMillis() + TimeUnit.DAYS.toMillis(30));
 
         try {
-            projectController.addProject(title, desc, goalAmount, deadline);
+            projectController.addProject(title, desc, goalAmount, deadline, selectedImagePath);
             Alert success = new Alert(Alert.AlertType.INFORMATION);
             success.setTitle("Success");
             success.setHeaderText("Project Created");
@@ -111,5 +130,6 @@ public class AddProjectController implements Initializable {
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Finovate - Dashboard");
+        SceneUtils.applyStageSize(stage);
     }
 }

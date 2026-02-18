@@ -10,7 +10,7 @@
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.esprit.finovate.controllers.LoginPlaceholderController"
-            prefHeight="400" prefWidth="450"
+            prefHeight="600" prefWidth="1000"
             styleClass="root" stylesheets="@../css/style.css">
     <center>
         <VBox alignment="CENTER" spacing="20" styleClass="login-box">
