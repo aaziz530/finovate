@@ -39,6 +39,21 @@ public class UserDashboardController implements Initializable {
     private Button btnBills;
 
     @FXML
+    private Button btnForum;
+
+    @FXML
+    private Button btnInvestissement;
+
+    @FXML
+    private Button btnReclamations;
+
+    @FXML
+    private Button btnMarketplace;
+
+    @FXML
+    private Button btnAds;
+
+    @FXML
     private Button btnProfile;
 
     @FXML
@@ -46,14 +61,41 @@ public class UserDashboardController implements Initializable {
 
     public static UserDashboardController instance;
 
+    private Button activeButton;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         instance = this;
         refreshUserInfo();
 
+        setupHoverEffects();
+
         // Load default view (User Home)
         loadView("/UserHome.fxml");
         updateButtonStyles(btnHome);
+    }
+
+    private void setupHoverEffects() {
+        Button[] buttons = { btnHome, btnGoals, btnTransfer, btnBills, btnForum, btnInvestissement, btnReclamations, btnMarketplace, btnAds, btnProfile, btnLogout };
+        for (Button btn : buttons) {
+            if (btn == null) {
+                continue;
+            }
+
+            btn.setOnMouseEntered(e -> {
+                if (btn != activeButton) {
+                    btn.setStyle(
+                            "-fx-background-color: #f0fdf4; -fx-text-fill: #237f4e; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-weight: bold;");
+                }
+            });
+
+            btn.setOnMouseExited(e -> {
+                if (btn != activeButton) {
+                    btn.setStyle(
+                            "-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand; -fx-font-weight: normal;");
+                }
+            });
+        }
     }
 
     @FXML
@@ -121,7 +163,8 @@ public class UserDashboardController implements Initializable {
     }
 
     private void updateButtonStyles(Button activeBtn) {
-        Button[] buttons = { btnHome, btnGoals, btnTransfer, btnBills, btnProfile };
+        this.activeButton = activeBtn;
+        Button[] buttons = { btnHome, btnGoals, btnTransfer, btnBills, btnForum, btnInvestissement, btnReclamations, btnMarketplace, btnAds, btnProfile };
         for (Button btn : buttons) {
             if (btn == null)
                 continue;
@@ -132,6 +175,11 @@ public class UserDashboardController implements Initializable {
                 btn.setStyle(
                         "-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand; -fx-font-weight: normal;");
             }
+        }
+
+        if (btnLogout != null) {
+            btnLogout.setStyle(
+                    "-fx-background-color: transparent; -fx-text-fill: #dc3545; -fx-cursor: hand; -fx-font-weight: normal;");
         }
     }
 }

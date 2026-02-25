@@ -15,9 +15,12 @@ import org.esprit.finovate.utils.Session;
 import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.ResourceBundle;
+import javafx.scene.Node;
+import javafx.scene.shape.SVGPath;
 
 public class UserProfileController implements Initializable {
 
@@ -83,8 +86,22 @@ public class UserProfileController implements Initializable {
         tf.managedProperty().bind(visibleProp);
 
         toggleBtn.setOnAction(e -> visibleProp.set(!visibleProp.get()));
-        visibleProp.addListener((obs, oldV, newV) -> toggleBtn.setText(newV ? "Hide" : "Show"));
-        toggleBtn.setText("Show");
+        toggleBtn.setText("");
+        toggleBtn.setGraphic(createEyeIcon(false));
+        visibleProp.addListener((obs, oldV, newV) -> toggleBtn.setGraphic(createEyeIcon(newV)));
+    }
+
+    private Node createEyeIcon(boolean visible) {
+        SVGPath svg = new SVGPath();
+        if (visible) {
+            svg.setContent("M1 12C3.5 7 8 4 12 4s8.5 3 11 8c-2.5 5-7 8-11 8S3.5 17 1 12z M12 9a3 3 0 1 0 0 6a3 3 0 0 0 0-6z");
+        } else {
+            svg.setContent("M2 4l20 16 M1 12C3.5 7 8 4 12 4c2.1 0 4.4.8 6.4 2.2M23 12c-2.5 5-7 8-11 8c-2.1 0-4.4-.8-6.4-2.2 M9.5 9.5a3 3 0 0 0 4.2 4.2");
+        }
+        svg.setFill(Color.web("#525f7f"));
+        svg.setScaleX(0.8);
+        svg.setScaleY(0.8);
+        return svg;
     }
 
     private void loadUserData() {
@@ -121,6 +138,28 @@ public class UserProfileController implements Initializable {
 
         if (firstName.isEmpty() || lastName.isEmpty() || email.isEmpty() || birthDateLocal == null) {
             showError("First name, Last name, Email and Birth Date are required.");
+            return;
+        }
+
+        if (firstName.length() < 3 || lastName.length() < 3) {
+            showError("First name and last name must be at least 3 characters.");
+            return;
+        }
+
+        if (!firstName.matches("[A-Za-zÀ-ÖØ-öø-ÿ]+([ '\\-][A-Za-zÀ-ÖØ-öø-ÿ]+)*") ||
+                !lastName.matches("[A-Za-zÀ-ÖØ-öø-ÿ]+([ '\\-][A-Za-zÀ-ÖØ-öø-ÿ]+)*")) {
+            showError("First name and last name must contain only letters.");
+            return;
+        }
+
+        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+            showError("Invalid email format.");
+            return;
+        }
+
+        int age = Period.between(birthDateLocal, LocalDate.now()).getYears();
+        if (age < 18) {
+            showError("You must be at least 18 years old.");
             return;
         }
 

@@ -201,7 +201,7 @@ public class UserService implements IUserService {
             throw new IllegalArgumentException("User ID cannot be null for update");
         }
 
-        String sql = "UPDATE `user` SET email=?, firstname=?, lastname=?, role=?, points=?, solde=?, birthdate=?, cin=? WHERE id=?";
+        String sql = "UPDATE `user` SET email=?, firstname=?, lastname=?, role=?, points=?, solde=?, birthdate=?, cin=?, numeroCarte=? WHERE id=?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getEmail());
@@ -218,7 +218,14 @@ public class UserService implements IUserService {
             }
 
             ps.setString(8, user.getCinNumber());
-            ps.setLong(9, user.getId());
+
+            if (user.getNumeroCarte() == null) {
+                ps.setNull(9, Types.BIGINT);
+            } else {
+                ps.setLong(9, user.getNumeroCarte());
+            }
+
+            ps.setLong(10, user.getId());
 
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected == 0) {

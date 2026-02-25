@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
@@ -113,7 +115,7 @@ public class AdminDashboardController implements Initializable {
     private TextField updateSoldeField;
 
     @FXML
-    private TextField updateCinField;
+    private TextField updateCinNumberField;
 
     @FXML
     private TextField updateNumeroCarteField;
@@ -347,8 +349,8 @@ public class AdminDashboardController implements Initializable {
             updatePointsField.setText(String.valueOf(user.getPoints()));
         if (updateSoldeField != null)
             updateSoldeField.setText(String.valueOf(user.getSolde()));
-        if (updateCinField != null)
-            updateCinField.setText(user.getCinNumber());
+        if (updateCinNumberField != null)
+            updateCinNumberField.setText(user.getCinNumber());
         if (updateNumeroCarteField != null)
             updateNumeroCarteField.setText(user.getNumeroCarte() != null ? String.valueOf(user.getNumeroCarte()) : "");
 
@@ -373,27 +375,74 @@ public class AdminDashboardController implements Initializable {
             return;
 
         try {
+            if (updateFirstNameField == null || updateLastNameField == null || updateEmailField == null ||
+                    updateCinNumberField == null || updatePointsField == null || updateSoldeField == null ||
+                    updateRoleComboBox == null) {
+                showUpdateError("Update dialog is not properly initialized (missing fields). Please reopen the dialog.");
+                return;
+            }
+
             // Validation
             if (updateFirstNameField.getText().trim().isEmpty() ||
                     updateLastNameField.getText().trim().isEmpty() ||
                     updateEmailField.getText().trim().isEmpty() ||
-                    updateCinField.getText().trim().isEmpty()) {
+                    updateCinNumberField.getText().trim().isEmpty()) {
                 showUpdateError("All required fields must be filled");
                 return;
             }
 
-            String cinNumber = updateCinField.getText().trim();
+            String firstName = updateFirstNameField.getText().trim();
+            String lastName = updateLastNameField.getText().trim();
+            String email = updateEmailField.getText().trim();
+
+            if (firstName.length() < 3 || lastName.length() < 3) {
+                showUpdateError("First name and last name must be at least 3 characters");
+                return;
+            }
+
+            if (!firstName.matches("[A-Za-zÀ-ÖØ-öø-ÿ]+([ '\\-][A-Za-zÀ-ÖØ-öø-ÿ]+)*") ||
+                    !lastName.matches("[A-Za-zÀ-ÖØ-öø-ÿ]+([ '\\-][A-Za-zÀ-ÖØ-öø-ÿ]+)*")) {
+                showUpdateError("First name and last name must contain only letters");
+                return;
+            }
+
+            if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
+                showUpdateError("Invalid email format");
+                return;
+            }
+
+            String cinNumber = updateCinNumberField.getText().trim();
             if (!cinNumber.matches("\\d{8}")) {
                 showUpdateError("CIN Number must be exactly 8 digits");
                 return;
             }
 
+            String cardNumberRaw = updateNumeroCarteField.getText() == null ? "" : updateNumeroCarteField.getText().trim();
+            if (cardNumberRaw.isEmpty()) {
+                showUpdateError("Card number is required and must be exactly 16 digits");
+                return;
+            }
+
+            if (!cardNumberRaw.matches("\\d{16}")) {
+                showUpdateError("Card number must be exactly 16 digits");
+                return;
+            }
+
+            Long cardNumber;
+            try {
+                cardNumber = Long.parseLong(cardNumberRaw);
+            } catch (NumberFormatException e) {
+                showUpdateError("Card number must be a valid 16-digit number");
+                return;
+            }
+
             // Update user object
-            selectedUserForUpdate.setFirstName(updateFirstNameField.getText().trim());
-            selectedUserForUpdate.setLastName(updateLastNameField.getText().trim());
-            selectedUserForUpdate.setEmail(updateEmailField.getText().trim());
+            selectedUserForUpdate.setFirstName(firstName);
+            selectedUserForUpdate.setLastName(lastName);
+            selectedUserForUpdate.setEmail(email);
             selectedUserForUpdate.setRole(updateRoleComboBox.getValue());
-            selectedUserForUpdate.setCinNumber(updateCinField.getText().trim());
+            selectedUserForUpdate.setCinNumber(updateCinNumberField.getText().trim());
+            selectedUserForUpdate.setNumeroCarte(cardNumber);
 
             try {
                 selectedUserForUpdate.setPoints(Integer.parseInt(updatePointsField.getText().trim()));
@@ -404,6 +453,12 @@ public class AdminDashboardController implements Initializable {
             }
 
             if (updateBirthdatePicker.getValue() != null) {
+                LocalDate birthDateLocal = updateBirthdatePicker.getValue();
+                int age = Period.between(birthDateLocal, LocalDate.now()).getYears();
+                if (age < 18) {
+                    showUpdateError("User must be at least 18 years old");
+                    return;
+                }
                 selectedUserForUpdate.setBirthdate(Date.from(updateBirthdatePicker.getValue()
                         .atStartOfDay(ZoneId.systemDefault()).toInstant()));
             }
@@ -418,9 +473,60 @@ public class AdminDashboardController implements Initializable {
             closeUpdateDialog();
 
         } catch (SQLException e) {
-            showUpdateError("Database error: " + e.getMessage());
+            showUpdateError(toFriendlyDatabaseErrorMessage(e));
+            e.printStackTrace();
+        } catch (RuntimeException e) {
+            showAlert(Alert.AlertType.ERROR, "Unexpected error: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private String toFriendlyDatabaseErrorMessage(SQLException e) {
+        String message = e.getMessage() == null ? "" : e.getMessage();
+        String sqlState = e.getSQLState() == null ? "" : e.getSQLState();
+        String lower = message.toLowerCase();
+
+        String duplicateValue = null;
+        String keyName = null;
+
+        java.util.regex.Matcher valueMatcher = java.util.regex.Pattern
+                .compile("duplicate entry '([^']+)'", java.util.regex.Pattern.CASE_INSENSITIVE)
+                .matcher(message);
+        if (valueMatcher.find()) {
+            duplicateValue = valueMatcher.group(1);
+        }
+
+        java.util.regex.Matcher keyMatcher = java.util.regex.Pattern
+                .compile("for key '([^']+)'", java.util.regex.Pattern.CASE_INSENSITIVE)
+                .matcher(message);
+        if (keyMatcher.find()) {
+            keyName = keyMatcher.group(1);
+        }
+
+        if (sqlState.startsWith("23") || lower.contains("duplicate entry")) {
+            if ((keyName != null && keyName.equalsIgnoreCase("cin")) || lower.contains("key 'cin'") || lower.contains("key `cin`")) {
+                return duplicateValue == null
+                        ? "CIN already exists. Please choose a different CIN."
+                        : "CIN already exists: " + duplicateValue;
+            }
+            if ((keyName != null && keyName.equalsIgnoreCase("email")) || lower.contains("key 'email'") || lower.contains("key `email`")) {
+                return duplicateValue == null
+                        ? "Email already exists. Please choose a different email."
+                        : "Email already exists: " + duplicateValue;
+            }
+            if ((keyName != null && keyName.equalsIgnoreCase("numerocarte")) || (keyName != null && keyName.equalsIgnoreCase("numeroCarte")) ||
+                    lower.contains("key 'numerocarte'") || lower.contains("key `numerocarte`") || lower.contains("key 'numeroCarte'") || lower.contains("key `numerocarte`")) {
+                return duplicateValue == null
+                        ? "Card number already exists. Please choose a different card number."
+                        : "Card number already exists: " + duplicateValue;
+            }
+            if (duplicateValue != null) {
+                return "This value already exists: " + duplicateValue;
+            }
+            return "This value already exists. Please choose a different value.";
+        }
+
+        return "Database error: " + message;
     }
 
     /**

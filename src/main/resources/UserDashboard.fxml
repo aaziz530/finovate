@@ -76,6 +76,51 @@
                             <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
                         </padding>
                     </Button>
+
+                    <Button fx:id="btnForum" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="Forum">
+                        <font>
+                            <Font size="14.0" />
+                        </font>
+                        <padding>
+                            <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                        </padding>
+                    </Button>
+
+                    <Button fx:id="btnInvestissement" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="Investissement">
+                        <font>
+                            <Font size="14.0" />
+                        </font>
+                        <padding>
+                            <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                        </padding>
+                    </Button>
+
+                    <Button fx:id="btnReclamations" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="Reclamations">
+                        <font>
+                            <Font size="14.0" />
+                        </font>
+                        <padding>
+                            <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                        </padding>
+                    </Button>
+
+                    <Button fx:id="btnMarketplace" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="Marketplace">
+                        <font>
+                            <Font size="14.0" />
+                        </font>
+                        <padding>
+                            <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                        </padding>
+                    </Button>
+
+                    <Button fx:id="btnAds" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="Ads">
+                        <font>
+                            <Font size="14.0" />
+                        </font>
+                        <padding>
+                            <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                        </padding>
+                    </Button>
                 </children>
                <VBox.margin>
                   <Insets bottom="30.0" />

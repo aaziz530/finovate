@@ -13,6 +13,8 @@ import org.esprit.finovate.services.UserService;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.Period;
 import java.time.ZoneId;
 import java.util.Date;
 
@@ -171,6 +173,17 @@ public class AuthController {
             return;
         }
 
+        if (firstName.length() < 3 || lastName.length() < 3) {
+            showRegisterError("First name and last name must be at least 3 characters");
+            return;
+        }
+
+        if (!firstName.matches("[A-Za-zÀ-ÖØ-öø-ÿ]+([ '\\-][A-Za-zÀ-ÖØ-öø-ÿ]+)*") ||
+                !lastName.matches("[A-Za-zÀ-ÖØ-öø-ÿ]+([ '\\-][A-Za-zÀ-ÖØ-öø-ÿ]+)*")) {
+            showRegisterError("First name and last name must contain only letters");
+            return;
+        }
+
         if (!cinNumber.matches("\\d{8}")) {
             showRegisterError("CIN Number must be exactly 8 digits");
             return;
@@ -193,6 +206,13 @@ public class AuthController {
 
         if (birthdatePicker.getValue() == null) {
             showRegisterError("Please select your birthdate");
+            return;
+        }
+
+        LocalDate birthdateLocal = birthdatePicker.getValue();
+        int age = Period.between(birthdateLocal, LocalDate.now()).getYears();
+        if (age < 18) {
+            showRegisterError("You must be at least 18 years old to create an account");
             return;
         }
 
