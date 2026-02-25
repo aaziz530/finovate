@@ -14,7 +14,7 @@ public class FinovateApp extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         // Login is handled by another module. For testing, use stub user ID 1. Replace this with your login when integrating.
-        org.esprit.finovate.utils.Session.currentUser = new org.esprit.finovate.utils.StubLoggedInUser(7L, "USER");
+        org.esprit.finovate.utils.Session.currentUser = new org.esprit.finovate.utils.StubLoggedInUser(1L, "ADMIN");
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/dashboard.fxml"));
         Parent root = loader.load();

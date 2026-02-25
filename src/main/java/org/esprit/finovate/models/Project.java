@@ -13,6 +13,9 @@ public class Project {
     private String status;
     private Long owner_id;
     private String imagePath;
+    private Double latitude;
+    private Double longitude;
+    private String category;
 
     public Project() {}
 
@@ -48,4 +51,10 @@ public class Project {
     public void setOwner_id(Long owner_id) { this.owner_id = owner_id; }
     public String getImagePath() { return imagePath; }
     public void setImagePath(String imagePath) { this.imagePath = imagePath; }
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 }

@@ -14,7 +14,7 @@
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.esprit.finovate.controllers.AdminDashboardController"
-            prefHeight="600" prefWidth="1000"
+            prefHeight="720" prefWidth="1280"
             styleClass="root" stylesheets="@../css/style.css">
     <left>
         <VBox styleClass="sidebar" prefWidth="220" spacing="0">
@@ -31,14 +31,14 @@
         </VBox>
     </left>
     <center>
-        <ScrollPane fitToWidth="true" fitToHeight="true">
-            <VBox spacing="24">
-                <padding><Insets top="16" right="24" bottom="24" left="24"/></padding>
+        <ScrollPane fitToWidth="true" fitToHeight="true" styleClass="projects-scroll">
+            <VBox spacing="28" styleClass="form-outer">
+                <padding><Insets top="28" right="36" bottom="36" left="36"/></padding>
 
                 <!-- PROJECTS -->
-                <VBox spacing="8">
+                <VBox spacing="12" styleClass="section-card">
                     <Label text="Projects" styleClass="section-title"/>
-                    <HBox spacing="8" alignment="CENTER_LEFT">
+                    <HBox spacing="12" alignment="CENTER_LEFT" styleClass="toolbar-card">
                         <TextField fx:id="txtSearchProjects" promptText="Recherche..." prefWidth="180"/>
                         <ComboBox fx:id="comboSortProjects" promptText="Trier par" prefWidth="130"/>
                         <Button text="Add Project" onAction="#handleAddProject" styleClass="btn-primary"/>
@@ -46,17 +46,17 @@
                         <Button text="Delete" onAction="#handleDeleteProject" styleClass="btn-danger"/>
                     </HBox>
                     <TableView fx:id="tableProjects" prefHeight="140" maxHeight="140"/>
-                    <HBox spacing="8" alignment="CENTER_LEFT">
+                    <HBox spacing="12" alignment="CENTER_LEFT">
                         <Button text="◀ Prev" onAction="#handleProjectsPrev" styleClass="btn-secondary"/>
-                        <Label fx:id="lblProjectsPage" text="Page 1 / 1"/>
+                        <Label fx:id="lblProjectsPage" text="Page 1 / 1" styleClass="page-label"/>
                         <Button text="Next ▶" onAction="#handleProjectsNext" styleClass="btn-secondary"/>
                     </HBox>
                 </VBox>
 
                 <!-- INVESTISSEMENTS -->
-                <VBox spacing="8">
+                <VBox spacing="12" styleClass="section-card">
                     <Label text="Investissements" styleClass="section-title"/>
-                    <HBox spacing="8" alignment="CENTER_LEFT">
+                    <HBox spacing="12" alignment="CENTER_LEFT" styleClass="toolbar-card">
                         <TextField fx:id="txtSearchInvest" promptText="Recherche..." prefWidth="180"/>
                         <ComboBox fx:id="comboSortInvest" promptText="Trier par" prefWidth="130"/>
                         <Button text="Add Investment" onAction="#handleAddInvestment" styleClass="btn-primary"/>
@@ -64,9 +64,9 @@
                         <Button text="Delete" onAction="#handleDeleteInvestment" styleClass="btn-danger"/>
                     </HBox>
                     <TableView fx:id="tableInvestissements" prefHeight="140" maxHeight="140"/>
-                    <HBox spacing="8" alignment="CENTER_LEFT">
+                    <HBox spacing="12" alignment="CENTER_LEFT">
                         <Button text="◀ Prev" onAction="#handleInvestPrev" styleClass="btn-secondary"/>
-                        <Label fx:id="lblInvestPage" text="Page 1 / 1"/>
+                        <Label fx:id="lblInvestPage" text="Page 1 / 1" styleClass="page-label"/>
                         <Button text="Next ▶" onAction="#handleInvestNext" styleClass="btn-secondary"/>
                     </HBox>
                 </VBox>

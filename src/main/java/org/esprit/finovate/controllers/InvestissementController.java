@@ -40,6 +40,14 @@ public class InvestissementController {
         return investissementService.hasInvestments(projectId);
     }
 
+    public double getMaxInvestableAmount(Long projectId, Long userId) throws SQLException {
+        return investissementService.getMaxInvestableAmount(projectId, userId);
+    }
+
+    public int getInvestorCount(Long projectId) throws SQLException {
+        return investissementService.getInvestorCount(projectId);
+    }
+
     public List<Investissement> getPendingInvestmentsForOwner(Long ownerId) throws SQLException {
         return investissementService.getPendingInvestmentsForOwner(ownerId);
     }

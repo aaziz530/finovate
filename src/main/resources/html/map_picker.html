@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Pick Location</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; }
+    .toolbar { display: flex; gap: 8px; padding: 10px; background: #f5f5f5; border-bottom: 1px solid #ddd; flex-shrink: 0; }
+    .toolbar input { flex: 1; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+    .toolbar button { padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    .toolbar .btn-search { background: #2196F3; color: white; }
+    .toolbar .btn-search:hover { background: #1976D2; }
+    .toolbar .btn-search:disabled { background: #aaa; cursor: not-allowed; }
+    #map { flex: 1; min-height: 200px; position: relative; }
+    .loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); background: rgba(255,255,255,0.95); padding: 20px 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 1000; }
+    .footer { display: flex; gap: 10px; padding: 12px; background: #f5f5f5; border-top: 1px solid #ddd; flex-shrink: 0; }
+    .footer button { padding: 10px 24px; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500; }
+    .btn-confirm { background: #4CAF50; color: white; }
+    .btn-confirm:hover { background: #388E3C; }
+    .btn-confirm:disabled { background: #aaa; cursor: not-allowed; }
+    .btn-cancel { background: #9e9e9e; color: white; }
+    .btn-cancel:hover { background: #757575; }
+    .hint { font-size: 12px; color: #666; padding: 4px 0; }
+  </style>
+</head>
+<body>
+  <div class="toolbar" id="toolbar">
+    <input type="text" id="searchInput" placeholder="Type a location (e.g. Tunis, Avenue Habib Bourguiba)" />
+    <button class="btn-search" id="btnSearch">Search</button>
+  </div>
+  <p class="hint" id="hint" style="margin: 0 10px;">Click on the map to place a marker, or search by location name. Then click Confirm.</p>
+  <div id="map">
+    <div class="loading" id="loading">Loading map...</div>
+  </div>
+  <div class="footer" id="footer"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    let map, marker, selectedLat, selectedLng;
+    const isPicker = true;
+    var initialLat, initialLng;
+
+    const DEFAULT_LAT = 36.8065;
+    const DEFAULT_LNG = 10.1815;
+
+    function hideLoading() {
+      const el = document.getElementById('loading');
+      if (el) el.style.display = 'none';
+    }
+
+    function setMarkerAt(lat, lng) {
+      if (!map) return;
+      if (marker) map.removeLayer(marker);
+      marker = L.marker([lat, lng]).addTo(map);
+      map.setView([lat, lng], Math.max(map.getZoom(), 14));
+      selectedLat = lat;
+      selectedLng = lng;
+    }
+
+    async function searchLocation() {
+      const q = document.getElementById('searchInput').value.trim();
+      if (!q) return;
+      const btn = document.getElementById('btnSearch');
+      btn.disabled = true;
+      btn.textContent = 'Searching...';
+      try {
+        const res = await fetch('https://nominatim.openstreetmap.org/search?q=' + encodeURIComponent(q) + '&format=json&limit=1', {
+          headers: { 'Accept': 'application/json', 'User-Agent': 'FinovateApp/1.0' }
+        });
+        const data = await res.json();
+        if (data && data[0]) {
+          const lat = parseFloat(data[0].lat);
+          const lng = parseFloat(data[0].lon);
+          setMarkerAt(lat, lng);
+        } else {
+          alert('Location not found. Try a different search.');
+        }
+      } catch (err) {
+        alert('Search failed. Check your connection.');
+      }
+      btn.disabled = false;
+      btn.textContent = 'Search';
+    }
+
+    function initMap() {
+      const lat = initialLat != null ? initialLat : DEFAULT_LAT;
+      const lng = initialLng != null ? initialLng : DEFAULT_LNG;
+
+      map = L.map('map').setView([lat, lng], 10);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(map);
+
+      if (isPicker) {
+        map.on('click', function(e) {
+          setMarkerAt(e.latlng.lat, e.latlng.lng);
+        });
+      }
+      if (isPicker) {
+        var f = document.getElementById('footer');
+        if (f) f.style.display = 'none';
+      } else {
+        var t = document.getElementById('toolbar');
+        var h = document.getElementById('hint');
+        var f = document.getElementById('footer');
+        if (t) t.style.display = 'none';
+        if (h) h.style.display = 'none';
+        if (f) f.style.display = 'none';
+        if (initialLat != null && initialLng != null) {
+          marker = L.marker([initialLat, initialLng]).addTo(map);
+        }
+      }
+
+      hideLoading();
+    }
+
+    window.getSelectedLocation = function() {
+      return (selectedLat != null && selectedLng != null) ? (selectedLat + ',' + selectedLng) : null;
+    };
+
+    document.getElementById('btnSearch').addEventListener('click', searchLocation);
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') searchLocation();
+    });
+
+    initMap();
+  </script>
+</body>
+</html>

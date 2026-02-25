@@ -12,10 +12,13 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.esprit.finovate.api.ExchangeRateService;
+import org.esprit.finovate.api.MapPicker;
 import org.esprit.finovate.models.Investissement;
 import org.esprit.finovate.models.Project;
 
 import java.text.SimpleDateFormat;
+import java.util.concurrent.TimeUnit;
 import org.esprit.finovate.utils.ImageUtils;
 import org.esprit.finovate.utils.SceneUtils;
 import org.esprit.finovate.utils.Session;
@@ -39,6 +42,7 @@ public class MyProjectsController implements Initializable {
     private List<Project> allProjects = List.of();
     private final ProjectController projectController = new ProjectController();
     private final InvestissementController investissementController = new InvestissementController();
+    private final ExchangeRateService exchangeRateService = new ExchangeRateService();
 
     public void setStage(Stage stage) { this.stage = stage; }
 
@@ -118,10 +122,10 @@ public class MyProjectsController implements Initializable {
         card.getStyleClass().add("project-card");
         card.setPrefWidth(800);
 
-        String resolved = ImageUtils.resolveImagePath(p.getImagePath());
-        if (resolved != null) {
+        String imgUrl = ImageUtils.toImageUrl(p.getImagePath());
+        if (imgUrl != null) {
             try {
-                ImageView iv = new ImageView(new Image("file:" + resolved));
+                ImageView iv = new ImageView(new Image(imgUrl));
                 iv.setFitWidth(120);
                 iv.setFitHeight(80);
                 iv.setPreserveRatio(true);
@@ -148,11 +152,33 @@ public class MyProjectsController implements Initializable {
         progressBar.getStyleClass().add("project-progress-bar");
         progressBar.setMaxWidth(Double.MAX_VALUE);
 
-        Label meta = new Label(String.format("%.2f TND / %.2f TND  •  %s", p.getCurrent_amount(), p.getGoal_amount(), p.getStatus()));
+        String metaStr = exchangeRateService.formatTndAndEur(p.getCurrent_amount()) + " / " + exchangeRateService.formatTndAndEur(p.getGoal_amount()) + "  •  " + p.getStatus();
+        try {
+            int investors = investissementController.getInvestorCount(p.getProject_id());
+            if (investors > 0) metaStr += "  •  " + investors + " investor(s)";
+        } catch (SQLException ignored) {}
+        if (p.getDeadline() != null && p.getDeadline().after(new java.util.Date())) {
+            long days = TimeUnit.MILLISECONDS.toDays(p.getDeadline().getTime() - System.currentTimeMillis());
+            metaStr += "  •  " + days + " days left";
+        }
+        Label meta = new Label(metaStr);
         meta.getStyleClass().add("project-meta");
 
         card.getChildren().add(progressBar);
         card.getChildren().add(meta);
+
+        if (p.getLatitude() != null && p.getLongitude() != null) {
+            Button btnMap = new Button("View on Map");
+            btnMap.getStyleClass().addAll("btn-secondary", "btn-small");
+            btnMap.setOnAction(e -> {
+                Dialog<Void> d = new Dialog<>();
+                d.setTitle("Project Location");
+                d.getDialogPane().setContent(MapPicker.createViewerWebView(p.getLatitude(), p.getLongitude()));
+                d.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+                d.showAndWait();
+            });
+            card.getChildren().add(btnMap);
+        }
 
         try {
             boolean hasInvestments = investissementController.hasInvestments(p.getProject_id());
@@ -166,6 +192,7 @@ public class MyProjectsController implements Initializable {
                 card.getChildren().add(pendingLabel);
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
                 for (Investissement inv : pending) {
+                    final Investissement invFinal = inv;
                     HBox invRow = new HBox(12);
                     invRow.getStyleClass().add("investment-card");
                     invRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
@@ -174,10 +201,10 @@ public class MyProjectsController implements Initializable {
                     invInfo.getStyleClass().add("project-meta");
                     Button btnAccept = new Button("Accept");
                     btnAccept.getStyleClass().addAll("btn-primary", "btn-small");
-                    btnAccept.setOnAction(e -> handleAccept(inv));
+                    btnAccept.setOnAction(e -> handleAccept(invFinal));
                     Button btnDecline = new Button("Decline");
                     btnDecline.getStyleClass().addAll("btn-danger", "btn-small");
-                    btnDecline.setOnAction(e -> handleDecline(inv));
+                    btnDecline.setOnAction(e -> handleDecline(invFinal));
                     invRow.getChildren().addAll(invInfo, btnAccept, btnDecline);
                     HBox.setHgrow(invInfo, javafx.scene.layout.Priority.ALWAYS);
                     card.getChildren().add(invRow);

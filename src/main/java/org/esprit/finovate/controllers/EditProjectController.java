@@ -3,15 +3,21 @@ package org.esprit.finovate.controllers;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.application.Platform;
+import org.esprit.finovate.api.ApiConfig;
+import org.esprit.finovate.api.MapPicker;
+import org.esprit.finovate.api.UnsplashService;
 import org.esprit.finovate.models.Project;
 import org.esprit.finovate.utils.ImageUtils;
 import org.esprit.finovate.utils.LiveValidationHelper;
@@ -31,8 +37,12 @@ public class EditProjectController implements Initializable {
     @FXML private TextArea txtDescription;
     @FXML private TextField txtGoalAmount;
     @FXML private DatePicker dateDeadline;
+    @FXML private ComboBox<String> comboCategory;
     @FXML private Label lblImagePath;
     @FXML private Label lblError;
+    @FXML private Label lblLocation;
+    @FXML private TextField txtUnsplashSearch;
+    @FXML private FlowPane flowUnsplashResults;
 
     private Stage stage;
     private Project project;
@@ -40,6 +50,7 @@ public class EditProjectController implements Initializable {
     private MyProjectsController returnToMyProjects;
     private Runnable adminReturnCallback;
     private final ProjectController projectController = new ProjectController();
+    private final UnsplashService unsplashService = new UnsplashService();
 
     public void setStage(Stage stage) { this.stage = stage; }
     public void setAdminReturnCallback(Runnable r) { this.adminReturnCallback = r; }
@@ -54,7 +65,62 @@ public class EditProjectController implements Initializable {
         if (p.getDeadline() != null) {
             dateDeadline.setValue(p.getDeadline().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         }
-        lblImagePath.setText(p.getImagePath() != null ? "Current: " + p.getImagePath() : "");
+        if (comboCategory != null && p.getCategory() != null) comboCategory.setValue(p.getCategory());
+        lblImagePath.setText(p.getImagePath() != null ? "Current: " + (p.getImagePath().length() > 50 ? p.getImagePath().substring(0, 50) + "..." : p.getImagePath()) : "");
+        if (lblLocation != null && p.getLatitude() != null && p.getLongitude() != null) {
+            lblLocation.setText(String.format("%.4f, %.4f", p.getLatitude(), p.getLongitude()));
+        }
+    }
+
+    @FXML
+    private void handleSearchUnsplash() {
+        if (flowUnsplashResults == null || txtUnsplashSearch == null || !ApiConfig.hasUnsplashKey()) return;
+        String q = txtUnsplashSearch.getText() != null ? txtUnsplashSearch.getText().trim() : (txtTitle.getText() != null ? txtTitle.getText() : "");
+        if (q == null || q.isEmpty()) q = "project";
+        final String searchQuery = q;
+        flowUnsplashResults.getChildren().clear();
+        flowUnsplashResults.getChildren().add(new Label("Searching..."));
+        new Thread(() -> {
+            var photos = unsplashService.searchPhotos(searchQuery, 8);
+            Platform.runLater(() -> {
+                flowUnsplashResults.getChildren().clear();
+                for (var ph : photos) {
+                    final var photo = ph;
+                    try {
+                        ImageView iv = new ImageView(new Image(photo.urlSmall(), true));
+                        iv.setFitWidth(100);
+                        iv.setFitHeight(80);
+                        iv.setPreserveRatio(true);
+                        iv.setOnMouseClicked(e -> {
+                            project.setImagePath(photo.urlRegular());
+                            lblImagePath.setText("Unsplash selected");
+                        });
+                        flowUnsplashResults.getChildren().add(iv);
+                    } catch (Exception ignored) {}
+                }
+            });
+        }).start();
+    }
+
+    @FXML
+    private void handlePickLocation() {
+        Stage mapStage = new Stage();
+        mapStage.initModality(Modality.APPLICATION_MODAL);
+        mapStage.setTitle("Pick Project Location");
+        VBox root = new VBox(10);
+        root.setPadding(new Insets(10));
+        javafx.scene.layout.VBox pickerPanel = MapPicker.createPickerWebView(
+            (lat, lng) -> {
+                project.setLatitude(lat);
+                project.setLongitude(lng);
+                if (lblLocation != null) lblLocation.setText(String.format("%.4f, %.4f", lat, lng));
+                mapStage.close();
+            },
+            mapStage::close
+        );
+        root.getChildren().add(pickerPanel);
+        mapStage.setScene(new Scene(root, 640, 520));
+        mapStage.showAndWait();
     }
 
     @FXML
@@ -80,6 +146,9 @@ public class EditProjectController implements Initializable {
         LiveValidationHelper.bind(txtDescription, s -> ValidationUtils.validateDescription(s));
         LiveValidationHelper.bind(txtGoalAmount, s -> ValidationUtils.validateGoalAmount(s));
         LiveValidationHelper.bind(dateDeadline, d -> d == null ? null : ValidationUtils.validateDeadline(d, "Deadline"));
+        if (comboCategory != null) {
+            comboCategory.getItems().addAll("Technology", "Agriculture", "Commerce", "Education", "Health", "Transport", "Other");
+        }
     }
 
     @FXML
@@ -113,7 +182,9 @@ public class EditProjectController implements Initializable {
         project.setDescription(desc);
         project.setGoal_amount(goalAmount);
         project.setDeadline(deadline);
-        // imagePath already set by handleChooseImage if user picked new image
+        String cat = comboCategory != null && comboCategory.getValue() != null ? comboCategory.getValue().trim() : null;
+        project.setCategory(cat != null && !cat.isEmpty() ? cat : null);
+        // imagePath, latitude, longitude already set by handleChooseImage / handleSearchUnsplash / handlePickLocation
 
         try {
             projectController.updateProject(project);

@@ -11,12 +11,16 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.esprit.finovate.api.ExchangeRateService;
+import org.esprit.finovate.api.MapPicker;
 import org.esprit.finovate.models.Project;
 import org.esprit.finovate.utils.ImageUtils;
 import org.esprit.finovate.utils.SceneUtils;
+import org.esprit.finovate.utils.Session;
 import org.esprit.finovate.utils.ValidationUtils;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.List;
@@ -32,6 +36,7 @@ public class InvestController implements Initializable {
     private List<Project> allProjects = List.of();
     private final ProjectController projectController = new ProjectController();
     private final InvestissementController investissementController = new InvestissementController();
+    private final ExchangeRateService exchangeRateService = new ExchangeRateService();
 
     public void setStage(Stage stage) {
         this.stage = stage;
@@ -96,10 +101,10 @@ public class InvestController implements Initializable {
         card.getStyleClass().add("project-card");
         card.setPrefWidth(900);
 
-        String resolved = ImageUtils.resolveImagePath(p.getImagePath());
-        if (resolved != null) {
+        String imgUrl = ImageUtils.toImageUrl(p.getImagePath());
+        if (imgUrl != null) {
             try {
-                ImageView iv = new ImageView(new Image("file:" + resolved));
+                ImageView iv = new ImageView(new Image(imgUrl));
                 iv.setFitWidth(120);
                 iv.setFitHeight(80);
                 iv.setPreserveRatio(true);
@@ -125,15 +130,43 @@ public class InvestController implements Initializable {
         ProgressBar progressBar = new ProgressBar(progress);
         progressBar.getStyleClass().add("project-progress-bar");
         progressBar.setMaxWidth(Double.MAX_VALUE);
-        Label meta = new Label(String.format("%.2f TND / %.2f TND  •  %s", p.getCurrent_amount(), p.getGoal_amount(), p.getStatus()));
+        String metaStr = exchangeRateService.formatTndAndEur(p.getCurrent_amount()) + " / " + exchangeRateService.formatTndAndEur(p.getGoal_amount()) + "  •  " + p.getStatus();
+        try {
+            int investors = investissementController.getInvestorCount(p.getProject_id());
+            if (investors > 0) metaStr += "  •  " + investors + " investor(s)";
+        } catch (SQLException ignored) {}
+        if (p.getDeadline() != null && p.getDeadline().after(new java.util.Date())) {
+            long days = TimeUnit.MILLISECONDS.toDays(p.getDeadline().getTime() - System.currentTimeMillis());
+            metaStr += "  •  " + days + " days left";
+        }
+        Label meta = new Label(metaStr);
         meta.getStyleClass().add("project-meta");
         card.getChildren().add(progressBar);
         card.getChildren().add(meta);
 
+        if (p.getLatitude() != null && p.getLongitude() != null) {
+            Button btnMap = new Button("View on Map");
+            btnMap.getStyleClass().addAll("btn-secondary", "btn-small");
+            btnMap.setOnAction(e -> {
+                Dialog<Void> d = new Dialog<>();
+                d.setTitle("Project Location");
+                d.getDialogPane().setContent(MapPicker.createViewerWebView(p.getLatitude(), p.getLongitude()));
+                d.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+                d.showAndWait();
+            });
+            card.getChildren().add(btnMap);
+        }
+
         if (canInvest) {
             TextField txtAmount = new TextField();
-            txtAmount.setPromptText("Amount (TND)...");
-            txtAmount.setPrefWidth(120);
+            double maxHint = p.getGoal_amount() - p.getCurrent_amount();
+            try {
+                if (Session.currentUser != null) {
+                    maxHint = investissementController.getMaxInvestableAmount(p.getProject_id(), Session.currentUser.getId());
+                }
+            } catch (SQLException ignored) {}
+            txtAmount.setPromptText("Max " + String.format("%.0f", maxHint) + " TND");
+            txtAmount.setPrefWidth(140);
             Button btnInvest = new Button("Invest");
             btnInvest.getStyleClass().addAll("btn-primary", "btn-small");
             btnInvest.setOnAction(e -> handleInvest(p, txtAmount));
@@ -152,8 +185,11 @@ public class InvestController implements Initializable {
 
     private void handleInvest(Project p, TextField txtAmount) {
         String amountStr = txtAmount.getText() == null ? "" : txtAmount.getText().trim();
-        double remaining = p.getGoal_amount() - p.getCurrent_amount();
-        String err = ValidationUtils.validateInvestmentAmount(amountStr, remaining > 0 ? remaining : null);
+        Double maxAllowed = null;
+        try {
+            if (Session.currentUser != null) maxAllowed = investissementController.getMaxInvestableAmount(p.getProject_id(), Session.currentUser.getId());
+        } catch (SQLException ignored) {}
+        String err = ValidationUtils.validateInvestmentAmount(amountStr, maxAllowed);
         if (err != null) {
             new Alert(Alert.AlertType.WARNING, err).showAndWait();
             return;

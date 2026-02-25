@@ -13,7 +13,7 @@
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.esprit.finovate.controllers.MyProjectsController"
-            prefHeight="600" prefWidth="1000"
+            prefHeight="720" prefWidth="1280"
             styleClass="root" stylesheets="@../css/style.css">
     <top>
         <VBox alignment="CENTER_LEFT" styleClass="form-header">
@@ -25,21 +25,23 @@
         </VBox>
     </top>
     <center>
-        <VBox spacing="20" alignment="TOP_LEFT" styleClass="form-content">
+        <VBox styleClass="form-outer" alignment="TOP_LEFT">
             <padding>
-                <Insets left="32" right="32" bottom="32"/>
+                <Insets top="28" left="36" right="36" bottom="36"/>
             </padding>
+            <VBox spacing="20" alignment="TOP_LEFT" styleClass="form-content">
             <Label text="Your projects" styleClass="section-title"/>
-            <HBox spacing="12" alignment="CENTER_LEFT">
-                <TextField fx:id="txtSearchDynamic" promptText="Recherche dynamique..." prefWidth="220"/>
-                <ComboBox fx:id="comboStatus" promptText="Statut" prefWidth="120"/>
-                <Button text="Rechercher" onAction="#handleStaticSearch" styleClass="btn-secondary"/>
-                <ComboBox fx:id="comboTri" promptText="Trier par" prefWidth="140"/>
+            <HBox styleClass="toolbar-card" spacing="12" alignment="CENTER_LEFT">
+                <TextField fx:id="txtSearchDynamic" promptText="Recherche dynamique..." prefWidth="240"/>
+                <ComboBox fx:id="comboStatus" promptText="Statut" prefWidth="130"/>
+                <Button text="Rechercher" onAction="#handleStaticSearch" styleClass="btn-primary"/>
+                <ComboBox fx:id="comboTri" promptText="Trier par" prefWidth="150"/>
             </HBox>
             <ScrollPane fitToWidth="true" styleClass="projects-scroll" VBox.vgrow="ALWAYS">
                 <VBox fx:id="projectsContainer" spacing="12"/>
             </ScrollPane>
             <Button text="Back to Dashboard" onAction="#handleBack" styleClass="btn-secondary" prefWidth="180"/>
+            </VBox>
         </VBox>
     </center>
 </BorderPane>

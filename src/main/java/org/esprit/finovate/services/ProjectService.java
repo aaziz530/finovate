@@ -25,7 +25,7 @@ public class ProjectService {
             throw new IllegalStateException("❌ No user logged in!");
         }
 
-        String sql = "INSERT INTO project (title, description, goal_amount, current_amount, created_at, deadline, status, owner_id, image_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO project (title, description, goal_amount, current_amount, created_at, deadline, status, owner_id, image_path, latitude, longitude, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, p.getTitle());
@@ -37,6 +37,9 @@ public class ProjectService {
             ps.setString(7, p.getStatus() != null ? p.getStatus() : "OPEN");
             ps.setLong(8, Session.currentUser.getId());
             ps.setString(9, p.getImagePath());
+            ps.setObject(10, p.getLatitude());
+            ps.setObject(11, p.getLongitude());
+            ps.setString(12, p.getCategory());
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
@@ -59,7 +62,7 @@ public class ProjectService {
         }
         Long ownerId = p.getOwner_id() != null ? p.getOwner_id() : Session.currentUser.getId();
 
-        String sql = "INSERT INTO project (title, description, goal_amount, current_amount, created_at, deadline, status, owner_id, image_path) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO project (title, description, goal_amount, current_amount, created_at, deadline, status, owner_id, image_path, latitude, longitude, category) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, p.getTitle());
             ps.setString(2, p.getDescription());
@@ -70,6 +73,9 @@ public class ProjectService {
             ps.setString(7, p.getStatus() != null ? p.getStatus() : "OPEN");
             ps.setLong(8, ownerId);
             ps.setString(9, p.getImagePath());
+            ps.setObject(10, p.getLatitude());
+            ps.setObject(11, p.getLongitude());
+            ps.setString(12, p.getCategory());
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
@@ -86,9 +92,9 @@ public class ProjectService {
      * Read - Get all projects
      */
     public List<Project> getAllProjects() throws SQLException {
+        applyAutoStatusForAll();
         List<Project> list = new ArrayList<>();
         String sql = "SELECT * FROM project ORDER BY created_at DESC";
-
         try (PreparedStatement ps = connection.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
@@ -102,6 +108,7 @@ public class ProjectService {
      * Read - Get all projects owned by a user
      */
     public List<Project> getProjectsByOwnerId(Long ownerId) throws SQLException {
+        applyAutoStatusForAll();
         List<Project> list = new ArrayList<>();
         String sql = "SELECT * FROM project WHERE owner_id = ? ORDER BY created_at DESC";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -136,7 +143,7 @@ public class ProjectService {
      * Update - Modify an existing project
      */
     public void updateProject(Project p) throws SQLException {
-        String sql = "UPDATE project SET title=?, description=?, goal_amount=?, current_amount=?, deadline=?, status=?, image_path=? WHERE project_id=?";
+        String sql = "UPDATE project SET title=?, description=?, goal_amount=?, current_amount=?, deadline=?, status=?, image_path=?, latitude=?, longitude=?, category=? WHERE project_id=?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, p.getTitle());
@@ -146,9 +153,13 @@ public class ProjectService {
             ps.setDate(5, p.getDeadline() != null ? new java.sql.Date(p.getDeadline().getTime()) : null);
             ps.setString(6, p.getStatus());
             ps.setString(7, p.getImagePath());
-            ps.setLong(8, p.getProject_id());
+            ps.setObject(8, p.getLatitude());
+            ps.setObject(9, p.getLongitude());
+            ps.setString(10, p.getCategory());
+            ps.setLong(11, p.getProject_id());
             int rows = ps.executeUpdate();
             if (rows > 0) {
+                applyAutoStatus(p.getProject_id());
                 System.out.println("✅ Project updated successfully");
             } else {
                 System.out.println("⚠️ No project found with ID: " + p.getProject_id());
@@ -178,12 +189,80 @@ public class ProjectService {
      */
     public void addToCurrentAmount(Long projectId, double amount) throws SQLException {
         String sql = "UPDATE project SET current_amount = current_amount + ? WHERE project_id = ?";
-
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setDouble(1, amount);
             ps.setLong(2, projectId);
             ps.executeUpdate();
         }
+        recordAmountHistory(projectId, amount);
+        applyAutoStatus(projectId);
+    }
+
+    private void recordAmountHistory(Long projectId, double deltaAmount) {
+        try {
+            Project p = getProjectById(projectId);
+            if (p == null) return;
+            double newTotal = p.getCurrent_amount();
+            String sql = "INSERT INTO project_amount_history (project_id, amount) VALUES (?, ?)";
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setLong(1, projectId);
+                ps.setDouble(2, newTotal);
+                ps.executeUpdate();
+            }
+        } catch (SQLException ignored) {}
+    }
+
+    public void applyAutoStatus(Long projectId) throws SQLException {
+        Project p = getProjectById(projectId);
+        if (p == null) return;
+        String newStatus = null;
+        if (p.getCurrent_amount() >= p.getGoal_amount()) newStatus = "FUNDED";
+        else if (p.getDeadline() != null && p.getDeadline().before(new java.util.Date())) newStatus = "CLOSED";
+        if (newStatus != null && !newStatus.equals(p.getStatus())) {
+            try (PreparedStatement ps = connection.prepareStatement("UPDATE project SET status=? WHERE project_id=?")) {
+                ps.setString(1, newStatus);
+                ps.setLong(2, projectId);
+                ps.executeUpdate();
+            }
+        }
+    }
+
+    private void applyAutoStatusForAll() {
+        try {
+            try (PreparedStatement ps1 = connection.prepareStatement("UPDATE project SET status='FUNDED' WHERE current_amount >= goal_amount AND status != 'FUNDED'")) {
+                ps1.executeUpdate();
+            }
+            try (PreparedStatement ps2 = connection.prepareStatement("UPDATE project SET status='CLOSED' WHERE deadline < NOW() AND status = 'OPEN'")) {
+                ps2.executeUpdate();
+            }
+        } catch (SQLException ignored) {}
+    }
+
+    public List<Project> getSimilarProjects(Long projectId, int limit) throws SQLException {
+        Project ref = getProjectById(projectId);
+        if (ref == null) return List.of();
+        String cat = ref.getCategory();
+        if (cat == null || cat.isBlank()) cat = ref.getTitle();
+        List<Project> list = new ArrayList<>();
+        String sql = "SELECT * FROM project WHERE project_id != ? AND status = 'OPEN' AND (category = ? OR title LIKE ?) ORDER BY created_at DESC LIMIT ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setLong(1, projectId);
+            ps.setString(2, cat);
+            ps.setString(3, "%" + (ref.getTitle() != null ? ref.getTitle().split(" ")[0] : "") + "%");
+            ps.setInt(4, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapResultSetToProject(rs));
+            }
+        } catch (SQLException e) {
+            String sql2 = "SELECT * FROM project WHERE project_id != ? AND status = 'OPEN' ORDER BY created_at DESC LIMIT " + limit;
+            try (PreparedStatement ps = connection.prepareStatement(sql2)) {
+                ps.setLong(1, projectId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) list.add(mapResultSetToProject(rs));
+                }
+            }
+        }
+        return list;
     }
 
     private Project mapResultSetToProject(ResultSet rs) throws SQLException {
@@ -199,9 +278,10 @@ public class ProjectService {
         p.setDeadline(deadline != null ? new java.util.Date(deadline.getTime()) : null);
         p.setStatus(rs.getString("status"));
         p.setOwner_id(rs.getLong("owner_id"));
-        try {
-            p.setImagePath(rs.getString("image_path"));
-        } catch (SQLException ignored) { /* column may not exist in old DB */ }
+        try { p.setImagePath(rs.getString("image_path")); } catch (SQLException ignored) {}
+        try { p.setLatitude(rs.getObject("latitude") != null ? rs.getDouble("latitude") : null); } catch (SQLException ignored) {}
+        try { p.setLongitude(rs.getObject("longitude") != null ? rs.getDouble("longitude") : null); } catch (SQLException ignored) {}
+        try { p.setCategory(rs.getString("category")); } catch (SQLException ignored) {}
         return p;
     }
 }

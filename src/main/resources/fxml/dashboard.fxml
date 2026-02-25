@@ -13,7 +13,7 @@
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.esprit.finovate.controllers.DashboardController"
-            prefHeight="600" prefWidth="1000"
+            prefHeight="720" prefWidth="1280"
             styleClass="root" stylesheets="@../css/style.css">
     <left>
         <VBox styleClass="sidebar" prefWidth="220" spacing="0">
@@ -32,14 +32,13 @@
         </VBox>
     </left>
     <center>
-        <VBox alignment="TOP_LEFT" spacing="16" styleClass="dashboard-content">
-            <padding><Insets top="24" right="32" bottom="32" left="32"/></padding>
+        <VBox alignment="TOP_LEFT" spacing="20" styleClass="dashboard-content">
             <Label text="All Projects" styleClass="section-title"/>
-            <HBox spacing="12" alignment="CENTER_LEFT">
-                <TextField fx:id="txtSearchDynamic" promptText="Recherche dynamique..." prefWidth="220"/>
-                <ComboBox fx:id="comboStatus" promptText="Statut" prefWidth="120"/>
-                <Button text="Rechercher" onAction="#handleStaticSearch" styleClass="btn-secondary"/>
-                <ComboBox fx:id="comboTri" promptText="Trier par" prefWidth="140"/>
+            <HBox styleClass="toolbar-card" spacing="16" alignment="CENTER_LEFT">
+                <TextField fx:id="txtSearchDynamic" promptText="Recherche dynamique..." prefWidth="240"/>
+                <ComboBox fx:id="comboStatus" promptText="Statut" prefWidth="130"/>
+                <Button text="Rechercher" onAction="#handleStaticSearch" styleClass="btn-primary"/>
+                <ComboBox fx:id="comboTri" promptText="Trier par" prefWidth="150"/>
             </HBox>
             <ScrollPane fitToWidth="true" styleClass="projects-scroll" VBox.vgrow="ALWAYS">
                 <VBox fx:id="projectsContainer" spacing="12"/>

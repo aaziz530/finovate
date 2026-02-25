@@ -69,45 +69,39 @@ public class AdminDashboardController implements Initializable {
 
     private void setupProjectsTable() {
         tableProjects.getColumns().clear();
-        TableColumn<Project, Long> colId = new TableColumn<>("ID");
-        colId.setCellValueFactory(new PropertyValueFactory<>("project_id"));
-        colId.setPrefWidth(50);
         TableColumn<Project, String> colTitle = new TableColumn<>("Title");
         colTitle.setCellValueFactory(new PropertyValueFactory<>("title"));
-        colTitle.setPrefWidth(180);
+        colTitle.setPrefWidth(220);
         TableColumn<Project, Long> colOwner = new TableColumn<>("Owner");
         colOwner.setCellValueFactory(new PropertyValueFactory<>("owner_id"));
-        colOwner.setPrefWidth(60);
+        colOwner.setPrefWidth(80);
         TableColumn<Project, String> colStatus = new TableColumn<>("Status");
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
-        colStatus.setPrefWidth(70);
+        colStatus.setPrefWidth(90);
         TableColumn<Project, Double> colGoal = new TableColumn<>("Goal");
         colGoal.setCellValueFactory(new PropertyValueFactory<>("goal_amount"));
-        colGoal.setPrefWidth(70);
+        colGoal.setPrefWidth(90);
         TableColumn<Project, Double> colCurrent = new TableColumn<>("Current");
         colCurrent.setCellValueFactory(new PropertyValueFactory<>("current_amount"));
-        colCurrent.setPrefWidth(70);
-        tableProjects.getColumns().addAll(colId, colTitle, colOwner, colStatus, colGoal, colCurrent);
+        colCurrent.setPrefWidth(90);
+        tableProjects.getColumns().addAll(colTitle, colOwner, colStatus, colGoal, colCurrent);
     }
 
     private void setupInvestissementsTable() {
         tableInvestissements.getColumns().clear();
-        TableColumn<Investissement, Long> colId = new TableColumn<>("ID");
-        colId.setCellValueFactory(new PropertyValueFactory<>("investissement_id"));
-        colId.setPrefWidth(45);
         TableColumn<Investissement, Long> colProject = new TableColumn<>("Project");
         colProject.setCellValueFactory(new PropertyValueFactory<>("project_id"));
-        colProject.setPrefWidth(70);
+        colProject.setPrefWidth(90);
         TableColumn<Investissement, Long> colInvestor = new TableColumn<>("Investor");
         colInvestor.setCellValueFactory(new PropertyValueFactory<>("investor_id"));
-        colInvestor.setPrefWidth(70);
+        colInvestor.setPrefWidth(90);
         TableColumn<Investissement, Double> colAmount = new TableColumn<>("Amount");
         colAmount.setCellValueFactory(new PropertyValueFactory<>("amount"));
-        colAmount.setPrefWidth(80);
+        colAmount.setPrefWidth(100);
         TableColumn<Investissement, String> colStatus = new TableColumn<>("Status");
         colStatus.setCellValueFactory(new PropertyValueFactory<>("status"));
-        colStatus.setPrefWidth(85);
-        tableInvestissements.getColumns().addAll(colId, colProject, colInvestor, colAmount, colStatus);
+        colStatus.setPrefWidth(100);
+        tableInvestissements.getColumns().addAll(colProject, colInvestor, colAmount, colStatus);
     }
 
     private void loadData() {

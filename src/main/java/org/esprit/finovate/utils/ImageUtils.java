@@ -44,16 +44,28 @@ public final class ImageUtils {
     }
 
     /**
-     * Resolves the stored path to an absolute path for loading in ImageView.
-     * @param storedPath path from DB (e.g. "uploads/projects/1234.png")
-     * @return absolute path, or null if invalid
+     * Resolves the stored path/URL for loading in ImageView.
+     * Supports: file paths, Unsplash URLs (http/https).
+     * @param storedPath path from DB or URL (e.g. "uploads/projects/1234.png" or "https://images.unsplash.com/...")
+     * @return absolute file path, or URL string for remote images
      */
     public static String resolveImagePath(String storedPath) {
         if (storedPath == null || storedPath.isBlank()) return null;
+        if (storedPath.startsWith("http://") || storedPath.startsWith("https://")) {
+            return storedPath;
+        }
         Path p = Paths.get(storedPath);
         if (!p.isAbsolute()) {
             p = Paths.get(System.getProperty("user.dir")).resolve(storedPath);
         }
         return Files.exists(p) ? p.toAbsolutePath().toString() : null;
+    }
+
+    /** Returns URL string for Image constructor (file:path or http(s) URL). */
+    public static String toImageUrl(String storedPath) {
+        String resolved = resolveImagePath(storedPath);
+        if (resolved == null) return null;
+        if (resolved.startsWith("http://") || resolved.startsWith("https://")) return resolved;
+        return "file:" + resolved;
     }
 }

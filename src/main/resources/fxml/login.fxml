@@ -10,17 +10,17 @@
 <BorderPane xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="org.esprit.finovate.controllers.LoginPlaceholderController"
-            prefHeight="600" prefWidth="1000"
-            styleClass="root" stylesheets="@../css/style.css">
+            prefHeight="720" prefWidth="1280"
+            styleClass="root login-page" stylesheets="@../css/style.css">
     <center>
-        <VBox alignment="CENTER" spacing="20" styleClass="login-box">
+        <VBox alignment="CENTER" spacing="24" styleClass="login-box">
             <padding>
-                <Insets bottom="40" left="50" right="50" top="40"/>
+                <Insets bottom="48" left="56" right="56" top="48"/>
             </padding>
             <Label text="FINOVATE" styleClass="logo-title"/>
             <Label text="Enter User ID to access dashboard" styleClass="subtitle" wrapText="true"/>
             <TextField fx:id="txtUserId" promptText="User ID (e.g. 1)" prefWidth="200"/>
-            <Button text="Enter Dashboard" onAction="#handleEnter" styleClass="btn-primary" prefWidth="200"/>
+            <Button text="Enter Dashboard" onAction="#handleEnter" styleClass="btn-primary btn-large" prefWidth="220"/>
         </VBox>
     </center>
 </BorderPane>

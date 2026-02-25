@@ -19,9 +19,12 @@ public class InvestissementService {
         this.projectService = new ProjectService();
     }
 
+    private static final double PLAFOND_PERCENT = 0.30;
+    private static final int PENDING_DAYS_LIMIT = 7;
+
     /**
      * Create - Add an investment (investor = current logged user).
-     * @return Generated investissement_id, or null if DB does not return keys.
+     * Enforces: plafond 30% max per investor per project.
      */
     public Long addInvestissement(Investissement inv) throws SQLException {
         if (Session.currentUser == null) {
@@ -34,6 +37,14 @@ public class InvestissementService {
         }
         if (project.getOwner_id() != null && project.getOwner_id().equals(Session.currentUser.getId())) {
             throw new IllegalStateException("You cannot invest in your own project.");
+        }
+
+        double maxAllowed = getMaxInvestableAmount(inv.getProject_id(), Session.currentUser.getId());
+        if (inv.getAmount() > maxAllowed) {
+            throw new IllegalStateException(String.format("Maximum investable amount: %.2f TND (30%% of goal per investor).", maxAllowed));
+        }
+        if (inv.getAmount() > project.getGoal_amount() - project.getCurrent_amount()) {
+            throw new IllegalStateException("Amount exceeds remaining funding needed.");
         }
 
         String sql = "INSERT INTO investissement (project_id, investor_id, amount, investment_date, status) VALUES (?, ?, ?, ?, ?)";
@@ -193,9 +204,11 @@ public class InvestissementService {
     }
 
     /**
-     * Get pending investments for projects owned by a user
+     * Get pending investments for projects owned by a user.
+     * Auto-declines investments older than PENDING_DAYS_LIMIT days.
      */
     public List<Investissement> getPendingInvestmentsForOwner(Long ownerId) throws SQLException {
+        autoDeclineExpiredPending();
         List<Investissement> list = new ArrayList<>();
         String sql = "SELECT i.* FROM investissement i " +
                 "JOIN project p ON i.project_id = p.project_id " +
@@ -209,6 +222,47 @@ public class InvestissementService {
             }
         }
         return list;
+    }
+
+    private void autoDeclineExpiredPending() {
+        try {
+            String sql = "UPDATE investissement SET status = 'DECLINED' WHERE status = 'PENDING' AND investment_date < DATE_SUB(NOW(), INTERVAL ? DAY)";
+            try (PreparedStatement ps = connection.prepareStatement(sql)) {
+                ps.setInt(1, PENDING_DAYS_LIMIT);
+                ps.executeUpdate();
+            }
+        } catch (SQLException ignored) {}
+    }
+
+    public double getTotalInvestedByUserForProject(Long projectId, Long userId) throws SQLException {
+        String sql = "SELECT COALESCE(SUM(amount), 0) FROM investissement WHERE project_id = ? AND investor_id = ? AND status = 'CONFIRMED'";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setLong(1, projectId);
+            ps.setLong(2, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getDouble(1) : 0;
+            }
+        }
+    }
+
+    public double getMaxInvestableAmount(Long projectId, Long userId) throws SQLException {
+        Project p = projectService.getProjectById(projectId);
+        if (p == null) return 0;
+        double remaining = p.getGoal_amount() - p.getCurrent_amount();
+        double plafondMax = p.getGoal_amount() * PLAFOND_PERCENT;
+        double alreadyInvested = getTotalInvestedByUserForProject(projectId, userId);
+        double plafondRemaining = plafondMax - alreadyInvested;
+        return Math.max(0, Math.min(remaining, plafondRemaining));
+    }
+
+    public int getInvestorCount(Long projectId) throws SQLException {
+        String sql = "SELECT COUNT(DISTINCT investor_id) FROM investissement WHERE project_id = ? AND status = 'CONFIRMED'";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setLong(1, projectId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        }
     }
 
     /**

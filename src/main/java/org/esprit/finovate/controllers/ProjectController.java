@@ -16,6 +16,11 @@ public class ProjectController {
     }
 
     public void addProject(String title, String description, double goalAmount, Date deadline, String imagePath) throws SQLException {
+        addProject(title, description, goalAmount, deadline, imagePath, null, null, null);
+    }
+
+    public void addProject(String title, String description, double goalAmount, Date deadline,
+                           String imagePath, Double latitude, Double longitude, String category) throws SQLException {
         Project p = new Project();
         p.setTitle(title);
         p.setDescription(description);
@@ -25,7 +30,14 @@ public class ProjectController {
         p.setDeadline(deadline);
         p.setStatus("OPEN");
         p.setImagePath(imagePath);
+        p.setLatitude(latitude);
+        p.setLongitude(longitude);
+        p.setCategory(category);
         projectService.addProject(p);
+    }
+
+    public List<Project> getSimilarProjects(Long projectId, int limit) throws SQLException {
+        return projectService.getSimilarProjects(projectId, limit);
     }
 
     public List<Project> getAllProjects() throws SQLException {
