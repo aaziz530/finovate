@@ -105,6 +105,15 @@
                   <Insets bottom="14.0" top="14.0" />
                </padding>
                <VBox.margin>
+                  <Insets bottom="10.0" />
+               </VBox.margin>
+            </Button>
+
+            <Button fx:id="githubLoginButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleGitHubLogin" style="-fx-background-color: transparent; -fx-text-fill: #333; -fx-background-radius: 5; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-border-color: #333; -fx-border-radius: 5; -fx-font-family: 'Poppins';" text="Se connecter avec GitHub">
+               <padding>
+                  <Insets bottom="14.0" top="14.0" />
+               </padding>
+               <VBox.margin>
                   <Insets bottom="20.0" />
                </VBox.margin>
             </Button>

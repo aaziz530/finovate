@@ -10,6 +10,8 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.esprit.finovate.entities.User;
 import org.esprit.finovate.services.EmailService;
+import org.esprit.finovate.services.GitHubOAuthConfig;
+import org.esprit.finovate.services.GitHubOAuthService;
 import org.esprit.finovate.services.GoogleOAuthConfig;
 import org.esprit.finovate.services.GoogleOAuthService;
 import org.esprit.finovate.services.IUserService;
@@ -41,6 +43,9 @@ public class AuthController {
 
     @FXML
     private Button googleLoginButton;
+
+    @FXML
+    private Button githubLoginButton;
 
     @FXML
     private CheckBox rememberMeCheckbox;
@@ -183,6 +188,101 @@ public class AuthController {
         t.start();
     }
 
+    @FXML
+    private void handleGitHubLogin() {
+        clearError();
+
+        setLoginControlsDisabled(true);
+
+        Thread t = new Thread(() -> {
+            try {
+                GitHubOAuthConfig config = GitHubOAuthConfig.load();
+                GitHubOAuthService oauth = new GitHubOAuthService(config);
+                GitHubOAuthService.GitHubUserInfo githubUser = oauth.authenticate();
+
+                Platform.runLater(() -> handleGitHubUserAuthenticated(githubUser));
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    showError("GitHub login failed: " + e.getMessage());
+                    setLoginControlsDisabled(false);
+                });
+            }
+        });
+
+        t.setDaemon(true);
+        t.start();
+    }
+
+    private void handleGitHubUserAuthenticated(GitHubOAuthService.GitHubUserInfo githubUser) {
+        try {
+            String email = githubUser.email();
+            if (email == null || email.isBlank()) {
+                showError("GitHub did not return an email");
+                return;
+            }
+
+            User existing = ((UserService) userService).findByEmail(email);
+            if (existing != null) {
+                org.esprit.finovate.utils.Session.currentUser = existing;
+                if ("ADMIN".equalsIgnoreCase(existing.getRole())) {
+                    loadAdminDashboard();
+                } else {
+                    navigateToPage("/UserDashboard.fxml", "User Dashboard - Finovate");
+                }
+                return;
+            }
+
+            // New user - show complete profile dialog
+            CompleteProfileController.CompleteProfileResult result = showCompleteProfileDialogForGitHub(githubUser);
+            if (result == null) {
+                return;
+            }
+
+            Date birthdate = Date.from(result.birthdate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            User created = ((UserService) userService).registerGoogleUser(email, result.firstName(), result.lastName(), birthdate, result.cin());
+
+            if (created != null) {
+                Session.currentUser = created;
+                navigateToPage("/UserDashboard.fxml", "User Dashboard - Finovate");
+            }
+        } catch (IllegalStateException e) {
+            showError(e.getMessage());
+        } catch (SQLException e) {
+            showError("Database error: " + e.getMessage());
+        } finally {
+            setLoginControlsDisabled(false);
+        }
+    }
+
+    private CompleteProfileController.CompleteProfileResult showCompleteProfileDialogForGitHub(GitHubOAuthService.GitHubUserInfo githubUser) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/CompleteProfileDialog.fxml"));
+            Parent root = loader.load();
+            CompleteProfileController controller = loader.getController();
+
+            controller.presetName(
+                    githubUser.firstName() == null ? "" : githubUser.firstName(),
+                    githubUser.lastName() == null ? "" : githubUser.lastName());
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            Stage owner = getCurrentStage();
+            if (owner != null) {
+                stage.initOwner(owner);
+            }
+            stage.setTitle("Complete Profile");
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.centerOnScreen();
+            stage.showAndWait();
+
+            return controller.getResult();
+        } catch (IOException e) {
+            showError("Failed to open profile form: " + e.getMessage());
+            return null;
+        }
+    }
+
     private void handleGoogleUserAuthenticated(GoogleOAuthService.GoogleUserInfo googleUser) {
         try {
             String email = googleUser.email();
@@ -258,6 +358,9 @@ public class AuthController {
         }
         if (googleLoginButton != null) {
             googleLoginButton.setDisable(disabled);
+        }
+        if (githubLoginButton != null) {
+            githubLoginButton.setDisable(disabled);
         }
         if (usernameField != null) {
             usernameField.setDisable(disabled);
