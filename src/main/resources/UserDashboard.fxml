@@ -121,6 +121,15 @@
                             <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
                         </padding>
                     </Button>
+
+                    <Button fx:id="btnChatbot" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleChatbot" style="-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="Finovate AI">
+                        <font>
+                            <Font size="14.0" />
+                        </font>
+                        <padding>
+                            <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                        </padding>
+                    </Button>
                 </children>
                <VBox.margin>
                   <Insets bottom="30.0" />

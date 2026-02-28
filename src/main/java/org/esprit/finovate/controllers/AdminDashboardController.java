@@ -12,6 +12,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.esprit.finovate.entities.User;
@@ -41,6 +43,9 @@ public class AdminDashboardController implements Initializable {
 
     @FXML
     private Button logoutButton;
+
+    @FXML
+    private Button chatbotButton;
 
     // Statistics cards
     @FXML
@@ -158,6 +163,12 @@ public class AdminDashboardController implements Initializable {
     @FXML
     private Button filterToggleButton;
 
+    @FXML
+    private VBox mainContentArea;
+
+    private ObservableList<javafx.scene.Node> savedAdminContent;
+    private boolean chatbotVisible = false;
+
     // Service and data
     private final IUserService userService;
     private final ObservableList<User> usersList = FXCollections.observableArrayList();
@@ -175,6 +186,42 @@ public class AdminDashboardController implements Initializable {
         setupUserTable();
         setupFilterControls();
         loadUsers();
+    }
+
+    @FXML
+    private void handleChatbotTop() {
+        if (mainContentArea == null) {
+            showAlert(Alert.AlertType.ERROR, "Chat view container is missing (mainContentArea).");
+            return;
+        }
+
+        if (!chatbotVisible) {
+            // Save current content before switching
+            savedAdminContent = FXCollections.observableArrayList(mainContentArea.getChildren());
+            
+            try {
+                Parent chatbotView = FXMLLoader.load(getClass().getResource("/ChatbotView.fxml"));
+                mainContentArea.getChildren().setAll(chatbotView);
+                VBox.setVgrow(chatbotView, Priority.ALWAYS);
+                chatbotVisible = true;
+
+                if (chatbotButton != null) {
+                    chatbotButton.setText("Back");
+                }
+            } catch (IOException e) {
+                showAlert(Alert.AlertType.ERROR, "Failed to load chatbot: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            // Restore saved content
+            if (savedAdminContent != null) {
+                mainContentArea.getChildren().setAll(savedAdminContent);
+            }
+            chatbotVisible = false;
+            if (chatbotButton != null) {
+                chatbotButton.setText("Finovate AI");
+            }
+        }
     }
 
     private void setupFilterControls() {

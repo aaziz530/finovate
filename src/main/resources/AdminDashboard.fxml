@@ -45,6 +45,15 @@
                   <Insets right="20.0" />
                </HBox.margin>
             </Label>
+
+            <Button fx:id="chatbotButton" mnemonicParsing="false" onAction="#handleChatbotTop" style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand; -fx-font-weight: bold;" text="Finovate AI">
+               <padding>
+                  <Insets bottom="8.0" left="16.0" right="16.0" top="8.0" />
+               </padding>
+               <HBox.margin>
+                  <Insets right="12.0" />
+               </HBox.margin>
+            </Button>
             
             <!-- Logout Button -->
             <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#handleLogout" style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand; -fx-font-weight: bold;" text="Logout">
@@ -57,7 +66,7 @@
    </top>
    
    <center>
-      <VBox spacing="25.0" BorderPane.alignment="CENTER">
+      <VBox fx:id="mainContentArea" spacing="25.0" BorderPane.alignment="CENTER">
          <padding>
             <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
          </padding>
