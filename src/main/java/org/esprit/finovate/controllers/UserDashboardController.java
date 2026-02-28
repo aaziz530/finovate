@@ -138,6 +138,7 @@ public class UserDashboardController implements Initializable {
     @FXML
     private void handleLogout() {
         Session.currentUser = null;
+        org.esprit.finovate.utils.RememberMeService.clearCredentials();
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Login.fxml"));
             Parent root = loader.load();

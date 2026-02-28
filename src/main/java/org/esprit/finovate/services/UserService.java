@@ -7,6 +7,8 @@ import org.esprit.finovate.utils.PasswordUtils;
 import org.esprit.finovate.utils.Session;
 
 import java.sql.*;
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.Date;
 
 public class UserService implements IUserService {
@@ -15,6 +17,35 @@ public class UserService implements IUserService {
 
     public UserService() {
         this.connection = MyDataBase.getInstance().getConnection();
+    }
+
+    public User findByEmail(String email) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+
+        String sql = "SELECT * FROM `user` WHERE email=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToUser(rs);
+                }
+            }
+        }
+        return null;
+    }
+
+    public User registerGoogleUser(String email, String firstName, String lastName, Date birthdate, String cinNumber)
+            throws SQLException {
+        String randomPassword = generateRandomPassword();
+        return register(email, randomPassword, firstName, lastName, birthdate, cinNumber);
+    }
+
+    private String generateRandomPassword() {
+        byte[] bytes = new byte[24];
+        new SecureRandom().nextBytes(bytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
     @Override

@@ -66,6 +66,14 @@
                         </Hyperlink>
                      </children>
                   </HBox>
+                  <javafx.scene.control.CheckBox fx:id="rememberMeCheckbox" text="Remember Me" textFill="#6c757d">
+                     <font>
+                        <Font size="13.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets bottom="10.0" />
+                     </VBox.margin>
+                  </javafx.scene.control.CheckBox>
                </children>
                <VBox.margin>
                   <Insets bottom="10.0" />
@@ -84,6 +92,15 @@
             
             <!-- Login Button -->
             <Button fx:id="loginButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleLogin" style="-fx-background-color: #237f4e; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-font-family: 'Poppins';" text="Sign In">
+               <padding>
+                  <Insets bottom="14.0" top="14.0" />
+               </padding>
+               <VBox.margin>
+                  <Insets bottom="10.0" />
+               </VBox.margin>
+            </Button>
+
+            <Button fx:id="googleLoginButton" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleGoogleLogin" style="-fx-background-color: transparent; -fx-text-fill: #237f4e; -fx-background-radius: 5; -fx-font-size: 14px; -fx-font-weight: bold; -fx-cursor: hand; -fx-border-color: #237f4e; -fx-border-radius: 5; -fx-font-family: 'Poppins';" text="Se connecter avec Google">
                <padding>
                   <Insets bottom="14.0" top="14.0" />
                </padding>

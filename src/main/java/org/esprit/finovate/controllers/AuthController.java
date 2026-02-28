@@ -2,14 +2,20 @@ package org.esprit.finovate.controllers;
 
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.application.Platform;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.esprit.finovate.entities.User;
 import org.esprit.finovate.services.EmailService;
+import org.esprit.finovate.services.GoogleOAuthConfig;
+import org.esprit.finovate.services.GoogleOAuthService;
 import org.esprit.finovate.services.IUserService;
 import org.esprit.finovate.services.UserService;
+import org.esprit.finovate.utils.Session;
+import org.esprit.finovate.utils.RememberMeService;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -32,6 +38,12 @@ public class AuthController {
 
     @FXML
     private Button loginButton;
+
+    @FXML
+    private Button googleLoginButton;
+
+    @FXML
+    private CheckBox rememberMeCheckbox;
 
     @FXML
     private Label errorLabel;
@@ -115,6 +127,146 @@ public class AuthController {
         this.emailService = new EmailService();
     }
 
+    @FXML
+    public void initialize() {
+        if (usernameField != null && passwordField != null && rememberMeCheckbox != null) {
+            if (RememberMeService.isRememberMeEnabled()) {
+                String savedUser = RememberMeService.getSavedUsername();
+                String savedPass = RememberMeService.getSavedPassword();
+                
+                usernameField.setText(savedUser);
+                passwordField.setText(savedPass);
+                rememberMeCheckbox.setSelected(true);
+
+                // Auto-login
+                Platform.runLater(() -> {
+                    try {
+                        User user = userService.login(savedUser, savedPass);
+                        if (user != null) {
+                            if ("ADMIN".equalsIgnoreCase(user.getRole())) {
+                                loadAdminDashboard();
+                            } else {
+                                navigateToPage("/UserDashboard.fxml", "User Dashboard - Finovate");
+                            }
+                        }
+                    } catch (SQLException e) {
+                        // If auto-login fails (e.g. password changed), just stay on login page
+                        System.err.println("Auto-login failed: " + e.getMessage());
+                    }
+                });
+            }
+        }
+    }
+
+    @FXML
+    private void handleGoogleLogin() {
+        clearError();
+
+        setLoginControlsDisabled(true);
+
+        Thread t = new Thread(() -> {
+            try {
+                GoogleOAuthConfig config = GoogleOAuthConfig.load();
+                GoogleOAuthService oauth = new GoogleOAuthService(config);
+                GoogleOAuthService.GoogleUserInfo googleUser = oauth.authenticate();
+
+                Platform.runLater(() -> handleGoogleUserAuthenticated(googleUser));
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    showError("Google login failed: " + e.getMessage());
+                    setLoginControlsDisabled(false);
+                });
+            }
+        });
+
+        t.setDaemon(true);
+        t.start();
+    }
+
+    private void handleGoogleUserAuthenticated(GoogleOAuthService.GoogleUserInfo googleUser) {
+        try {
+            String email = googleUser.email();
+            if (email == null || email.isBlank()) {
+                showError("Google did not return an email");
+                return;
+            }
+
+            User existing = ((UserService) userService).findByEmail(email);
+            if (existing != null) {
+                org.esprit.finovate.utils.Session.currentUser = existing;
+                if ("ADMIN".equalsIgnoreCase(existing.getRole())) {
+                    loadAdminDashboard();
+                } else {
+                    navigateToPage("/UserDashboard.fxml", "User Dashboard - Finovate");
+                }
+                return;
+            }
+
+            CompleteProfileController.CompleteProfileResult result = showCompleteProfileDialog(googleUser);
+            if (result == null) {
+                return;
+            }
+
+            Date birthdate = Date.from(result.birthdate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+            User created = ((UserService) userService).registerGoogleUser(email, result.firstName(), result.lastName(), birthdate, result.cin());
+
+            if (created != null) {
+                Session.currentUser = created;
+                navigateToPage("/UserDashboard.fxml", "User Dashboard - Finovate");
+            }
+        } catch (IllegalStateException e) {
+            showError(e.getMessage());
+        } catch (SQLException e) {
+            showError("Database error: " + e.getMessage());
+        } finally {
+            setLoginControlsDisabled(false);
+        }
+    }
+
+    private CompleteProfileController.CompleteProfileResult showCompleteProfileDialog(GoogleOAuthService.GoogleUserInfo googleUser) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/CompleteProfileDialog.fxml"));
+            Parent root = loader.load();
+            CompleteProfileController controller = loader.getController();
+
+            controller.presetName(
+                    googleUser.givenName() == null ? "" : googleUser.givenName(),
+                    googleUser.familyName() == null ? "" : googleUser.familyName());
+
+            Stage stage = new Stage();
+            stage.initModality(Modality.APPLICATION_MODAL);
+            Stage owner = getCurrentStage();
+            if (owner != null) {
+                stage.initOwner(owner);
+            }
+            stage.setTitle("Complete Profile");
+            stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.centerOnScreen();
+            stage.showAndWait();
+
+            return controller.getResult();
+        } catch (IOException e) {
+            showError("Failed to open profile form: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private void setLoginControlsDisabled(boolean disabled) {
+        if (loginButton != null) {
+            loginButton.setDisable(disabled);
+        }
+        if (googleLoginButton != null) {
+            googleLoginButton.setDisable(disabled);
+        }
+        if (usernameField != null) {
+            usernameField.setDisable(disabled);
+        }
+        if (passwordField != null) {
+            passwordField.setDisable(disabled);
+        }
+    }
+
     /**
      * Handle login action
      */
@@ -137,6 +289,13 @@ public class AuthController {
             if (user == null) {
                 showError("Invalid email or password");
                 return;
+            }
+
+            // Save or clear credentials based on Remember Me checkbox
+            if (rememberMeCheckbox.isSelected()) {
+                RememberMeService.saveCredentials(username, password);
+            } else {
+                RememberMeService.clearCredentials();
             }
 
             // Check if user is admin

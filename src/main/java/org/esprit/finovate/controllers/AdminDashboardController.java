@@ -59,8 +59,6 @@ public class AdminDashboardController implements Initializable {
     @FXML
     private TableView<User> usersTable;
 
-    @FXML
-    private TableColumn<User, Long> idColumn;
 
     @FXML
     private TableColumn<User, String> firstNameColumn;
@@ -198,7 +196,6 @@ public class AdminDashboardController implements Initializable {
             return;
 
         // Configure columns
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
         firstNameColumn.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         lastNameColumn.setCellValueFactory(new PropertyValueFactory<>("lastName"));
         emailColumn.setCellValueFactory(new PropertyValueFactory<>("email"));
@@ -634,6 +631,7 @@ public class AdminDashboardController implements Initializable {
     @FXML
     private void handleLogout() {
         userService.logout();
+        org.esprit.finovate.utils.RememberMeService.clearCredentials();
 
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/Login.fxml"));

@@ -6,7 +6,7 @@ import jakarta.mail.internet.MimeMessage;
 import java.util.Properties;
 
 public class EmailService {
-    private final String username = "email@gmail.com"; // User will need to configure this
+    private final String username = "username"; // User will need to configure this
     private final String password = "password"; // User will need to configure this
 
     public void sendEmail(String to, String subject, String content) throws MessagingException {

@@ -154,7 +154,6 @@
                   <!-- Users Table -->
                   <TableView fx:id="usersTable" VBox.vgrow="ALWAYS">
                      <columns>
-                        <TableColumn fx:id="idColumn" prefWidth="60.0" text="ID" />
                         <TableColumn fx:id="firstNameColumn" prefWidth="150.0" text="First Name" />
                         <TableColumn fx:id="lastNameColumn" prefWidth="150.0" text="Last Name" />
                         <TableColumn fx:id="emailColumn" prefWidth="200.0" text="Email" />
