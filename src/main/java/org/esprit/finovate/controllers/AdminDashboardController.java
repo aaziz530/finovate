@@ -18,6 +18,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.esprit.finovate.entities.User;
 import org.esprit.finovate.services.IUserService;
+import org.esprit.finovate.services.PDFExportService;
 import org.esprit.finovate.services.UserService;
 import org.esprit.finovate.utils.Session;
 
@@ -162,6 +163,9 @@ public class AdminDashboardController implements Initializable {
 
     @FXML
     private Button filterToggleButton;
+
+    @FXML
+    private Button exportPdfButton;
 
     @FXML
     private VBox mainContentArea;
@@ -767,6 +771,36 @@ public class AdminDashboardController implements Initializable {
         if (deleteCancelButton != null) {
             Stage stage = (Stage) deleteCancelButton.getScene().getWindow();
             stage.close();
+        }
+    }
+
+    /**
+     * Handle export to PDF action
+     */
+    @FXML
+    private void handleExportPdf() {
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Save PDF Report");
+        fileChooser.getExtensionFilters().add(
+                new javafx.stage.FileChooser.ExtensionFilter("PDF Files", "*.pdf"));
+        fileChooser.setInitialFileName("finovate_users_report_" + 
+                new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()) + ".pdf");
+
+        java.io.File file = fileChooser.showSaveDialog(
+                exportPdfButton != null ? (Stage) exportPdfButton.getScene().getWindow() : null);
+
+        if (file != null) {
+            try {
+                PDFExportService pdfService = new PDFExportService();
+                List<User> usersToExport = userService.getAllUsers();
+                pdfService.exportUsersToPDF(usersToExport, file.getAbsolutePath());
+
+                showAlert(Alert.AlertType.INFORMATION, 
+                        "PDF report generated successfully!\nLocation: " + file.getAbsolutePath());
+            } catch (Exception e) {
+                showAlert(Alert.AlertType.ERROR, "Failed to generate PDF: " + e.getMessage());
+                e.printStackTrace();
+            }
         }
     }
 
