@@ -5,11 +5,22 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import java.util.Properties;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 public class EmailService {
-    private final String username = "username"; // User will need to configure this
-    private final String password = "password"; // User will need to configure this
+    private static final Dotenv dotenv = Dotenv.configure()
+            .directory("./")
+            .ignoreIfMalformed()
+            .ignoreIfMissing()
+            .load();
+
+    private final String username = dotenv.get("EMAIL_USERNAME", System.getenv("EMAIL_USERNAME"));
+    private final String password = dotenv.get("EMAIL_PASSWORD", System.getenv("EMAIL_PASSWORD"));
 
     public void sendEmail(String to, String subject, String content) throws MessagingException {
+        if (username == null || password == null) {
+            throw new MessagingException("Email credentials not found in .env or system environment");
+        }
         Properties prop = new Properties();
         prop.put("mail.smtp.host", "smtp.gmail.com");
         prop.put("mail.smtp.port", "587");
