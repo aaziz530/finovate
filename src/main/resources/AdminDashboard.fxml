@@ -3,6 +3,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -140,11 +142,27 @@
                            </font>
                         </Label>
                         
+                        <!-- Advanced Search Toggle and Fields -->
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <children>
+                              <Button fx:id="filterToggleButton" mnemonicParsing="false" onAction="#toggleFilters" style="-fx-background-color: #e9ecef; -fx-text-fill: #495057; -fx-background-radius: 6; -fx-cursor: hand;" text="Advanced Filters" />
+                              <HBox fx:id="filterPanel" alignment="CENTER_LEFT" managed="false" spacing="10.0" visible="false">
+                                 <children>
+                                    <ComboBox fx:id="roleFilterCombo" promptText="Role" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 6;" />
+                                    <TextField fx:id="minBalanceField" prefWidth="100.0" promptText="Min Balance" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 6;" />
+                                    <TextField fx:id="maxBalanceField" prefWidth="100.0" promptText="Max Balance" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 6;" />
+                                    <DatePicker fx:id="dateFilterPicker" prefWidth="150.0" promptText="Created After" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 6;" />
+                                    <Button mnemonicParsing="false" onAction="#clearFilters" style="-fx-background-color: #ffc107; -fx-text-fill: black; -fx-background-radius: 6; -fx-cursor: hand;" text="Clear" />
+                                 </children>
+                              </HBox>
+                           </children>
+                        </HBox>
+                        
                         <!-- Spacer -->
                         <HBox HBox.hgrow="ALWAYS" />
                         
                         <!-- Search Field -->
-                        <TextField fx:id="searchField" onKeyReleased="#handleSearch" promptText="Search users..." style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 10;" prefWidth="300.0" />
+                        <TextField fx:id="searchField" onKeyReleased="#handleSearch" prefWidth="300.0" promptText="Search users..." style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 10;" />
                      </children>
                      <VBox.margin>
                         <Insets bottom="15.0" />

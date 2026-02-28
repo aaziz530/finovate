@@ -140,6 +140,24 @@ public class AdminDashboardController implements Initializable {
     @FXML
     private Button deleteConfirmButton;
 
+    @FXML
+    private HBox filterPanel;
+
+    @FXML
+    private ComboBox<String> roleFilterCombo;
+
+    @FXML
+    private TextField minBalanceField;
+
+    @FXML
+    private TextField maxBalanceField;
+
+    @FXML
+    private DatePicker dateFilterPicker;
+
+    @FXML
+    private Button filterToggleButton;
+
     // Service and data
     private final IUserService userService;
     private final ObservableList<User> usersList = FXCollections.observableArrayList();
@@ -155,7 +173,98 @@ public class AdminDashboardController implements Initializable {
         setupAdminInfo();
         setupStatistics();
         setupUserTable();
+        setupFilterControls();
         loadUsers();
+    }
+
+    private void setupFilterControls() {
+        if (roleFilterCombo != null) {
+            roleFilterCombo.setItems(FXCollections.observableArrayList("ALL", "USER", "ADMIN"));
+            roleFilterCombo.setValue("ALL");
+            roleFilterCombo.setOnAction(e -> applyFilters());
+        }
+
+        if (dateFilterPicker != null) {
+            dateFilterPicker.setOnAction(e -> applyFilters());
+        }
+
+        if (minBalanceField != null) {
+            minBalanceField.textProperty().addListener((obs, oldVal, newVal) -> applyFilters());
+        }
+
+        if (maxBalanceField != null) {
+            maxBalanceField.textProperty().addListener((obs, oldVal, newVal) -> applyFilters());
+        }
+    }
+
+    @FXML
+    private void toggleFilters() {
+        if (filterPanel != null) {
+            boolean isVisible = !filterPanel.isVisible();
+            filterPanel.setVisible(isVisible);
+            filterPanel.setManaged(isVisible);
+            filterToggleButton.setText(isVisible ? "Hide Filters" : "Advanced Filters");
+        }
+    }
+
+    @FXML
+    private void clearFilters() {
+        if (roleFilterCombo != null) roleFilterCombo.setValue("ALL");
+        if (minBalanceField != null) minBalanceField.clear();
+        if (maxBalanceField != null) maxBalanceField.clear();
+        if (dateFilterPicker != null) dateFilterPicker.setValue(null);
+        if (searchField != null) searchField.clear();
+        loadUsers();
+    }
+
+    private void applyFilters() {
+        String searchTerm = searchField.getText().toLowerCase().trim();
+        String roleFilter = roleFilterCombo.getValue();
+        String minBalStr = minBalanceField.getText().trim();
+        String maxBalStr = maxBalanceField.getText().trim();
+        LocalDate dateLimit = dateFilterPicker.getValue();
+
+        try {
+            List<User> allUsers = userService.getAllUsers();
+            List<User> filteredUsers = allUsers.stream().filter(user -> {
+                // Search term check
+                boolean matchesSearch = searchTerm.isEmpty() ||
+                        user.getFirstName().toLowerCase().contains(searchTerm) ||
+                        user.getLastName().toLowerCase().contains(searchTerm) ||
+                        user.getEmail().toLowerCase().contains(searchTerm) ||
+                        user.getCinNumber().toLowerCase().contains(searchTerm);
+
+                // Role check
+                boolean matchesRole = "ALL".equals(roleFilter) || roleFilter.equalsIgnoreCase(user.getRole());
+
+                // Balance check
+                boolean matchesBalance = true;
+                if (!minBalStr.isEmpty()) {
+                    try {
+                        matchesBalance = user.getSolde() >= Float.parseFloat(minBalStr);
+                    } catch (NumberFormatException e) { /* ignore invalid input */ }
+                }
+                if (matchesBalance && !maxBalStr.isEmpty()) {
+                    try {
+                        matchesBalance = user.getSolde() <= Float.parseFloat(maxBalStr);
+                    } catch (NumberFormatException e) { /* ignore invalid input */ }
+                }
+
+                // Date check
+                boolean matchesDate = true;
+                if (dateLimit != null && user.getCreatedAt() != null) {
+                    LocalDate createdDate = user.getCreatedAt().toInstant()
+                            .atZone(ZoneId.systemDefault()).toLocalDate();
+                    matchesDate = createdDate.isAfter(dateLimit) || createdDate.isEqual(dateLimit);
+                }
+
+                return matchesSearch && matchesRole && matchesBalance && matchesDate;
+            }).toList();
+
+            usersList.setAll(filteredUsers);
+        } catch (SQLException e) {
+            showAlert(Alert.AlertType.ERROR, "Filter error: " + e.getMessage());
+        }
     }
 
     /**
@@ -291,18 +400,7 @@ public class AdminDashboardController implements Initializable {
      */
     @FXML
     private void handleSearch() {
-        String searchTerm = searchField.getText().trim();
-
-        try {
-            List<User> users = userService.searchUsers(searchTerm);
-            usersList.clear();
-            // Filter out ADMIN users
-            usersList.addAll(users.stream()
-                    .toList());
-        } catch (SQLException e) {
-            showAlert(Alert.AlertType.ERROR, "Search error: " + e.getMessage());
-            e.printStackTrace();
-        }
+        applyFilters();
     }
 
     /**
