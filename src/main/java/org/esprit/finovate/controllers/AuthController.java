@@ -18,6 +18,9 @@ import org.esprit.finovate.services.IUserService;
 import org.esprit.finovate.services.UserService;
 import org.esprit.finovate.utils.Session;
 import org.esprit.finovate.utils.RememberMeService;
+import org.esprit.finovate.utils.CaptchaService;
+import javafx.scene.image.ImageView;
+import javafx.scene.image.Image;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -93,6 +96,18 @@ public class AuthController {
     @FXML
     private Hyperlink loginLink;
 
+    // Captcha FXML fields
+    @FXML
+    private ImageView captchaImageView;
+
+    @FXML
+    private Button refreshCaptchaButton;
+
+    @FXML
+    private TextField captchaField;
+
+    private CaptchaService captchaService;
+
     // Forgot Password FXML fields
     @FXML
     private TextField resetEmailField;
@@ -130,10 +145,16 @@ public class AuthController {
     public AuthController() {
         this.userService = new UserService();
         this.emailService = new EmailService();
+        this.captchaService = new CaptchaService();
     }
 
     @FXML
     public void initialize() {
+        // Initialize captcha on register page
+        if (captchaImageView != null && captchaService != null) {
+            refreshCaptcha();
+        }
+
         if (usernameField != null && passwordField != null && rememberMeCheckbox != null) {
             if (RememberMeService.isRememberMeEnabled()) {
                 String savedUser = RememberMeService.getSavedUsername();
@@ -478,6 +499,21 @@ public class AuthController {
             return;
         }
 
+        // Captcha validation
+        String captchaInput = captchaField != null ? captchaField.getText().trim() : "";
+        if (captchaInput.isEmpty()) {
+            showRegisterError("Please enter the verification code");
+            return;
+        }
+        if (!captchaService.verify(captchaInput)) {
+            showRegisterError("Invalid verification code. Please try again.");
+            refreshCaptcha();
+            if (captchaField != null) {
+                captchaField.clear();
+            }
+            return;
+        }
+
         try {
             Date birthdate = Date.from(birthdatePicker.getValue()
                     .atStartOfDay(ZoneId.systemDefault()).toInstant());
@@ -502,6 +538,25 @@ public class AuthController {
     @FXML
     private void handleRegisterLink() {
         navigateToPage("/Register.fxml", "Register - Finovate");
+    }
+
+    /**
+     * Refresh captcha image
+     */
+    @FXML
+    private void handleRefreshCaptcha() {
+        refreshCaptcha();
+        if (captchaField != null) {
+            captchaField.clear();
+        }
+    }
+
+    private void refreshCaptcha() {
+        if (captchaService != null && captchaImageView != null) {
+            captchaService.generateNewCaptcha();
+            Image captchaImage = captchaService.generateCaptchaImage();
+            captchaImageView.setImage(captchaImage);
+        }
     }
 
     /**

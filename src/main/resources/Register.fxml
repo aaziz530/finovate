@@ -149,6 +149,27 @@
                      </VBox.margin>
                   </HBox>
                   
+                  <!-- Captcha -->
+                  <VBox spacing="8.0">
+                     <children>
+                        <Label text="Verification" textFill="#495057">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                           <children>
+                              <javafx.scene.image.ImageView fx:id="captchaImageView" fitHeight="60.0" fitWidth="200.0" pickOnBounds="true" preserveRatio="true" style="-fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 5, 0, 0, 1);" />
+                              <Button fx:id="refreshCaptchaButton" mnemonicParsing="false" onAction="#handleRefreshCaptcha" style="-fx-background-color: transparent; -fx-text-fill: #237f4e; -fx-cursor: hand; -fx-font-size: 18px;" text="🔄" />
+                           </children>
+                        </HBox>
+                        <TextField fx:id="captchaField" promptText="Enter the code from image" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10;" />
+                     </children>
+                     <VBox.margin>
+                        <Insets bottom="10.0" />
+                     </VBox.margin>
+                  </VBox>
+                  
                   <!-- Error Label -->
                   <Label fx:id="registerErrorLabel" textFill="#dc3545" wrapText="true">
                      <font>
