@@ -91,6 +91,9 @@ public class AdminDashboardController implements Initializable {
     private TableColumn<User, String> cinColumn;
 
     @FXML
+    private TableColumn<User, String> phoneColumn;
+
+    @FXML
     private TableColumn<User, Long> numeroCarteColumn;
 
     @FXML
@@ -120,6 +123,9 @@ public class AdminDashboardController implements Initializable {
 
     @FXML
     private TextField updateCinNumberField;
+
+    @FXML
+    private TextField updatePhoneField;
 
     @FXML
     private TextField updateNumeroCarteField;
@@ -363,6 +369,7 @@ public class AdminDashboardController implements Initializable {
         pointsColumn.setCellValueFactory(new PropertyValueFactory<>("points"));
         soldeColumn.setCellValueFactory(new PropertyValueFactory<>("solde"));
         cinColumn.setCellValueFactory(new PropertyValueFactory<>("cinNumber"));
+        phoneColumn.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
         numeroCarteColumn.setCellValueFactory(new PropertyValueFactory<>("numeroCarte"));
 
         // Format createdAt column
@@ -497,6 +504,8 @@ public class AdminDashboardController implements Initializable {
             updateSoldeField.setText(String.valueOf(user.getSolde()));
         if (updateCinNumberField != null)
             updateCinNumberField.setText(user.getCinNumber());
+        if (updatePhoneField != null)
+            updatePhoneField.setText(String.valueOf(user.getPhoneNumber()));
         if (updateNumeroCarteField != null)
             updateNumeroCarteField.setText(user.getNumeroCarte() != null ? String.valueOf(user.getNumeroCarte()) : "");
 
@@ -563,6 +572,24 @@ public class AdminDashboardController implements Initializable {
                 return;
             }
 
+            // Phone number validation
+            String phoneRaw = updatePhoneField != null ? updatePhoneField.getText().trim() : "";
+            if (phoneRaw.isEmpty()) {
+                showUpdateError("Phone number is required");
+                return;
+            }
+            if (!phoneRaw.matches("\\d{8}")) {
+                showUpdateError("Phone number must be exactly 8 digits");
+                return;
+            }
+            int editedPhone;
+            try {
+                editedPhone = Integer.parseInt(phoneRaw);
+            } catch (NumberFormatException e) {
+                showUpdateError("Phone number must be a valid 8-digit number");
+                return;
+            }
+
             String cardNumberRaw = updateNumeroCarteField.getText() == null ? "" : updateNumeroCarteField.getText().trim();
             if (cardNumberRaw.isEmpty()) {
                 showUpdateError("Card number is required and must be exactly 16 digits");
@@ -588,6 +615,13 @@ public class AdminDashboardController implements Initializable {
             selectedUserForUpdate.setEmail(email);
             selectedUserForUpdate.setRole(updateRoleComboBox.getValue());
             selectedUserForUpdate.setCinNumber(updateCinNumberField.getText().trim());
+
+            // Check phone uniqueness for other users
+            if (userService.phoneExistsForOtherUser(editedPhone, selectedUserForUpdate.getId())) {
+                showUpdateError("Phone number already exists for another user");
+                return;
+            }
+            selectedUserForUpdate.setPhoneNumber(editedPhone);
             selectedUserForUpdate.setNumeroCarte(cardNumber);
 
             try {

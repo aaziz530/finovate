@@ -36,10 +36,10 @@ public class UserService implements IUserService {
         return null;
     }
 
-    public User registerGoogleUser(String email, String firstName, String lastName, Date birthdate, String cinNumber)
+    public User registerGoogleUser(String email, String firstName, String lastName, Date birthdate, String cinNumber, String phoneNumber)
             throws SQLException {
         String randomPassword = generateRandomPassword();
-        return register(email, randomPassword, firstName, lastName, birthdate, cinNumber);
+        return register(email, randomPassword, firstName, lastName, birthdate, cinNumber, phoneNumber);
     }
 
     private String generateRandomPassword() {
@@ -84,9 +84,14 @@ public class UserService implements IUserService {
 
     @Override
     public User register(String email, String password, String firstName, String lastName, Date birthdate,
-            String cinNumber)
+            String cinNumber, String phoneNumber)
             throws SQLException {
-        User user = new User(email, password, firstName, lastName, birthdate, cinNumber);
+        int phone = 0;
+        if (phoneNumber != null && !phoneNumber.trim().isEmpty()) {
+            phone = Integer.parseInt(phoneNumber.trim());
+        }
+
+        User user = new User(email, password, firstName, lastName, birthdate, cinNumber, phone);
         user.setPassword(PasswordUtils.sha256(password));
 
         if (connection == null) {
@@ -101,7 +106,7 @@ public class UserService implements IUserService {
             throw new IllegalStateException("CIN already exists");
         }
 
-        String sql = "INSERT INTO `user` (email, password, firstname, lastname, role, points, createdAt, solde, numeroCarte, birthdate, cin) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO `user` (email, password, firstname, lastname, role, points, createdAt, solde, numeroCarte, birthdate, cin, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getPassword());
@@ -123,6 +128,7 @@ public class UserService implements IUserService {
                 ps.setDate(10, new java.sql.Date(user.getBirthdate().getTime()));
 
             ps.setString(11, user.getCinNumber());
+            ps.setInt(12, user.getPhoneNumber());
 
             ps.executeUpdate();
 
@@ -164,6 +170,35 @@ public class UserService implements IUserService {
         }
     }
 
+    @Override
+    public boolean phoneExists(int phone) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+        String sql = "SELECT 1 FROM `user` WHERE phone_number=?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, phone);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
+    @Override
+    public boolean phoneExistsForOtherUser(int phone, Long excludeUserId) throws SQLException {
+        if (connection == null) {
+            throw new SQLException("Database connection is null");
+        }
+        String sql = "SELECT 1 FROM `user` WHERE phone_number=? AND id != ?";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, phone);
+            ps.setLong(2, excludeUserId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
         User u = new User();
         u.setId(rs.getLong("id"));
@@ -181,6 +216,7 @@ public class UserService implements IUserService {
 
         u.setBirthdate(rs.getDate("birthdate"));
         u.setCinNumber(rs.getString("cin"));
+        u.setPhoneNumber(rs.getInt("phone_number"));
         return u;
     }
 
@@ -232,7 +268,7 @@ public class UserService implements IUserService {
             throw new IllegalArgumentException("User ID cannot be null for update");
         }
 
-        String sql = "UPDATE `user` SET email=?, firstname=?, lastname=?, role=?, points=?, solde=?, birthdate=?, cin=?, numeroCarte=? WHERE id=?";
+        String sql = "UPDATE `user` SET email=?, firstname=?, lastname=?, role=?, points=?, solde=?, birthdate=?, cin=?, numeroCarte=?, phone_number=? WHERE id=?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getEmail());
@@ -256,7 +292,8 @@ public class UserService implements IUserService {
                 ps.setLong(9, user.getNumeroCarte());
             }
 
-            ps.setLong(10, user.getId());
+            ps.setInt(10, user.getPhoneNumber());
+            ps.setLong(11, user.getId());
 
             int rowsAffected = ps.executeUpdate();
             if (rowsAffected == 0) {

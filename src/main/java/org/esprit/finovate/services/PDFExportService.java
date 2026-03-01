@@ -158,12 +158,12 @@ public class PDFExportService {
 
     private void addUsersTable(Document document, List<User> users, PdfFont boldFont, PdfFont regularFont) {
         // Table header
-        float[] columnWidths = {5, 15, 15, 25, 15, 15, 10};
+        float[] columnWidths = {5, 12, 12, 22, 12, 12, 12, 13};
         Table table = new Table(UnitValue.createPercentArray(columnWidths));
         table.setWidth(UnitValue.createPercentValue(100));
 
         // Header row
-        String[] headers = {"#", "First Name", "Last Name", "Email", "CIN", "Birthdate", "Role"};
+        String[] headers = {"#", "First Name", "Last Name", "Email", "CIN", "Phone", "Birthdate", "Role"};
         for (String header : headers) {
             Cell cell = new Cell();
             cell.setBackgroundColor(HEADER_BG_COLOR);
@@ -195,6 +195,7 @@ public class PDFExportService {
             addTableCell(table, user.getLastName() != null ? user.getLastName() : "-", regularFont, alternate, TextAlignment.LEFT);
             addTableCell(table, user.getEmail() != null ? user.getEmail() : "-", regularFont, alternate, TextAlignment.LEFT);
             addTableCell(table, user.getCinNumber() != null ? user.getCinNumber() : "-", regularFont, alternate, TextAlignment.CENTER);
+            addTableCell(table, String.valueOf(user.getPhoneNumber()), regularFont, alternate, TextAlignment.CENTER);
             addTableCell(table, user.getBirthdate() != null ? dateFormat.format(user.getBirthdate()) : "-", regularFont, alternate, TextAlignment.CENTER);
             addTableCell(table, user.getRole() != null ? user.getRole() : "USER", regularFont, alternate, TextAlignment.CENTER);
         }

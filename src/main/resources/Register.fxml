@@ -117,6 +117,20 @@
                      </VBox.margin>
                   </VBox>
       
+                  <!-- Phone Number -->
+                  <VBox spacing="5.0">
+                     <children>
+                        <Label text="Phone Number" textFill="#495057">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <TextField fx:id="phoneField" promptText="Enter your phone number" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 10;" />
+                     </children>
+                     <VBox.margin>
+                        <Insets bottom="10.0" />
+                     </VBox.margin>
+                  </VBox>
 
                   
                   <!-- Password & Confirm Password Row -->

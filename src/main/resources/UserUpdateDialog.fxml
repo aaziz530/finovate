@@ -100,6 +100,21 @@
             <Insets bottom="15.0" />
          </VBox.margin>
       </VBox>
+
+      <!-- Phone Number -->
+      <VBox spacing="8.0">
+         <children>
+            <Label text="Phone Number" textFill="#495057">
+               <font>
+                  <Font name="System Bold" size="13.0" />
+               </font>
+            </Label>
+            <TextField fx:id="updatePhoneField" promptText="Phone number" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10;" />
+         </children>
+         <VBox.margin>
+            <Insets bottom="15.0" />
+         </VBox.margin>
+      </VBox>
       
       <!-- Birthdate -->
       <VBox spacing="8.0">

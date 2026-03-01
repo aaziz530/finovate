@@ -54,6 +54,8 @@ public class UserProfileController implements Initializable {
     @FXML
     private TextField numeroCarteField;
     @FXML
+    private TextField phoneField;
+    @FXML
     private DatePicker birthDatePicker;
     @FXML
     private Label errorLabel;
@@ -113,6 +115,7 @@ public class UserProfileController implements Initializable {
 
             cinField.setText(user.getCinNumber());
             numeroCarteField.setText(user.getNumeroCarte().toString());
+            phoneField.setText(String.valueOf(user.getPhoneNumber()));
 
             if (user.getBirthdate() != null) {
                 // Wrap in java.util.Date to avoid UnsupportedOperationException from
@@ -130,6 +133,8 @@ public class UserProfileController implements Initializable {
         String firstName = firstNameField.getText().trim();
         String lastName = lastNameField.getText().trim();
         String email = emailField.getText() != null ? emailField.getText().trim() : "";
+        String phoneRaw = phoneField != null && phoneField.getText() != null ? phoneField.getText().trim() : "";
+
         LocalDate birthDateLocal = birthDatePicker.getValue();
 
         String oldPwd = oldPasswordField.isVisible() ? oldPasswordField.getText() : oldPasswordTextField.getText();
@@ -157,6 +162,15 @@ public class UserProfileController implements Initializable {
             return;
         }
 
+        if (phoneRaw.isEmpty()) {
+            showError("Phone number is required.");
+            return;
+        }
+        if (!phoneRaw.matches("\\d{8}")) {
+            showError("Phone number must be exactly 8 digits.");
+            return;
+        }
+
         int age = Period.between(birthDateLocal, LocalDate.now()).getYears();
         if (age < 18) {
             showError("You must be at least 18 years old.");
@@ -165,6 +179,7 @@ public class UserProfileController implements Initializable {
 
         try {
             User user = Session.currentUser;
+
             if (user == null) {
                 showError("No user in session.");
                 return;
@@ -209,6 +224,14 @@ public class UserProfileController implements Initializable {
             user.setFirstName(firstName);
             user.setLastName(lastName);
             user.setBirthdate(Date.from(birthDateLocal.atStartOfDay(ZoneId.systemDefault()).toInstant()));
+
+            // Update phone number - check uniqueness for other users
+            int phone = Integer.parseInt(phoneRaw);
+            if (userService.phoneExistsForOtherUser(phone, user.getId())) {
+                showError("Phone number already exists for another user.");
+                return;
+            }
+            user.setPhoneNumber(phone);
 
             userService.updateUser(user);
 

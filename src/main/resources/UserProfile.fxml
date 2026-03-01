@@ -110,15 +110,20 @@
                       </Label>
                       <TextField fx:id="cinField" editable="false" style="-fx-background-color: #e9ecef; -fx-border-color: #dee2e6; -fx-text-fill: #32325d;" GridPane.columnIndex="1" GridPane.rowIndex="6" />
                       
-                      <Label text="Card Number:" textFill="#525f7f" GridPane.rowIndex="7">
+                      <Label text="Phone Number:" textFill="#525f7f" GridPane.rowIndex="7">
                          <font><Font name="System Bold" size="14.0" /></font>
                       </Label>
-                      <TextField fx:id="numeroCarteField" editable="false" style="-fx-background-color: #e9ecef; -fx-border-color: #dee2e6; -fx-text-fill: #32325d;" GridPane.columnIndex="1" GridPane.rowIndex="7" />
+                      <TextField fx:id="phoneField" promptText="Enter your phone number" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-text-fill: #32325d;" GridPane.columnIndex="1" GridPane.rowIndex="7" />
                       
-                      <Label text="Birth Date:" textFill="#525f7f" GridPane.rowIndex="8">
+                      <Label text="Card Number:" textFill="#525f7f" GridPane.rowIndex="8">
                          <font><Font name="System Bold" size="14.0" /></font>
                       </Label>
-                      <DatePicker fx:id="birthDatePicker" maxWidth="Infinity" style="-fx-background-color: #f8f9fa; -fx-text-fill: #32325d;" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                      <TextField fx:id="numeroCarteField" editable="false" style="-fx-background-color: #e9ecef; -fx-border-color: #dee2e6; -fx-text-fill: #32325d;" GridPane.columnIndex="1" GridPane.rowIndex="8" />
+                      
+                      <Label text="Birth Date:" textFill="#525f7f" GridPane.rowIndex="9">
+                         <font><Font name="System Bold" size="14.0" /></font>
+                      </Label>
+                      <DatePicker fx:id="birthDatePicker" maxWidth="Infinity" style="-fx-background-color: #f8f9fa; -fx-text-fill: #32325d;" GridPane.columnIndex="1" GridPane.rowIndex="9" />
                     </children>
                   </GridPane>
 

@@ -12,12 +12,16 @@ public interface IUserService {
 
     void logout();
 
-    User register(String email, String password, String firstName, String lastName, Date birthdate, String cinNumber)
+    User register(String email, String password, String firstName, String lastName, Date birthdate, String cinNumber, String phoneNumber)
             throws SQLException;
 
     boolean emailExists(String email) throws SQLException;
 
     boolean cinExists(String cin) throws SQLException;
+
+    boolean phoneExists(int phone) throws SQLException;
+
+    boolean phoneExistsForOtherUser(int phone, Long excludeUserId) throws SQLException;
 
     // Admin user management methods
     List<User> getAllUsers() throws SQLException;

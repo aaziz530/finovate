@@ -79,6 +79,9 @@ public class AuthController {
     private TextField cinField;
 
     @FXML
+    private TextField phoneField;
+
+    @FXML
     private PasswordField registerPasswordField;
 
     @FXML
@@ -260,7 +263,7 @@ public class AuthController {
             }
 
             Date birthdate = Date.from(result.birthdate().atStartOfDay(ZoneId.systemDefault()).toInstant());
-            User created = ((UserService) userService).registerGoogleUser(email, result.firstName(), result.lastName(), birthdate, result.cin());
+            User created = ((UserService) userService).registerGoogleUser(email, result.firstName(), result.lastName(), birthdate, result.cin(), result.phone());
 
             if (created != null) {
                 Session.currentUser = created;
@@ -329,7 +332,7 @@ public class AuthController {
             }
 
             Date birthdate = Date.from(result.birthdate().atStartOfDay(ZoneId.systemDefault()).toInstant());
-            User created = ((UserService) userService).registerGoogleUser(email, result.firstName(), result.lastName(), birthdate, result.cin());
+            User created = ((UserService) userService).registerGoogleUser(email, result.firstName(), result.lastName(), birthdate, result.cin(), result.phone());
 
             if (created != null) {
                 Session.currentUser = created;
@@ -499,6 +502,17 @@ public class AuthController {
             return;
         }
 
+        // Phone number validation
+        String phoneNumber = phoneField != null ? phoneField.getText().trim() : "";
+        if (phoneNumber.isEmpty()) {
+            showRegisterError("Phone number is required");
+            return;
+        }
+        if (!phoneNumber.matches("\\d{8}")) {
+            showRegisterError("Phone number must be exactly 8 digits");
+            return;
+        }
+
         // Captcha validation
         String captchaInput = captchaField != null ? captchaField.getText().trim() : "";
         if (captchaInput.isEmpty()) {
@@ -518,7 +532,14 @@ public class AuthController {
             Date birthdate = Date.from(birthdatePicker.getValue()
                     .atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-            User user = userService.register(email, password, firstName, lastName, birthdate, cinNumber);
+            int phone = Integer.parseInt(phoneNumber);
+            
+            if (userService.phoneExists(phone)) {
+                showRegisterError("Phone number already exists");
+                return;
+            }
+            
+            User user = userService.register(email, password, firstName, lastName, birthdate, cinNumber, phoneNumber);
 
             if (user != null) {
                 showSuccessAndNavigateToLogin();

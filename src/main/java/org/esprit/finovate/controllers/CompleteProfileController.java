@@ -23,6 +23,9 @@ public class CompleteProfileController {
     private TextField cinField;
 
     @FXML
+    private TextField phoneField;
+
+    @FXML
     private DatePicker birthdatePicker;
 
     @FXML
@@ -57,9 +60,10 @@ public class CompleteProfileController {
         String firstName = firstNameField == null ? "" : firstNameField.getText().trim();
         String lastName = lastNameField == null ? "" : lastNameField.getText().trim();
         String cin = cinField == null ? "" : cinField.getText().trim();
+        String phone = phoneField == null ? "" : phoneField.getText().trim();
         LocalDate birthdate = birthdatePicker == null ? null : birthdatePicker.getValue();
 
-        if (firstName.isEmpty() || lastName.isEmpty() || cin.isEmpty() || birthdate == null) {
+        if (firstName.isEmpty() || lastName.isEmpty() || cin.isEmpty() || birthdate == null || phone.isEmpty()) {
             showError("All fields are required.");
             return;
         }
@@ -80,13 +84,23 @@ public class CompleteProfileController {
             return;
         }
 
+        if (!phone.matches("\\d{8}")) {
+            showError("Phone number must be exactly 8 digits.");
+            return;
+        }
+
         try {
             if (userService.cinExists(cin)) {
                 showError("This CIN is already registered.");
                 return;
             }
+            int phoneInt = Integer.parseInt(phone);
+            if (userService.phoneExists(phoneInt)) {
+                showError("This phone number is already registered.");
+                return;
+            }
         } catch (java.sql.SQLException e) {
-            showError("Database error checking CIN: " + e.getMessage());
+            showError("Database error: " + e.getMessage());
             return;
         }
 
@@ -96,7 +110,7 @@ public class CompleteProfileController {
             return;
         }
 
-        result = new CompleteProfileResult(firstName, lastName, cin, birthdate);
+        result = new CompleteProfileResult(firstName, lastName, cin, phone, birthdate);
         close();
     }
 
@@ -131,6 +145,6 @@ public class CompleteProfileController {
         }
     }
 
-    public record CompleteProfileResult(String firstName, String lastName, String cin, LocalDate birthdate) {
+    public record CompleteProfileResult(String firstName, String lastName, String cin, String phone, LocalDate birthdate) {
     }
 }
