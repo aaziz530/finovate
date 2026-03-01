@@ -16,10 +16,34 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
+    public float getDailyTransferTotal(int userId) throws SQLException {
+        String sql = "SELECT SUM(amount) as total FROM transaction " +
+                     "WHERE senderId = ? AND type = 'TRANSFER' " +
+                     "AND DATE(date) = CURDATE()";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, userId);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getFloat("total");
+                }
+            }
+        }
+        return 0;
+    }
+
+    @Override
     public void transferMoney(int senderId, Long numeroCarte, String cin, float amount, String description)
             throws SQLException {
         if (amount <= 0) {
             throw new SQLException("Amount must be positive");
+        }
+
+        // Daily limit check (3000 TND)
+        float dailyTotal = getDailyTransferTotal(senderId);
+        if (dailyTotal + amount > 3000) {
+            throw new SQLException(String.format(
+                "Limite quotidienne dépassée. Vous avez déjà transféré %.3f TND aujourd'hui. " +
+                "Le maximum autorisé est de 3000 TND par jour.", dailyTotal));
         }
 
         // Data for SMS notification

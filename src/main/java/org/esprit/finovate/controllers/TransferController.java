@@ -132,5 +132,6 @@ public class TransferController implements Initializable {
     private void showError(String message) {
         errorLabel.setText(message);
         errorLabel.setVisible(true);
+        errorLabel.setStyle("-fx-text-fill: #dc3545; -fx-font-weight: bold;");
     }
 }
