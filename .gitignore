@@ -5,6 +5,9 @@ target/
 
 .env
 
+# Ne pas versionner la config IA
+src/main/java/org/esprit/finovate/config/AIConfig.java
+
 ### IntelliJ IDEA ###
 .idea/modules.xml
 .idea/jarRepositories.xml
