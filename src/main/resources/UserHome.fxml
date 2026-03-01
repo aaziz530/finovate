@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<ScrollPane fitToWidth="true" style="-fx-background: #f7f9fc; -fx-background-color: #f7f9fc; -fx-border-color: transparent;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.esprit.finovate.controllers.UserHomeController">
+   <content>
+      <VBox spacing="25.0" style="-fx-background-color: #f7f9fc;">
+         <padding>
+            <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+         </padding>
+         <children>
+            <VBox>
+               <children>
+                  <Label fx:id="welcomeLabel" text="Welcome back, User!" textFill="#32325d">
+                     <font>
+                        <Font name="System Bold" size="28.0" />
+                     </font>
+                  </Label>
+                  <Label text="Here is what's happening with your money today." textFill="#8898aa">
+                     <font>
+                        <Font size="16.0" />
+                     </font>
+                  </Label>
+               </children>
+            </VBox>
+            
+            <HBox spacing="20.0">
+               <children>
+                  <!-- Balance Card -->
+                  <VBox HBox.hgrow="ALWAYS" maxWidth="300.0" style="-fx-background-color: #237f4e; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(35,127,78,0.3), 10, 0, 0, 4);">
+                     <children>
+                        <Label text="Total Balance" textFill="white" opacity="0.8">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="balanceLabel" text="0.00 TND" textFill="white">
+                           <font>
+                              <Font name="System Bold" size="32.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+                  
+                  <!-- Points Card -->
+                  <VBox HBox.hgrow="ALWAYS" maxWidth="300.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);">
+                     <children>
+                        <Label text="FinoPoints" textFill="#8898aa">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="pointsLabel" text="0 pts" textFill="#f5365c">
+                           <font>
+                              <Font name="System Bold" size="32.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+                  
+                  <!-- Active Goals Count Card -->
+                  <VBox HBox.hgrow="ALWAYS" maxWidth="300.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);">
+                     <children>
+                        <Label text="Active Goals" textFill="#8898aa">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                        </Label>
+                        <Label fx:id="goalsCountLabel" text="0" textFill="#11cdef">
+                           <font>
+                              <Font name="System Bold" size="32.0" />
+                           </font>
+                        </Label>
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+
+            <HBox spacing="30.0" VBox.vgrow="ALWAYS">
+               <children>
+                  <!-- Recent Transactions -->
+                  <VBox minWidth="400.0" spacing="15.0" HBox.hgrow="ALWAYS" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);">
+                     <children>
+                        <Label text="Recent Transactions" textFill="#32325d">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                        </Label>
+                        <ListView fx:id="recentTransactionsList" minHeight="300.0" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-border-color: transparent;" />
+                     </children>
+                  </VBox>
+                  
+                  <!-- Featured Goal -->
+                  <VBox maxWidth="320.0" prefWidth="320.0" spacing="20.0" style="-fx-background-color: white; -fx-background-radius: 15; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.05), 10, 0, 0, 2);">
+                     <children>
+                        <Label text="Goal Progress" textFill="#32325d">
+                           <font>
+                              <Font name="System Bold" size="18.0" />
+                           </font>
+                        </Label>
+                        
+                        <VBox fx:id="featuredGoalContainer" spacing="15.0">
+                            <children>
+                                <Label fx:id="featuredGoalTitle" text="No active goals" textFill="#525f7f">
+                                   <font>
+                                      <Font name="System Bold" size="14.0" />
+                                   </font>
+                                </Label>
+                                <ProgressBar fx:id="featuredGoalProgress" maxWidth="Infinity" progress="0.0" style="-fx-accent: #237f4e;" />
+                                <Label fx:id="featuredGoalAmount" text="0 / 0 TND" textFill="#8898aa" />
+                            </children>
+                        </VBox>
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </content>
+</ScrollPane>
