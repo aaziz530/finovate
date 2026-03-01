@@ -1,9 +1,14 @@
 package org.esprit.finovate.controllers;
 
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.HBox;
+import javafx.scene.text.Font;
 import org.esprit.finovate.entities.Goal;
 import org.esprit.finovate.entities.Transaction;
 import org.esprit.finovate.services.*;
@@ -34,9 +39,16 @@ public class UserHomeController implements Initializable {
     private Label featuredGoalAmount;
     @FXML
     private VBox featuredGoalContainer;
+    @FXML
+    private Button aiAdviceButton;
+    @FXML
+    private VBox aiAdvicePopup;
+    @FXML
+    private Label aiAdviceLabel;
 
     private final ITransactionService transactionService = new TransactionService();
     private final IGoalService goalService = new GoalService();
+    private final FinancialAdviceService financialAdviceService = new FinancialAdviceService();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -83,5 +95,48 @@ public class UserHomeController implements Initializable {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    @FXML
+    private void handleAiAdvice() {
+        if (aiAdvicePopup.isVisible()) {
+            closeAiPopup();
+            return;
+        }
+
+        // Reset and show popup with loading state
+        aiAdviceLabel.setText("🤖 Réflexion en cours...");
+        aiAdviceLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #718096; -fx-font-style: italic;");
+        aiAdvicePopup.setVisible(true);
+        aiAdvicePopup.setManaged(true);
+
+        // Async task to generate advice
+        Task<String> adviceTask = new Task<>() {
+            @Override
+            protected String call() {
+                return financialAdviceService.generateAdvice();
+            }
+        };
+
+        adviceTask.setOnSucceeded(e -> {
+            String advice = adviceTask.getValue();
+            aiAdviceLabel.setText(advice);
+            aiAdviceLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #2d3748; -fx-font-style: normal;");
+        });
+
+        adviceTask.setOnFailed(e -> {
+            aiAdviceLabel.setText("⚠️ Désolé, je n'ai pas pu générer de conseil pour le moment.");
+            aiAdviceLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: #e53e3e; -fx-font-style: normal;");
+        });
+
+        Thread thread = new Thread(adviceTask);
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    @FXML
+    private void closeAiPopup() {
+        aiAdvicePopup.setVisible(false);
+        aiAdvicePopup.setManaged(false);
     }
 }
