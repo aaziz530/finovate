@@ -3,6 +3,7 @@ package org.esprit.finovate.services;
 import org.esprit.finovate.entities.Transaction;
 import org.esprit.finovate.utils.MyDataBase;
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,18 +22,28 @@ public class TransactionService implements ITransactionService {
             throw new SQLException("Amount must be positive");
         }
 
+        // Data for SMS notification
+        String receiverFirstName = null;
+        String receiverLastName = null;
+        int receiverPhone = 0;
+        String senderFirstName = null;
+        String senderLastName = null;
+
         try {
             connection.setAutoCommit(false);
 
-            // 1. Get Receiver ID
+            // 1. Get Receiver ID, name, and phone number
             int receiverId = -1;
-            String getReceiverSql = "SELECT id FROM user WHERE numeroCarte = ? AND cin = ?";
+            String getReceiverSql = "SELECT id, firstname, lastname, phone_number FROM user WHERE numeroCarte = ? AND cin = ?";
             try (PreparedStatement pstReceiver = connection.prepareStatement(getReceiverSql)) {
                 pstReceiver.setLong(1, numeroCarte);
                 pstReceiver.setString(2, cin);
                 try (ResultSet rs = pstReceiver.executeQuery()) {
                     if (rs.next()) {
                         receiverId = rs.getInt("id");
+                        receiverFirstName = rs.getString("firstname");
+                        receiverLastName = rs.getString("lastname");
+                        receiverPhone = rs.getInt("phone_number");
                     } else {
                         throw new SQLException("Receiver not found with specified Card Number and CIN.");
                     }
@@ -41,6 +52,18 @@ public class TransactionService implements ITransactionService {
 
             if (senderId == receiverId) {
                 throw new SQLException("You cannot transfer money to yourself");
+            }
+
+            // 1b. Get Sender name
+            String getSenderSql = "SELECT firstname, lastname FROM user WHERE id = ?";
+            try (PreparedStatement pstSender = connection.prepareStatement(getSenderSql)) {
+                pstSender.setInt(1, senderId);
+                try (ResultSet rs = pstSender.executeQuery()) {
+                    if (rs.next()) {
+                        senderFirstName = rs.getString("firstname");
+                        senderLastName = rs.getString("lastname");
+                    }
+                }
             }
 
             // 2. Check Sender Balance
@@ -77,6 +100,19 @@ public class TransactionService implements ITransactionService {
             }
 
             connection.commit();
+
+            // 6. Send SMS notification to receiver (after successful commit)
+            if (receiverPhone > 0 && receiverFirstName != null && senderFirstName != null) {
+                String receiverName = receiverFirstName + " " + receiverLastName;
+                String senderName = senderFirstName + " " + senderLastName;
+                TwilioSmsService.getInstance().sendTransferNotification(
+                        receiverName,
+                        receiverPhone,
+                        amount,
+                        senderName,
+                        LocalDateTime.now()
+                );
+            }
 
         } catch (SQLException e) {
             connection.rollback();
