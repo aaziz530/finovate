@@ -23,9 +23,49 @@ public class GoalDialogController {
     @FXML
     private Button cancelButton;
 
+    @FXML
+    private Label suggestedLabel;
+
     // Result
     private Goal createdGoal;
     public boolean saveClicked = false;
+
+    @FXML
+    public void initialize() {
+        // Ajouter des écouteurs pour mettre à jour la suggestion en temps réel
+        amountField.textProperty().addListener((obs, oldVal, newVal) -> updateSuggestion());
+        deadlinePicker.valueProperty().addListener((obs, oldVal, newVal) -> updateSuggestion());
+    }
+
+    private void updateSuggestion() {
+        try {
+            String amountStr = amountField.getText().trim();
+            LocalDate deadlineDate = deadlinePicker.getValue();
+
+            if (!amountStr.isEmpty() && deadlineDate != null) {
+                float targetAmount = Float.parseFloat(amountStr);
+                Date deadline = Date.from(deadlineDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                
+                // Calcul temporaire pour l'affichage
+                Goal tempGoal = new Goal();
+                tempGoal.setTargetAmount(targetAmount);
+                tempGoal.setCurrentAmount(createdGoal != null ? createdGoal.getCurrentAmount() : 0);
+                tempGoal.setDeadline(deadline);
+                
+                float suggested = tempGoal.getSuggestedMonthlySaving();
+                if (suggested > 0) {
+                    suggestedLabel.setText(String.format("Suggested: %.2f TND / month", suggested));
+                    suggestedLabel.setVisible(true);
+                } else {
+                    suggestedLabel.setVisible(false);
+                }
+            } else {
+                suggestedLabel.setVisible(false);
+            }
+        } catch (Exception e) {
+            suggestedLabel.setVisible(false);
+        }
+    }
 
     public void setGoal(Goal goal) {
         this.createdGoal = goal;

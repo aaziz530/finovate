@@ -107,9 +107,17 @@ public class GoalsController implements Initializable {
         amounts.setStyle("-fx-font-weight: bold; -fx-text-fill: #525f7f;");
 
         // Deadline
-        Label deadline = new Label(
+        Label deadlineLabel = new Label(
                 "Deadline: " + (goal.getDeadline() != null ? goal.getDeadline().toString() : "None"));
-        deadline.setStyle("-fx-font-size: 11px; -fx-text-fill: #8898aa;");
+        deadlineLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #8898aa;");
+
+        // Suggested Saving
+        float suggestedSaving = goal.getSuggestedMonthlySaving();
+        Label suggestedLabel = new Label();
+        if (suggestedSaving > 0 && !"Achieved".equalsIgnoreCase(goal.getStatus())) {
+            suggestedLabel.setText(String.format("Suggested monthly saving: %.2f TND", suggestedSaving));
+            suggestedLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #237f4e; -fx-font-weight: bold;");
+        }
 
         // Actions
         Button addFundsBtn = new Button("+ Add Funds");
@@ -132,7 +140,7 @@ public class GoalsController implements Initializable {
         HBox bottomActions = new HBox(10, editBtn, deleteBtn);
         bottomActions.setAlignment(Pos.CENTER_RIGHT);
 
-        card.getChildren().addAll(header, amounts, progressInfo, progressText, deadline, actions, bottomActions);
+        card.getChildren().addAll(header, amounts, progressInfo, progressText, deadlineLabel, suggestedLabel, actions, bottomActions);
         return card;
     }
 

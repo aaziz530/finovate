@@ -106,4 +106,29 @@ public class Goal {
             return 0;
         return Math.min(1.0f, currentAmount / targetAmount);
     }
+
+    /**
+     * Calcule le montant mensuel suggéré à épargner pour atteindre l'objectif.
+     * @return montant suggéré par mois, ou 0 si deadline passée ou déjà atteint
+     */
+    public float getSuggestedMonthlySaving() {
+        if (targetAmount <= currentAmount || deadline == null) {
+            return 0;
+        }
+
+        long diffInMillies = deadline.getTime() - System.currentTimeMillis();
+        if (diffInMillies <= 0) {
+            return targetAmount - currentAmount; // Doit être fait immédiatement
+        }
+
+        // Convertir en mois (approximatif : 30.44 jours par mois)
+        double diffInDays = diffInMillies / (1000.0 * 60 * 60 * 24);
+        double diffInMonths = diffInDays / 30.44;
+
+        if (diffInMonths < 1) {
+            return targetAmount - currentAmount; // Moins d'un mois restant
+        }
+
+        return (float) ((targetAmount - currentAmount) / diffInMonths);
+    }
 }
