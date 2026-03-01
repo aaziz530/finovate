@@ -2,7 +2,7 @@ package org.esprit.finovate.services;
 
 import org.esprit.finovate.entities.Forum;
 import org.esprit.finovate.entities.User;
-import org.esprit.finovate.utils.Databaseconnection;
+import org.esprit.finovate.utils.DatabaseConfig;
 import org.esprit.finovate.utils.ValidationUtils;
 
 import java.sql.*;
@@ -23,7 +23,7 @@ public class ForumService {
 
         String query = "INSERT INTO forums (title, description, creator_id, created_at) VALUES (?, ?, ?, ?)";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, ValidationUtils.sanitize(forum.getTitle()));
@@ -47,7 +47,7 @@ public class ForumService {
         List<Forum> forums = new ArrayList<>();
         String query = "SELECT * FROM forums ORDER BY created_at DESC";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(query)) {
 
@@ -61,7 +61,7 @@ public class ForumService {
     // READ - by ID
     public Forum getForumById(Long id) throws SQLException {
         String query = "SELECT * FROM forums WHERE id = ?";
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setLong(1, id);
@@ -82,7 +82,7 @@ public class ForumService {
             throw new SecurityException("Vous ne pouvez modifier que vos forums");
 
         String query = "UPDATE forums SET title = ?, description = ? WHERE id = ?";
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setString(1, ValidationUtils.sanitize(forum.getTitle()));
@@ -102,7 +102,7 @@ public class ForumService {
             throw new SecurityException("Vous ne pouvez supprimer que vos forums");
 
         String query = "DELETE FROM forums WHERE id = ?";
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setLong(1, forumId);

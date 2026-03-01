@@ -1,7 +1,7 @@
 package org.esprit.finovate.services;
 
 import org.esprit.finovate.entities.Vote;
-import org.esprit.finovate.utils.Databaseconnection;
+import org.esprit.finovate.utils.DatabaseConfig;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ public class VoteService {
     private boolean createVote(Vote vote) throws SQLException {
         String query = "INSERT INTO votes (post_id, user_id, vote_type) VALUES (?, ?, ?)";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setInt(1, vote.getPostId());
@@ -69,7 +69,7 @@ public class VoteService {
     private boolean updateVote(int voteId, Vote.VoteType newVoteType) throws SQLException {
         String query = "UPDATE votes SET vote_type = ? WHERE id = ?";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setString(1, newVoteType.name());
@@ -85,7 +85,7 @@ public class VoteService {
     private boolean deleteVote(int voteId) throws SQLException {
         String query = "DELETE FROM votes WHERE id = ?";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, voteId);
@@ -99,7 +99,7 @@ public class VoteService {
     public Vote getVoteByUserAndPost(int userId, int postId) throws SQLException {
         String query = "SELECT * FROM votes WHERE user_id = ? AND post_id = ?";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, userId);
@@ -120,7 +120,7 @@ public class VoteService {
         List<Vote> votes = new ArrayList<>();
         String query = "SELECT * FROM votes WHERE post_id = ?";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, postId);
@@ -142,7 +142,7 @@ public class VoteService {
                 "SUM(CASE WHEN vote_type = 'DOWNVOTE' THEN 1 ELSE 0 END) as downvotes " +
                 "FROM votes WHERE post_id = ?";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, postId);
@@ -163,7 +163,7 @@ public class VoteService {
     public int getUpvoteCount(int postId) throws SQLException {
         String query = "SELECT COUNT(*) as count FROM votes WHERE post_id = ? AND vote_type = 'UPVOTE'";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, postId);
@@ -182,7 +182,7 @@ public class VoteService {
     public int getDownvoteCount(int postId) throws SQLException {
         String query = "SELECT COUNT(*) as count FROM votes WHERE post_id = ? AND vote_type = 'DOWNVOTE'";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, postId);

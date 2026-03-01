@@ -2,7 +2,7 @@ package org.esprit.finovate.services;
 
 import org.esprit.finovate.entities.Post;
 import org.esprit.finovate.entities.User;
-import org.esprit.finovate.utils.Databaseconnection;
+import org.esprit.finovate.utils.DatabaseConfig;
 import org.esprit.finovate.utils.ValidationUtils;
 
 import java.sql.*;
@@ -31,28 +31,28 @@ public class PostService {
             throw new IllegalArgumentException("Contenu invalide (10-5000 caractères)");
         }
 
-        try (Connection conn = Databaseconnection.getConnection()) {
+        try (Connection conn = DatabaseConfig.getConnection()) {
             // VÉRIFICATION DE SÉCURITÉ: L'utilisateur doit avoir créé ou rejoint le forum
             // Utiliser UNION pour combiner les deux sources
             String checkPermissionQuery = "SELECT 1 FROM forums f " +
-                                         "WHERE f.id = ? AND f.creator_id = ? " +
-                                         "UNION " +
-                                         "SELECT 1 FROM forums f " +
-                                         "INNER JOIN user_forum uf ON f.id = uf.forum_id " +
-                                         "WHERE f.id = ? AND uf.user_id = ?";
-            
+                    "WHERE f.id = ? AND f.creator_id = ? " +
+                    "UNION " +
+                    "SELECT 1 FROM forums f " +
+                    "INNER JOIN user_forum uf ON f.id = uf.forum_id " +
+                    "WHERE f.id = ? AND uf.user_id = ?";
+
             try (PreparedStatement checkStmt = conn.prepareStatement(checkPermissionQuery)) {
                 checkStmt.setInt(1, post.getForumId());
                 checkStmt.setInt(2, post.getAuthorId());
                 checkStmt.setInt(3, post.getForumId());
                 checkStmt.setInt(4, post.getAuthorId());
                 ResultSet permRs = checkStmt.executeQuery();
-                
+
                 if (!permRs.next()) {
                     throw new SecurityException("Vous devez être membre du forum pour créer un post");
                 }
             }
-            
+
             // Créer le post
             String query = "INSERT INTO posts (forum_id, title, content, author_id) VALUES (?, ?, ?, ?)";
             try (PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
@@ -68,10 +68,10 @@ public class PostService {
                     if (generatedKeys.next()) {
                         post.setId(generatedKeys.getInt(1));
                     }
-                    
+
                     // Vérifier les badges après création du post
                     org.esprit.finovate.utils.BadgeManager.checkPostBadges(post.getAuthorId());
-                    
+
                     return true;
                 }
                 return false;
@@ -85,7 +85,7 @@ public class PostService {
     public Post getPostById(int id) throws SQLException {
         String query = "SELECT * FROM posts WHERE id = ?";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, id);
@@ -105,7 +105,7 @@ public class PostService {
         List<Post> posts = new ArrayList<>();
         String query = "SELECT * FROM posts WHERE forum_id = ? ORDER BY created_at DESC";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, forumId);
@@ -125,7 +125,7 @@ public class PostService {
         List<Post> posts = new ArrayList<>();
         String query = "SELECT * FROM posts WHERE author_id = ? ORDER BY created_at DESC";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, authorId);
@@ -165,7 +165,7 @@ public class PostService {
 
         String query = "UPDATE posts SET title = ?, content = ? WHERE id = ?";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setString(1, ValidationUtils.sanitize(post.getTitle()));
@@ -190,7 +190,7 @@ public class PostService {
 
         String query = "DELETE FROM posts WHERE id = ?";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, postId);
@@ -204,7 +204,7 @@ public class PostService {
     public int getCommentCount(int postId) throws SQLException {
         String query = "SELECT COUNT(*) as count FROM comments WHERE post_id = ?";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, postId);

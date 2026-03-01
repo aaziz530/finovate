@@ -2,7 +2,7 @@ package org.esprit.finovate.services;
 
 import org.esprit.finovate.entities.Comment;
 import org.esprit.finovate.entities.User;
-import org.esprit.finovate.utils.Databaseconnection;
+import org.esprit.finovate.utils.DatabaseConfig;
 import org.esprit.finovate.utils.ValidationUtils;
 
 import java.sql.*;
@@ -29,7 +29,7 @@ public class CommentService {
 
         String query = "INSERT INTO comments (post_id, author_id, content) VALUES (?, ?, ?)";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setInt(1, comment.getPostId());
@@ -55,7 +55,7 @@ public class CommentService {
     public Comment getCommentById(int id) throws SQLException {
         String query = "SELECT * FROM comments WHERE id = ?";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, id);
@@ -75,7 +75,7 @@ public class CommentService {
         List<Comment> comments = new ArrayList<>();
         String query = "SELECT * FROM comments WHERE post_id = ? ORDER BY created_at ASC";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, postId);
@@ -95,7 +95,7 @@ public class CommentService {
         List<Comment> comments = new ArrayList<>();
         String query = "SELECT * FROM comments WHERE author_id = ? ORDER BY created_at DESC";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, authorId);
@@ -132,7 +132,7 @@ public class CommentService {
 
         String query = "UPDATE comments SET content = ? WHERE id = ?";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setString(1, ValidationUtils.sanitize(comment.getContent()));
@@ -156,7 +156,7 @@ public class CommentService {
 
         String query = "DELETE FROM comments WHERE id = ?";
 
-        try (Connection conn = Databaseconnection.getConnection();
+        try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setInt(1, commentId);
