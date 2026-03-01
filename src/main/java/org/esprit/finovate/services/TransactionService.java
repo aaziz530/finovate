@@ -171,4 +171,17 @@ public class TransactionService implements ITransactionService {
         }
         throw new SQLException("User not found");
     }
+
+    @Override
+    public void logTopUp(int userId, float amount) throws SQLException {
+        String sql = "INSERT INTO transaction (senderId, receiverId, amount, type, description) VALUES (?, ?, ?, ?, ?)";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setInt(1, userId);
+            pst.setNull(2, java.sql.Types.INTEGER);
+            pst.setFloat(3, amount);
+            pst.setString(4, "TOPUP");
+            pst.setString(5, "Alimentation carte via Stripe");
+            pst.executeUpdate();
+        }
+    }
 }

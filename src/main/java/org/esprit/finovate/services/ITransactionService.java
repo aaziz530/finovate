@@ -11,4 +11,6 @@ public interface ITransactionService {
     List<Transaction> getTransactionsByUserId(int userId) throws SQLException;
 
     float getUserBalance(int userId) throws SQLException;
+
+    void logTopUp(int userId, float amount) throws SQLException;
 }

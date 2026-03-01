@@ -36,6 +36,9 @@ public class UserDashboardController implements Initializable {
     private Button btnTransfer;
 
     @FXML
+    private Button btnTopUp;
+
+    @FXML
     private Button btnBills;
 
     @FXML
@@ -79,7 +82,7 @@ public class UserDashboardController implements Initializable {
     }
 
     private void setupHoverEffects() {
-        Button[] buttons = { btnHome, btnGoals, btnTransfer, btnBills, btnForum, btnInvestissement, btnReclamations, btnMarketplace, btnAds, btnChatbot, btnProfile, btnLogout };
+        Button[] buttons = { btnHome, btnGoals, btnTransfer, btnTopUp, btnBills, btnForum, btnInvestissement, btnReclamations, btnMarketplace, btnAds, btnChatbot, btnProfile, btnLogout };
         for (Button btn : buttons) {
             if (btn == null) {
                 continue;
@@ -117,6 +120,12 @@ public class UserDashboardController implements Initializable {
     private void handleTransfer() {
         loadView("/Transfer.fxml");
         updateButtonStyles(btnTransfer);
+    }
+
+    @FXML
+    private void handleTopUp() {
+        loadView("/TopUp.fxml");
+        updateButtonStyles(btnTopUp);
     }
 
     @FXML
@@ -180,7 +189,7 @@ public class UserDashboardController implements Initializable {
 
     private void updateButtonStyles(Button activeBtn) {
         this.activeButton = activeBtn;
-        Button[] buttons = { btnHome, btnGoals, btnTransfer, btnBills, btnForum, btnInvestissement, btnReclamations, btnMarketplace, btnAds, btnChatbot, btnProfile };
+        Button[] buttons = { btnHome, btnGoals, btnTransfer, btnTopUp, btnBills, btnForum, btnInvestissement, btnReclamations, btnMarketplace, btnAds, btnChatbot, btnProfile };
         for (Button btn : buttons) {
             if (btn == null)
                 continue;
