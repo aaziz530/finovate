@@ -77,7 +77,7 @@
                         </padding>
                     </Button>
 
-                    <Button fx:id="btnForum" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="Forum">
+                    <Button fx:id="btnForum" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleForum" style="-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="Forum">
                         <font>
                             <Font size="14.0" />
                         </font>

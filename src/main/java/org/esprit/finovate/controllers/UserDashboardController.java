@@ -126,6 +126,12 @@ public class UserDashboardController implements Initializable {
     }
 
     @FXML
+    private void handleForum() {
+        loadView("/forums-page.fxml");
+        updateButtonStyles(btnForum);
+    }
+
+    @FXML
     private void handleProfile() {
         loadView("/UserProfile.fxml");
         updateButtonStyles(btnProfile);

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.esprit.finovate.controllers.BadgesViewController"
+      spacing="20" style="-fx-background-color: #F8F9FA; -fx-padding: 25;">
+
+    <!-- Titre -->
+    <Label text="🏆 Mes Badges" 
+           style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #1A1A1B;"/>
+
+    <!-- Statistiques - Juste le total -->
+    <HBox spacing="20" alignment="CENTER_LEFT">
+        <VBox spacing="8" alignment="CENTER" 
+              style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 3); -fx-pref-width: 250;">
+            <Label fx:id="totalBadgesLabel" text="0" 
+                   style="-fx-font-size: 48px; -fx-font-weight: bold; -fx-text-fill: #0079D3;"/>
+            <Label text="Badges Gagnés" 
+                   style="-fx-font-size: 16px; -fx-text-fill: #666; -fx-font-weight: 600;"/>
+        </VBox>
+        
+        <VBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10;">
+            <Label text="🥉 Bronze: 3 posts" 
+                   style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+            <Label text="🥈 Silver: 5 posts" 
+                   style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+            <Label text="🥇 Gold: 10 posts" 
+                   style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+            <Label text="💎 Diamond: 15 posts" 
+                   style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+        </VBox>
+    </HBox>
+
+    <!-- Liste des badges -->
+    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-border-color: transparent;">
+        <GridPane fx:id="badgesGrid" hgap="20" vgap="20" 
+                  style="-fx-background-color: transparent;">
+        </GridPane>
+    </ScrollPane>
+
+</VBox>

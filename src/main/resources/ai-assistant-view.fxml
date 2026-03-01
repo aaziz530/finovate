@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.esprit.finovate.controllers.AIAssistantController"
+      spacing="0" style="-fx-background-color: #F8F9FA;">
+
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="15" 
+          style="-fx-background-color: linear-gradient(to right, #667eea, #764ba2); -fx-padding: 20;">
+        <Label text="🤖" style="-fx-font-size: 32px;"/>
+        <VBox spacing="2">
+            <Label text="Assistant IA" 
+                   style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            <Label text="Posez-moi vos questions sur le forum, la finance, la blockchain..." 
+                   style="-fx-font-size: 13px; -fx-text-fill: rgba(255,255,255,0.9);"/>
+        </VBox>
+        <HBox HBox.hgrow="ALWAYS"/>
+        <Button text="🗑️ Effacer" onAction="#clearChat"
+                style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-size: 13px; -fx-padding: 8 16; -fx-background-radius: 20; -fx-cursor: hand;"/>
+    </HBox>
+
+    <!-- Chat Area -->
+    <ScrollPane fx:id="chatScrollPane" fitToWidth="true" VBox.vgrow="ALWAYS"
+                style="-fx-background-color: transparent; -fx-border-color: transparent;">
+        <VBox fx:id="chatContainer" spacing="10" 
+              style="-fx-background-color: white; -fx-padding: 20;"/>
+    </ScrollPane>
+
+    <!-- Input Area -->
+    <HBox spacing="10" alignment="CENTER" 
+          style="-fx-background-color: white; -fx-padding: 15; -fx-border-color: #E0E0E0; -fx-border-width: 1 0 0 0;">
+        <TextField fx:id="messageField" promptText="Tapez votre message..." HBox.hgrow="ALWAYS"
+                   style="-fx-font-size: 14px; -fx-padding: 12; -fx-background-radius: 25; -fx-border-radius: 25; -fx-border-color: #E0E0E0; -fx-border-width: 1;"/>
+        <Button fx:id="sendButton" text="📤 Envoyer" onAction="#sendMessage"
+                style="-fx-background-color: #0079D3; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 12 24; -fx-background-radius: 25; -fx-cursor: hand;"/>
+    </HBox>
+
+</VBox>

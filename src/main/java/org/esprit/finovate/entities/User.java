@@ -9,7 +9,7 @@ public class User {
     private String password;
     private String firstname;
     private String lastname;
-    private String role;
+    public String role;
     private int points;
     private Date createdAt;
     private float solde;
