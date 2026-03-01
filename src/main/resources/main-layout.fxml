@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.esprit.finovate.controllers.MainLayoutController"
+            prefWidth="1200.0" prefHeight="750.0"
+            style="-fx-background-color: #f0f2f5;">
+
+    <left>
+        <VBox prefWidth="240.0" alignment="TOP_LEFT"
+              style="-fx-background-color: #2D3748; -fx-padding: 24 16;">
+            <padding><Insets top="16" right="12" bottom="16" left="12"/></padding>
+
+            <Label text="Finovate"
+                   style="-fx-text-fill: #2e8b57; -fx-font-size: 22px; -fx-font-weight: bold;"/>
+
+            <Label text="MAIN MENU"
+                   style="-fx-text-fill: #a0aec0; -fx-font-size: 11px; -fx-padding: 24 0 8 0;"/>
+
+            <Button fx:id="btnDashboard" text="Dashboard" onAction="#showDashboard"
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: CENTER_LEFT; -fx-padding: 10 12; -fx-cursor: hand; -fx-font-size: 14px;"/>
+            <Button fx:id="btnTickets" text="Tickets" onAction="#showTickets"
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: CENTER_LEFT; -fx-padding: 10 12; -fx-cursor: hand; -fx-font-size: 14px;"/>
+            <Button fx:id="btnCreateTicket" text="Créer un ticket" onAction="#showCreateTicket"
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: CENTER_LEFT; -fx-padding: 10 12; -fx-cursor: hand; -fx-font-size: 14px;"/>
+            <Button fx:id="btnAdmin" text="Admin Dashboard" onAction="#showAdminDashboard"
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: CENTER_LEFT; -fx-padding: 10 12; -fx-cursor: hand; -fx-font-size: 14px;"/>
+            <Button fx:id="btnMessagerie" text="Messagerie" onAction="#showMessagerie"
+                    style="-fx-background-color: transparent; -fx-text-fill: white; -fx-alignment: CENTER_LEFT; -fx-padding: 10 12; -fx-cursor: hand; -fx-font-size: 14px;"/>
+
+            <Label text="ACCOUNT"
+                   style="-fx-text-fill: #a0aec0; -fx-font-size: 11px; -fx-padding: 20 0 8 0;"/>
+
+            <Region VBox.vgrow="ALWAYS" minHeight="0"/>
+
+            <VBox spacing="2" style="-fx-padding: 16 0 0 0;">
+                <Label fx:id="lblUserName" text="User Name"
+                       style="-fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+                <Label text="USER"
+                       style="-fx-text-fill: #a0aec0; -fx-font-size: 11px;"/>
+            </VBox>
+        </VBox>
+    </left>
+
+    <center>
+        <StackPane fx:id="contentPane" style="-fx-padding: 24; -fx-background-color: #f0f2f5;">
+        </StackPane>
+    </center>
+
+</BorderPane>

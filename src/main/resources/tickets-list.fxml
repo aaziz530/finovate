@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.esprit.finovate.controllers.TicketsListController"
+      spacing="16.0">
+
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
+
+    <!-- Filtres -->
+    <HBox spacing="10.0">
+        <VBox spacing="4.0">
+            <Label text="Statut" style="-fx-font-size: 11px; -fx-text-fill: #6b7280;"/>
+            <ComboBox fx:id="statusFilter" prefWidth="140.0"/>
+        </VBox>
+        <VBox spacing="4.0">
+            <Label text="Priorité" style="-fx-font-size: 11px; -fx-text-fill: #6b7280;"/>
+            <ComboBox fx:id="priorityFilter" prefWidth="140.0"/>
+        </VBox>
+        <VBox spacing="4.0">
+            <Label text="Date création" style="-fx-font-size: 11px; -fx-text-fill: #6b7280;"/>
+            <DatePicker fx:id="dateFilter" prefWidth="160.0"/>
+        </VBox>
+        <VBox spacing="4.0">
+            <Label text="Recherche" style="-fx-font-size: 11px; -fx-text-fill: #6b7280;"/>
+            <TextField fx:id="searchField" promptText="ID, titre, client..."
+                       onKeyReleased="#onSearch" prefWidth="220.0"/>
+        </VBox>
+        <VBox spacing="4.0">
+            <Label text=" " />
+            <Button text="Réinitialiser" onAction="#onResetFilters"
+                    style="-fx-background-color: #e5e7eb; -fx-text-fill: #111827; -fx-font-weight: bold;"/>
+        </VBox>
+    </HBox>
+
+    <!-- Table tickets -->
+    <TableView fx:id="ticketsTable" VBox.vgrow="ALWAYS">
+        <columns>
+
+            <TableColumn fx:id="colTitre" text="Titre" prefWidth="180.0"/>
+            <TableColumn fx:id="colDescription" text="Description" prefWidth="250.0"/>
+            <TableColumn fx:id="colClient" text="Client" prefWidth="120.0"/>
+            <TableColumn fx:id="colPriorite" text="Priorité" prefWidth="90.0"/>
+            <TableColumn fx:id="colStatut" text="Statut" prefWidth="100.0"/>
+            <TableColumn fx:id="colDateCreation" text="Créé le" prefWidth="120.0"/>
+            <TableColumn fx:id="colAssigneA" text="Assigné à" prefWidth="120.0"/>
+            <TableColumn fx:id="colActions" text="Actions" prefWidth="80.0"/>
+        </columns>
+    </TableView>
+
+</VBox>
+

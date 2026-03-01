@@ -1,7 +1,10 @@
+package org.esprit.finovate;
 import org.esprit.finovate.entities.User;
 import org.esprit.finovate.services.IUserService;
 import org.esprit.finovate.services.UserService;
 import org.esprit.finovate.utils.Session;
+import java.util.Scanner;
+
 
 public class Main {
     public static void main(String[] args) {

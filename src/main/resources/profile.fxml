@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.DatePicker?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.esprit.finovate.controllers.ProfileController"
+      spacing="0" alignment="TOP_LEFT">
+
+    <padding><Insets top="0" right="0" bottom="24" left="0"/></padding>
+
+    <VBox style="-fx-background-color: white; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 2); -fx-padding: 28;">
+        <VBox spacing="4">
+            <Label text="My Profile"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #2D3748;"/>
+            <Label text="Update your personal account information."
+                   style="-fx-font-size: 13px; -fx-text-fill: #718096;"/>
+        </VBox>
+
+        <GridPane hgap="16" vgap="14" style="-fx-padding: 24 0 0 0;">
+            <columnConstraints>
+                <ColumnConstraints minWidth="140" halignment="RIGHT"/>
+                <ColumnConstraints minWidth="280"/>
+            </columnConstraints>
+
+            <Label text="First Name:" GridPane.columnIndex="0" GridPane.rowIndex="0"
+                   style="-fx-text-fill: #2D3748; -fx-font-size: 13px;"/>
+            <TextField fx:id="fieldFirstName" GridPane.columnIndex="1" GridPane.rowIndex="0"
+                       style="-fx-background-color: #f7fafc; -fx-border-color: #e2e8f0; -fx-background-radius: 6; -fx-padding: 8 12; -fx-prefWidth: 280;"/>
+
+            <Label text="Last Name:" GridPane.columnIndex="0" GridPane.rowIndex="1"
+                   style="-fx-text-fill: #2D3748; -fx-font-size: 13px;"/>
+            <TextField fx:id="fieldLastName" GridPane.columnIndex="1" GridPane.rowIndex="1"
+                       style="-fx-background-color: #f7fafc; -fx-border-color: #e2e8f0; -fx-background-radius: 6; -fx-padding: 8 12; -fx-prefWidth: 280;"/>
+
+            <Label text="Email Address:" GridPane.columnIndex="0" GridPane.rowIndex="2"
+                   style="-fx-text-fill: #2D3748; -fx-font-size: 13px;"/>
+            <TextField fx:id="fieldEmail" GridPane.columnIndex="1" GridPane.rowIndex="2"
+                       style="-fx-background-color: #f7fafc; -fx-border-color: #e2e8f0; -fx-background-radius: 6; -fx-padding: 8 12; -fx-prefWidth: 280;"/>
+
+            <Label text="Old Password:" GridPane.columnIndex="0" GridPane.rowIndex="3"
+                   style="-fx-text-fill: #2D3748; -fx-font-size: 13px;"/>
+            <HBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="3">
+                <PasswordField fx:id="fieldOldPassword"
+                       style="-fx-background-color: #f7fafc; -fx-border-color: #e2e8f0; -fx-background-radius: 6; -fx-padding: 8 12; -fx-prefWidth: 240;"/>
+                <Button text="Show" style="-fx-background-color: #e2e8f0; -fx-text-fill: #2D3748; -fx-background-radius: 6; -fx-padding: 8 14; -fx-cursor: hand;"/>
+            </HBox>
+
+            <Label text="New Password:" GridPane.columnIndex="0" GridPane.rowIndex="4"
+                   style="-fx-text-fill: #2D3748; -fx-font-size: 13px;"/>
+            <HBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="4">
+                <PasswordField fx:id="fieldNewPassword"
+                       style="-fx-background-color: #f7fafc; -fx-border-color: #e2e8f0; -fx-background-radius: 6; -fx-padding: 8 12; -fx-prefWidth: 240;"/>
+                <Button text="Show" style="-fx-background-color: #e2e8f0; -fx-text-fill: #2D3748; -fx-background-radius: 6; -fx-padding: 8 14; -fx-cursor: hand;"/>
+            </HBox>
+
+            <Label text="Confirm New Password:" GridPane.columnIndex="0" GridPane.rowIndex="5"
+                   style="-fx-text-fill: #2D3748; -fx-font-size: 13px;"/>
+            <HBox spacing="8" GridPane.columnIndex="1" GridPane.rowIndex="5">
+                <PasswordField fx:id="fieldConfirmPassword"
+                       style="-fx-background-color: #f7fafc; -fx-border-color: #e2e8f0; -fx-background-radius: 6; -fx-padding: 8 12; -fx-prefWidth: 240;"/>
+                <Button text="Show" style="-fx-background-color: #e2e8f0; -fx-text-fill: #2D3748; -fx-background-radius: 6; -fx-padding: 8 14; -fx-cursor: hand;"/>
+            </HBox>
+
+            <Label text="CIN:" GridPane.columnIndex="0" GridPane.rowIndex="6"
+                   style="-fx-text-fill: #2D3748; -fx-font-size: 13px;"/>
+            <TextField fx:id="fieldCIN" GridPane.columnIndex="1" GridPane.rowIndex="6"
+                       style="-fx-background-color: #f7fafc; -fx-border-color: #e2e8f0; -fx-background-radius: 6; -fx-padding: 8 12; -fx-prefWidth: 280;"/>
+
+            <Label text="Card Number:" GridPane.columnIndex="0" GridPane.rowIndex="7"
+                   style="-fx-text-fill: #2D3748; -fx-font-size: 13px;"/>
+            <TextField fx:id="fieldCardNumber" GridPane.columnIndex="1" GridPane.rowIndex="7"
+                       style="-fx-background-color: #f7fafc; -fx-border-color: #e2e8f0; -fx-background-radius: 6; -fx-padding: 8 12; -fx-prefWidth: 280;"/>
+
+            <Label text="Birth Date:" GridPane.columnIndex="0" GridPane.rowIndex="8"
+                   style="-fx-text-fill: #2D3748; -fx-font-size: 13px;"/>
+            <DatePicker fx:id="fieldBirthDate" GridPane.columnIndex="1" GridPane.rowIndex="8"
+                        style="-fx-prefWidth: 280;"/>
+        </GridPane>
+
+        <HBox alignment="CENTER" style="-fx-padding: 28 0 0 0;">
+            <Button text="Save Changes" onAction="#onSaveChanges"
+                    style="-fx-background-color: #2e8b57; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 6; -fx-padding: 12 32; -fx-cursor: hand; -fx-font-size: 14px;"/>
+        </HBox>
+    </VBox>
+</VBox>

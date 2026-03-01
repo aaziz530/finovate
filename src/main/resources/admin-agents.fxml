@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.esprit.finovate.controllers.AdminAgentsController"
+      spacing="12.0">
+
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
+
+    <Label text="Gestion des agents"
+           style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+
+    <TableView fx:id="agentsTable" VBox.vgrow="ALWAYS">
+        <columns>
+            <TableColumn fx:id="colAgentNom" text="Agent" prefWidth="180.0"/>
+            <TableColumn fx:id="colTicketsAssignes" text="Tickets assignés" prefWidth="140.0"/>
+            <TableColumn fx:id="colTicketsOuverts" text="Ouverts" prefWidth="100.0"/>
+            <TableColumn fx:id="colTicketsResolus" text="Résolus" prefWidth="100.0"/>
+            <TableColumn fx:id="colPerformance" text="Performance" prefWidth="120.0"/>
+        </columns>
+    </TableView>
+
+</VBox>
+

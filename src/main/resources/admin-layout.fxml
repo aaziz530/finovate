@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.esprit.finovate.controllers.AdminLayoutController"
+            prefWidth="1200.0" prefHeight="750.0"
+            style="-fx-background-color: #f1f5f9;">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="16"
+              style="-fx-background-color: #1e40af; -fx-padding: 14 24;">
+            <Label text="🏦 FINOVATE"
+                   style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>
+            <Label text="Admin Panel"
+                   style="-fx-text-fill: #93c5fd; -fx-font-size: 13px;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblWelcome" text="Welcome, Admin"
+                   style="-fx-text-fill: white; -fx-font-size: 13px;"/>
+            <Button text="⏻  Logout" onAction="#onLogout"
+                    style="-fx-background-color: transparent; -fx-text-fill: white;
+                           -fx-border-color: white; -fx-border-radius: 6;
+                           -fx-background-radius: 6; -fx-padding: 6 16; -fx-cursor: hand;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <TabPane tabClosingPolicy="UNAVAILABLE"
+                 style="-fx-background-color: #f1f5f9; -fx-tab-min-width: 140;">
+
+            <!-- TAB 1 : VUE D'ENSEMBLE -->
+            <Tab text="📊  Vue d'ensemble">
+                <ScrollPane fitToWidth="true"
+                            style="-fx-background: #f1f5f9; -fx-background-color: #f1f5f9;">
+                    <VBox spacing="24">
+                        <padding><Insets top="24" right="24" bottom="24" left="24"/></padding>
+
+                        <VBox spacing="4">
+                            <Label text="Tableau de bord"
+                                   style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                            <Label text="Vue d'ensemble en temps réel"
+                                   style="-fx-font-size: 13px; -fx-text-fill: #64748b;"/>
+                        </VBox>
+
+                        <!-- STAT CARDS -->
+                        <HBox spacing="16">
+                            <VBox spacing="8" prefWidth="200"
+                                  style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 12;
+                                         -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 10, 0.3, 0, 4);">
+                                <Label text="👥  Total Utilisateurs"
+                                       style="-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-font-weight: bold;"/>
+                                <Label fx:id="lblTotalUsers" text="0"
+                                       style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #1e40af;"/>
+                                <Label text="Comptes enregistrés"
+                                       style="-fx-font-size: 11px; -fx-text-fill: #94a3b8;"/>
+                            </VBox>
+                            <VBox spacing="8" prefWidth="200"
+                                  style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 12;
+                                         -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 10, 0.3, 0, 4);">
+                                <Label text="📋  Tickets ouverts"
+                                       style="-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-font-weight: bold;"/>
+                                <Label fx:id="lblOpenTickets" text="0"
+                                       style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #3b82f6;"/>
+                                <Label text="Nouveaux tickets"
+                                       style="-fx-font-size: 11px; -fx-text-fill: #94a3b8;"/>
+                            </VBox>
+                            <VBox spacing="8" prefWidth="200"
+                                  style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 12;
+                                         -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 10, 0.3, 0, 4);">
+                                <Label text="⏳  En cours"
+                                       style="-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-font-weight: bold;"/>
+                                <Label fx:id="lblInProgressTickets" text="0"
+                                       style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #f59e0b;"/>
+                                <Label text="En traitement"
+                                       style="-fx-font-size: 11px; -fx-text-fill: #94a3b8;"/>
+                            </VBox>
+                            <VBox spacing="8" prefWidth="200"
+                                  style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 12;
+                                         -fx-effect: dropshadow(gaussian, rgba(22,163,74,0.15), 10, 0.3, 0, 4);">
+                                <Label text="✅  Résolus"
+                                       style="-fx-font-size: 12px; -fx-text-fill: #64748b; -fx-font-weight: bold;"/>
+                                <Label fx:id="lblResolvedTickets" text="0"
+                                       style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #22c55e;"/>
+                                <Label text="Clôturés avec succès"
+                                       style="-fx-font-size: 11px; -fx-text-fill: #94a3b8;"/>
+                            </VBox>
+                            <VBox spacing="8" prefWidth="200"
+                                  style="-fx-background-color: #fef2f2; -fx-padding: 20; -fx-background-radius: 12;
+                                         -fx-effect: dropshadow(gaussian, rgba(220,38,38,0.12), 10, 0.3, 0, 4);">
+                                <Label text="🔴  Priorité haute"
+                                       style="-fx-font-size: 12px; -fx-text-fill: #b91c1c; -fx-font-weight: bold;"/>
+                                <Label fx:id="lblHighPriorityTickets" text="0"
+                                       style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #ef4444;"/>
+                                <Label text="Urgents"
+                                       style="-fx-font-size: 11px; -fx-text-fill: #94a3b8;"/>
+                            </VBox>
+                        </HBox>
+
+                        <!-- CHARTS -->
+                        <HBox spacing="16">
+                            <VBox spacing="8" HBox.hgrow="ALWAYS"
+                                  style="-fx-background-color: white; -fx-padding: 18; -fx-background-radius: 12;
+                                         -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 10, 0.3, 0, 4);">
+                                <Label text="Répartition par statut"
+                                       style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                                <Label text="Nombre de tickets par catégorie"
+                                       style="-fx-font-size: 11px; -fx-text-fill: #94a3b8;"/>
+                                <BarChart fx:id="ticketsByStatusChart" prefHeight="230" animated="true"
+                                          style="-fx-background-color: transparent;">
+                                    <xAxis><CategoryAxis/></xAxis>
+                                    <yAxis><NumberAxis/></yAxis>
+                                </BarChart>
+                            </VBox>
+                            <VBox spacing="8" prefWidth="320"
+                                  style="-fx-background-color: white; -fx-padding: 18; -fx-background-radius: 12;
+                                         -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 10, 0.3, 0, 4);">
+                                <Label text="Ouverts vs Fermés"
+                                       style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                                <Label text="Distribution globale"
+                                       style="-fx-font-size: 11px; -fx-text-fill: #94a3b8;"/>
+                                <PieChart fx:id="openVsClosedChart" prefHeight="230" animated="true"
+                                          style="-fx-background-color: transparent;"/>
+                            </VBox>
+                        </HBox>
+
+                    </VBox>
+                </ScrollPane>
+            </Tab>
+
+            <!-- TAB 2 : GESTION TICKETS -->
+            <Tab text="🎫  Gestion Tickets">
+                <VBox spacing="16">
+                    <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+                    <HBox alignment="CENTER_LEFT">
+                        <VBox spacing="2">
+                            <Label text="Gestion des Tickets"
+                                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                            <Label text="Consulter, modifier et supprimer les tickets"
+                                   style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+                        </VBox>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="btnAddTicket" text="＋  Nouveau Ticket"
+                                onAction="#onAddTicket"
+                                style="-fx-background-color: #1e40af; -fx-text-fill: white;
+                                       -fx-background-radius: 8; -fx-padding: 10 20;
+                                       -fx-font-size: 13px; -fx-cursor: hand;"/>
+                    </HBox>
+                    <VBox spacing="8" VBox.vgrow="ALWAYS"
+                          style="-fx-background-color: white; -fx-padding: 16; -fx-background-radius: 12;
+                                 -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 10, 0.3, 0, 4);">
+                        <TableView fx:id="latestTicketsTable" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colLatestType"     text="Type"      prefWidth="180"/>
+                                <TableColumn fx:id="colLatestPriorite" text="Priorité"  prefWidth="120"/>
+                                <TableColumn fx:id="colLatestStatut"   text="Statut"    prefWidth="120"/>
+                                <TableColumn fx:id="colLatestDate"     text="Date"      prefWidth="160"/>
+                                <TableColumn fx:id="colLatestActions"  text="Actions"   prefWidth="200"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </VBox>
+            </Tab>
+
+            <!-- TAB 3 : AGENTS -->
+            <Tab text="👥  Agents">
+                <VBox spacing="16">
+                    <padding><Insets top="20" right="24" bottom="20" left="24"/></padding>
+                    <VBox spacing="4">
+                        <Label text="Gestion des Agents"
+                               style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+                        <Label text="Performance et suivi des agents de support"
+                               style="-fx-font-size: 12px; -fx-text-fill: #64748b;"/>
+                    </VBox>
+                    <VBox VBox.vgrow="ALWAYS"
+                          style="-fx-background-color: white; -fx-padding: 16; -fx-background-radius: 12;
+                                 -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 10, 0.3, 0, 4);">
+                        <TableView fx:id="agentsTable" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colAgentNom"        text="Agent"            prefWidth="180"/>
+                                <TableColumn fx:id="colTicketsAssignes" text="Tickets assignés"  prefWidth="150"/>
+                                <TableColumn fx:id="colTicketsOuverts"  text="Ouverts"           prefWidth="110"/>
+                                <TableColumn fx:id="colTicketsResolus"  text="Résolus"           prefWidth="110"/>
+                                <TableColumn fx:id="colPerformance"     text="Performance"       prefWidth="160"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </VBox>
+            </Tab>
+
+        </TabPane>
+    </center>
+</BorderPane>

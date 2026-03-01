@@ -19,13 +19,12 @@ public class Main {
 
         System.out.println("=== APPLICATION GESTION TICKETS & MESSAGES ===\n");
 
-        // Test connexion
+        // Tester la connexion à la base
         DatabaseConnection.testConnection();
 
-        // Menu principal
         while (true) {
             showMainMenu();
-            int choice = getIntInput("Votre choix: ");
+            int choice = readInt("Votre choix: ");
 
             switch (choice) {
                 case 1: ticketMenu(); break;
@@ -39,6 +38,20 @@ public class Main {
         }
     }
 
+    // Méthode utilitaire pour lire un entier depuis le Scanner
+    private static int readInt(String prompt) {
+        System.out.print(prompt);
+        while (!scanner.hasNextInt()) {
+            System.out.println("❌ Veuillez entrer un nombre valide !");
+            scanner.next(); // Ignore l'entrée invalide
+            System.out.print(prompt);
+        }
+        int value = scanner.nextInt();
+        scanner.nextLine(); // Consomme le retour à la ligne restant
+        return value;
+    }
+
+    // Menu principal
     private static void showMainMenu() {
         System.out.println("\n╔════════════════════════════════════╗");
         System.out.println("║       MENU PRINCIPAL               ║");
@@ -49,12 +62,11 @@ public class Main {
         System.out.println("────────────────────────────────────");
     }
 
-    // ==================== TICKET MENU ====================
-
+    // ================== TICKET ==================
     private static void ticketMenu() {
         while (true) {
             showTicketMenu();
-            int choice = getIntInput("Votre choix: ");
+            int choice = readInt("Votre choix: ");
 
             switch (choice) {
                 case 1: createTicket(); break;
@@ -62,7 +74,7 @@ public class Main {
                 case 3: viewTicketById(); break;
                 case 4: updateTicket(); break;
                 case 5: deleteTicket(); break;
-                case 6: return; // Retour au menu principal
+                case 6: return;
                 default:
                     System.out.println("❌ Choix invalide! Réessayez.");
             }
@@ -79,146 +91,42 @@ public class Main {
         System.out.println("4. ✏️ Modifier un ticket");
         System.out.println("5. 🗑️ Supprimer un ticket");
         System.out.println("6. ⬅️ Retour au menu principal");
-        System.out.println("────────────────────────────────────");
     }
 
+    // Exemple de méthodes pour ticket (tu peux compléter avec DAO)
     private static void createTicket() {
-        System.out.println("\n=== CRÉER UN TICKET ===");
-
-        System.out.print("Type: ");
-        String type = scanner.nextLine();
-
-        System.out.print("Description: ");
-        String description = scanner.nextLine();
-
-        System.out.print("Priorité (HAUTE/MOYENNE/BASSE): ");
-        String priorite = scanner.nextLine().toUpperCase();
-
-        System.out.print("Statut (NOUVEAU/EN_COURS/RESOLU/FERME): ");
-        String statut = scanner.nextLine().toUpperCase();
-
-        Ticket t = new Ticket(type, description, priorite, statut);
-
-        if (ticketDAO.create(t)) {
-            System.out.println("✅ Ticket créé avec succès!");
-        } else {
-            System.out.println("❌ Erreur lors de la création");
-        }
+        System.out.println("\n💡 Fonction de création de ticket à implémenter");
     }
 
     private static void viewAllTickets() {
-        System.out.println("\n=== LISTE DES TICKETS ===");
-
-        List<Ticket> tickets = ticketDAO.findAll();
-
-        if (tickets.isEmpty()) {
-            System.out.println("📭 Aucun ticket trouvé.");
-        } else {
-            System.out.println("Nombre total: " + tickets.size());
-            System.out.println("────────────────────────────────────");
-            for (Ticket t : tickets) {
-                System.out.println(t);
-                System.out.println("────────────────────────────────────");
-            }
-        }
+        System.out.println("\n💡 Fonction d'affichage de tous les tickets à implémenter");
     }
 
     private static void viewTicketById() {
-        Long id = getLongInput("\n🔍 ID du ticket: ");
-
-        Ticket t = ticketDAO.findById(id);
-        if (t != null) {
-            System.out.println("\n" + t);
-
-            // Afficher les messages du ticket
-            List<Message> messages = messageDAO.findByTicketId(id);
-            if (!messages.isEmpty()) {
-                System.out.println("\n💬 Messages associés (" + messages.size() + "):");
-                System.out.println("────────────────────────────────────");
-                for (Message m : messages) {
-                    System.out.println(m);
-                    System.out.println("────────────────────────────────────");
-                }
-            }
-        } else {
-            System.out.println("❌ Ticket non trouvé.");
-        }
+        System.out.println("\n💡 Fonction de recherche par ID à implémenter");
     }
 
     private static void updateTicket() {
-        Long id = getLongInput("\n✏️ ID du ticket à modifier: ");
-
-        Ticket t = ticketDAO.findById(id);
-        if (t == null) {
-            System.out.println("❌ Ticket non trouvé.");
-            return;
-        }
-
-        System.out.println("Ticket actuel:\n" + t);
-        System.out.println("\n(Appuyez sur Entrée pour garder la valeur actuelle)");
-
-        System.out.print("Nouveau type [" + t.getType() + "]: ");
-        String type = scanner.nextLine();
-        if (!type.isEmpty()) t.setType(type);
-
-        System.out.print("Nouvelle description [" + t.getDescription() + "]: ");
-        String desc = scanner.nextLine();
-        if (!desc.isEmpty()) t.setDescription(desc);
-
-        System.out.print("Nouvelle priorité [" + t.getPriorite() + "]: ");
-        String prio = scanner.nextLine().toUpperCase();
-        if (!prio.isEmpty()) t.setPriorite(prio);
-
-        System.out.print("Nouveau statut [" + t.getStatut() + "]: ");
-        String stat = scanner.nextLine().toUpperCase();
-        if (!stat.isEmpty()) t.setStatut(stat);
-
-        if (ticketDAO.update(t)) {
-            System.out.println("✅ Ticket modifié avec succès!");
-        } else {
-            System.out.println("❌ Erreur lors de la modification");
-        }
+        System.out.println("\n💡 Fonction de modification de ticket à implémenter");
     }
 
     private static void deleteTicket() {
-        Long id = getLongInput("\n🗑️ ID du ticket à supprimer: ");
-
-        Ticket t = ticketDAO.findById(id);
-        if (t == null) {
-            System.out.println("❌ Ticket non trouvé.");
-            return;
-        }
-
-        System.out.println("Ticket à supprimer:\n" + t);
-        System.out.print("Confirmer la suppression? (oui/non): ");
-        String confirmation = scanner.nextLine();
-
-        if (confirmation.equalsIgnoreCase("oui")) {
-            if (ticketDAO.delete(id)) {
-                System.out.println("✅ Ticket supprimé avec succès!");
-            } else {
-                System.out.println("❌ Erreur lors de la suppression");
-            }
-        } else {
-            System.out.println("⚠️ Suppression annulée.");
-        }
+        System.out.println("\n💡 Fonction de suppression de ticket à implémenter");
     }
 
-    // ==================== MESSAGE MENU ====================
-
+    // ================== MESSAGE ==================
     private static void messageMenu() {
         while (true) {
             showMessageMenu();
-            int choice = getIntInput("Votre choix: ");
+            int choice = readInt("Votre choix: ");
 
             switch (choice) {
                 case 1: createMessage(); break;
                 case 2: viewAllMessages(); break;
-                case 3: viewMessagesByTicket(); break;
-                case 4: viewMessageById(); break;
-                case 5: updateMessage(); break;
-                case 6: deleteMessage(); break;
-                case 7: return; // Retour au menu principal
+                case 3: viewMessageById(); break;
+                case 4: updateMessage(); break;
+                case 5: deleteMessage(); break;
+                case 6: return;
                 default:
                     System.out.println("❌ Choix invalide! Réessayez.");
             }
@@ -231,153 +139,30 @@ public class Main {
         System.out.println("╚════════════════════════════════════╝");
         System.out.println("1. ➕ Créer un message");
         System.out.println("2. 📋 Afficher tous les messages");
-        System.out.println("3. 🎫 Messages par ticket");
-        System.out.println("4. 🔍 Rechercher par ID");
-        System.out.println("5. ✏️ Modifier un message");
-        System.out.println("6. 🗑️ Supprimer un message");
-        System.out.println("7. ⬅️ Retour au menu principal");
-        System.out.println("────────────────────────────────────");
+        System.out.println("3. 🔍 Rechercher par ID");
+        System.out.println("4. ✏️ Modifier un message");
+        System.out.println("5. 🗑️ Supprimer un message");
+        System.out.println("6. ⬅️ Retour au menu principal");
     }
 
+    // Exemple de méthodes pour messages (à compléter)
     private static void createMessage() {
-        System.out.println("\n=== CRÉER UN MESSAGE ===");
-
-        Long idTicket = getLongInput("ID du ticket: ");
-
-        // Vérifier que le ticket existe
-        Ticket t = ticketDAO.findById(idTicket);
-        if (t == null) {
-            System.out.println("❌ Ticket non trouvé!");
-            return;
-        }
-
-        System.out.println("✅ Ticket: " + t.getType() + " - " + t.getDescription());
-
-        System.out.print("Contenu du message: ");
-        String content = scanner.nextLine();
-
-        Message m = new Message(idTicket, content);
-
-        if (messageDAO.create(m)) {
-            System.out.println("✅ Message ajouté au ticket!");
-        } else {
-            System.out.println("❌ Erreur lors de la création");
-        }
+        System.out.println("\n💡 Fonction de création de message à implémenter");
     }
 
     private static void viewAllMessages() {
-        System.out.println("\n=== LISTE DES MESSAGES ===");
-
-        List<Message> messages = messageDAO.findAll();
-
-        if (messages.isEmpty()) {
-            System.out.println("📭 Aucun message trouvé.");
-        } else {
-            System.out.println("Nombre total: " + messages.size());
-            System.out.println("────────────────────────────────────");
-            for (Message m : messages) {
-                System.out.println(m);
-                System.out.println("────────────────────────────────────");
-            }
-        }
-    }
-
-    private static void viewMessagesByTicket() {
-        Long idTicket = getLongInput("\n🎫 ID du ticket: ");
-
-        List<Message> messages = messageDAO.findByTicketId(idTicket);
-
-        if (messages.isEmpty()) {
-            System.out.println("📭 Aucun message trouvé pour ce ticket.");
-        } else {
-            System.out.println("\n💬 Messages du ticket #" + idTicket + " (" + messages.size() + "):");
-            System.out.println("────────────────────────────────────");
-            for (Message m : messages) {
-                System.out.println(m);
-                System.out.println("────────────────────────────────────");
-            }
-        }
+        System.out.println("\n💡 Fonction d'affichage de tous les messages à implémenter");
     }
 
     private static void viewMessageById() {
-        Long id = getLongInput("\n🔍 ID du message: ");
-
-        Message m = messageDAO.findById(id);
-        if (m != null) {
-            System.out.println("\n" + m);
-        } else {
-            System.out.println("❌ Message non trouvé.");
-        }
+        System.out.println("\n💡 Fonction de recherche de message par ID à implémenter");
     }
 
     private static void updateMessage() {
-        Long id = getLongInput("\n✏️ ID du message à modifier: ");
-
-        Message m = messageDAO.findById(id);
-        if (m == null) {
-            System.out.println("❌ Message non trouvé.");
-            return;
-        }
-
-        System.out.println("Message actuel:\n" + m);
-        System.out.println("\n(Appuyez sur Entrée pour garder le contenu actuel)");
-
-        System.out.print("Nouveau contenu [" + m.getContent() + "]: ");
-        String content = scanner.nextLine();
-        if (!content.isEmpty()) m.setContent(content);
-
-        if (messageDAO.update(m)) {
-            System.out.println("✅ Message modifié avec succès!");
-        } else {
-            System.out.println("❌ Erreur lors de la modification");
-        }
+        System.out.println("\n💡 Fonction de modification de message à implémenter");
     }
 
     private static void deleteMessage() {
-        Long id = getLongInput("\n🗑️ ID du message à supprimer: ");
-
-        Message m = messageDAO.findById(id);
-        if (m == null) {
-            System.out.println("❌ Message non trouvé.");
-            return;
-        }
-
-        System.out.println("Message à supprimer:\n" + m);
-        System.out.print("Confirmer la suppression? (oui/non): ");
-        String confirmation = scanner.nextLine();
-
-        if (confirmation.equalsIgnoreCase("oui")) {
-            if (messageDAO.delete(id)) {
-                System.out.println("✅ Message supprimé avec succès!");
-            } else {
-                System.out.println("❌ Erreur lors de la suppression");
-            }
-        } else {
-            System.out.println("⚠️ Suppression annulée.");
-        }
-    }
-
-    // ===== INPUT HELPERS =====
-
-    private static int getIntInput(String prompt) {
-        System.out.print(prompt);
-        while (!scanner.hasNextInt()) {
-            System.out.print("❌ Veuillez entrer un nombre: ");
-            scanner.next();
-        }
-        int value = scanner.nextInt();
-        scanner.nextLine(); // consume newline
-        return value;
-    }
-
-    private static Long getLongInput(String prompt) {
-        System.out.print(prompt);
-        while (!scanner.hasNextLong()) {
-            System.out.println("❌ Veuillez entrer un nombre: ");
-            scanner.next();
-        }
-        Long value = scanner.nextLong();
-        scanner.nextLine(); // consume newline
-        return value;
+        System.out.println("\n💡 Fonction de suppression de message à implémenter");
     }
 }

@@ -1,5 +1,7 @@
 package org.esprit.finovate.model;
 
+import java.sql.Timestamp;
+
 public class Ticket {
 
     private Long id;
@@ -7,6 +9,7 @@ public class Ticket {
     private String description;
     private String priorite;
     private String statut;
+    private Timestamp dateCreation;
 
     public Ticket() {}
 
@@ -17,52 +20,27 @@ public class Ticket {
         this.statut = statut;
     }
 
-    public Long getId() {
-        return id;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
-    public String getType() {
-        return type;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-    public void setType(String type) {
-        this.type = type;
-    }
+    public String getPriorite() { return priorite; }
+    public void setPriorite(String priorite) { this.priorite = priorite; }
 
-    public String getDescription() {
-        return description;
-    }
+    public String getStatut() { return statut; }
+    public void setStatut(String statut) { this.statut = statut; }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getPriorite() {
-        return priorite;
-    }
-
-    public void setPriorite(String priorite) {
-        this.priorite = priorite;
-    }
-
-    public String getStatut() {
-        return statut;
-    }
-
-    public void setStatut(String statut) {
-        this.statut = statut;
-    }
+    public Timestamp getDateCreation() { return dateCreation; }
+    public void setDateCreation(Timestamp dateCreation) { this.dateCreation = dateCreation; }
 
     @Override
     public String toString() {
-        return "ID: " + id +
-                "\nType: " + type +
-                "\nDescription: " + description +
-                "\nPriorité: " + priorite +
-                "\nStatut: " + statut;
+        return "ID: " + id + "\nType: " + type + "\nDescription: " + description
+                + "\nPriorité: " + priorite + "\nStatut: " + statut + "\nDate: " + dateCreation;
     }
 }

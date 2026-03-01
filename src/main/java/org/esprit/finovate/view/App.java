@@ -11,17 +11,17 @@ import java.net.URL;
 
 public class App extends Application {
 
-    private static final String VIEW_PATH = "ticket-view.fxml";
+    private static final String MAIN_LAYOUT = "main-layout.fxml";
 
     @Override
     public void start(Stage stage) throws IOException {
-        URL fxml = getClass().getResource("/" + VIEW_PATH);
+        URL fxml = getClass().getResource("/" + MAIN_LAYOUT);
         if (fxml == null) {
-            throw new IOException("FXML non trouvé. Vérifiez que src/main/resources/" + VIEW_PATH + " existe.");
+            throw new IOException("FXML non trouvé. Vérifiez que src/main/resources/" + MAIN_LAYOUT + " existe.");
         }
         Parent root = FXMLLoader.load(fxml);
-        Scene scene = new Scene(root, 700, 500);
-        stage.setTitle("Finovate - Gestion des réclamations");
+        Scene scene = new Scene(root, 1200, 750);
+        stage.setTitle("User Dashboard - Finovate");
         stage.setScene(scene);
         stage.show();
     }
