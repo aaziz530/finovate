@@ -1,5 +1,6 @@
 package org.esprit.finovate.controllers;
 
+import javafx.concurrent.Task;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -11,8 +12,12 @@ import org.esprit.finovate.entities.Transaction;
 import org.esprit.finovate.services.ITransactionService;
 import org.esprit.finovate.services.TransactionService;
 import org.esprit.finovate.utils.Session;
+import org.esprit.finovate.utils.MyDataBase;
 
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -47,6 +52,7 @@ public class TransferController implements Initializable {
 
     private final ITransactionService transactionService;
     private final ObservableList<Transaction> transactionList = FXCollections.observableArrayList();
+    private final Connection connection = MyDataBase.getInstance().getConnection();
 
     public TransferController() {
         this.transactionService = new TransactionService();
@@ -56,6 +62,55 @@ public class TransferController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         setupTable();
         refreshData();
+        recipientCardField.setEditable(false);
+        recipientCardField.setDisable(true);
+        setupCinAutoFill();
+    }
+
+    private void setupCinAutoFill() {
+        recipientCinField.textProperty().addListener((obs, oldVal, newVal) -> {
+            String cin = newVal != null ? newVal.trim() : "";
+
+            if (cin.length() != 8 || !cin.matches("\\d{8}")) {
+                recipientCardField.clear();
+                return;
+            }
+
+            Task<String> task = new Task<>() {
+                @Override
+                protected String call() throws Exception {
+                    return findCardNumberByCin(cin);
+                }
+            };
+
+            task.setOnSucceeded(e -> {
+                String card = task.getValue();
+                if (card != null && !card.isBlank()) {
+                    recipientCardField.setText(card);
+                } else {
+                    recipientCardField.clear();
+                }
+            });
+
+            task.setOnFailed(e -> recipientCardField.clear());
+
+            Thread t = new Thread(task);
+            t.setDaemon(true);
+            t.start();
+        });
+    }
+
+    private String findCardNumberByCin(String cin) throws SQLException {
+        String sql = "SELECT numeroCarte FROM user WHERE cin = ? LIMIT 1";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setString(1, cin);
+            try (ResultSet rs = pst.executeQuery()) {
+                if (rs.next()) {
+                    return String.valueOf(rs.getLong("numeroCarte"));
+                }
+            }
+        }
+        return null;
     }
 
     private void setupTable() {

@@ -54,7 +54,7 @@
                                     <Font name="System Bold" size="12.0" />
                                  </font>
                               </Label>
-                              <TextField fx:id="recipientCardField" promptText="20-digit card number" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-text-fill: #32325d;" />
+                              <TextField fx:id="recipientCardField" disable="true" editable="false" promptText="Auto-filled from CIN" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 5; -fx-background-radius: 5; -fx-padding: 10; -fx-text-fill: #32325d;" />
                            </children>
                         </VBox>
                         
