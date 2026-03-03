@@ -207,7 +207,11 @@ public class AuthController {
             }
 
         } catch (IllegalStateException e) {
-            showRegisterError("Email already exists. Please use a different email.");
+            if (e.getMessage().contains("Email")) {
+                showRegisterError("Email already exists.");
+            } else if (e.getMessage().contains("CIN")) {
+                showRegisterError("CIN already exists.");
+            }
         } catch (SQLException e) {
             showRegisterError("Database error: " + e.getMessage());
             e.printStackTrace();
