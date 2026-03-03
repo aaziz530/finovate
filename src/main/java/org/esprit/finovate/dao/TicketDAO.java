@@ -12,7 +12,7 @@ public class TicketDAO {
     public boolean create(Ticket r) {
         String sql = "INSERT INTO ticket (type, description, priorite, statut) VALUES (?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, r.getType());
             ps.setString(2, r.getDescription());
             ps.setString(3, r.getPriorite());
@@ -28,8 +28,8 @@ public class TicketDAO {
         List<Ticket> list = new ArrayList<>();
         String sql = "SELECT * FROM ticket ORDER BY id DESC";
         try (Connection conn = DatabaseConnection.getConnection();
-             Statement st = conn.createStatement();
-             ResultSet rs = st.executeQuery(sql)) {
+                Statement st = conn.createStatement();
+                ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
                 Ticket r = new Ticket();
                 r.setId(rs.getLong("id"));
@@ -37,8 +37,14 @@ public class TicketDAO {
                 r.setDescription(rs.getString("description"));
                 r.setPriorite(rs.getString("priorite"));
                 r.setStatut(rs.getString("statut"));
-                try { r.setDateCreation(rs.getTimestamp("date_creation")); }
-                catch (SQLException ignored) {}
+                try {
+                    r.setDateCreation(rs.getTimestamp("date_creation"));
+                } catch (SQLException ignored) {
+                }
+                try {
+                    r.setDateResolution(rs.getTimestamp("date_resolution"));
+                } catch (SQLException ignored) {
+                }
                 list.add(r);
             }
         } catch (SQLException e) {
@@ -50,7 +56,7 @@ public class TicketDAO {
     public Ticket findById(Long id) {
         String sql = "SELECT * FROM ticket WHERE id = ?";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, id);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
@@ -60,8 +66,14 @@ public class TicketDAO {
                 r.setDescription(rs.getString("description"));
                 r.setPriorite(rs.getString("priorite"));
                 r.setStatut(rs.getString("statut"));
-                try { r.setDateCreation(rs.getTimestamp("date_creation")); }
-                catch (SQLException ignored) {}
+                try {
+                    r.setDateCreation(rs.getTimestamp("date_creation"));
+                } catch (SQLException ignored) {
+                }
+                try {
+                    r.setDateResolution(rs.getTimestamp("date_resolution"));
+                } catch (SQLException ignored) {
+                }
                 return r;
             }
         } catch (SQLException e) {
@@ -71,14 +83,15 @@ public class TicketDAO {
     }
 
     public boolean update(Ticket r) {
-        String sql = "UPDATE ticket SET type=?, description=?, priorite=?, statut=? WHERE id=?";
+        String sql = "UPDATE ticket SET type=?, description=?, priorite=?, statut=?, date_resolution=? WHERE id=?";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, r.getType());
             ps.setString(2, r.getDescription());
             ps.setString(3, r.getPriorite());
             ps.setString(4, r.getStatut());
-            ps.setLong(5, r.getId());
+            ps.setTimestamp(5, r.getDateResolution());
+            ps.setLong(6, r.getId());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             System.out.println("Erreur UPDATE: " + e.getMessage());
@@ -89,7 +102,7 @@ public class TicketDAO {
     public boolean delete(Long id) {
         String sql = "DELETE FROM ticket WHERE id=?";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+                PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setLong(1, id);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {

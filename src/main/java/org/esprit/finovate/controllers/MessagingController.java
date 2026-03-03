@@ -10,6 +10,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Button;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import org.esprit.finovate.dao.TicketDAO;
@@ -41,6 +42,7 @@ public class MessagingController implements Initializable {
 
     private final TicketDAO ticketDAO = new TicketDAO();
     private final MessageService messageService = new MessageService();
+    private final org.esprit.finovate.services.TextToSpeechService ttsService = new org.esprit.finovate.services.TextToSpeechService();
     private Ticket selectedTicket;
     private List<Ticket> allTickets = new ArrayList<>();
 
@@ -199,7 +201,40 @@ public class MessagingController implements Initializable {
                     }));
         });
 
-        HBox topRow = new HBox(8, roleTag, langSelector);
+        // TTS BUTTON
+        Button ttsBtn = new Button("🔊");
+        ttsBtn.setStyle(
+                "-fx-background-color: transparent; -fx-cursor: hand; -fx-text-fill: #718096; -fx-font-size: 11px;");
+        ttsBtn.setOnAction(e -> {
+            String selectedLang = langSelector.getValue();
+            String targetLang = "auto";
+            if ("Français".equals(selectedLang))
+                targetLang = "fr";
+            else if ("English".equals(selectedLang))
+                targetLang = "en";
+
+            // Show loading or active state
+            ttsBtn.setText("⏳");
+            ttsService.readText(bubble.getText(), targetLang).thenAccept(success -> {
+                javafx.application.Platform.runLater(() -> {
+                    ttsBtn.setText("🔊");
+                    if (!success) {
+                        // Show error briefly if TTS failed (no internet, etc)
+                        ttsBtn.setText("❌");
+                        new java.util.Timer().schedule(
+                                new java.util.TimerTask() {
+                                    @Override
+                                    public void run() {
+                                        javafx.application.Platform.runLater(() -> ttsBtn.setText("🔊"));
+                                    }
+                                },
+                                2000);
+                    }
+                });
+            });
+        });
+
+        HBox topRow = new HBox(8, roleTag, langSelector, ttsBtn);
         topRow.setAlignment(isMe ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
 
         VBox bubbleBox = new VBox(2);

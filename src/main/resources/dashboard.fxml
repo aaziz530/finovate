@@ -7,6 +7,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.chart.PieChart?>
 
 <VBox xmlns="http://javafx.com/javafx/17"
       xmlns:fx="http://javafx.com/fxml/1"
@@ -48,19 +49,47 @@
         </VBox>
     </HBox>
 
-    <!-- Graphe tickets par mois -->
-    <VBox spacing="8.0"
-          style="-fx-background-color: white; -fx-padding: 12; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 8, 0.3, 0, 3);">
-        <Label text="Tickets par mois"
-               style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
-        <BarChart fx:id="ticketsByMonthChart" prefHeight="260.0">
-            <xAxis>
-                <CategoryAxis label="Mois"/>
-            </xAxis>
-            <yAxis>
-                <NumberAxis label="Nombre de tickets"/>
-            </yAxis>
-        </BarChart>
-    </VBox>
+    <!-- Graphe tickets par mois (Existant) -->
+    <HBox spacing="16.0">
+        <VBox spacing="8.0" HBox.hgrow="ALWAYS"
+              style="-fx-background-color: white; -fx-padding: 12; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 8, 0.3, 0, 3);">
+            <Label text="Tickets par mois"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+            <BarChart fx:id="ticketsByMonthChart" prefHeight="260.0">
+                <xAxis>
+                    <CategoryAxis label="Mois"/>
+                </xAxis>
+                <yAxis>
+                    <NumberAxis label="Nombre de tickets"/>
+                </yAxis>
+            </BarChart>
+        </VBox>
+    </HBox>
+
+    <!-- Nouveaux Graphes: Catégories et Temps de Résolution -->
+    <HBox spacing="16.0">
+        <!-- PieChart: Tickets par catégorie -->
+        <VBox spacing="8.0" HBox.hgrow="ALWAYS" prefWidth="350.0"
+              style="-fx-background-color: white; -fx-padding: 12; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 8, 0.3, 0, 3);">
+            <Label text="Répartition par Catégorie"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+            <PieChart fx:id="ticketsByCategoryChart" prefHeight="260.0"/>
+        </VBox>
+
+        <!-- BarChart: Temps de résolution moyen -->
+        <VBox spacing="8.0" HBox.hgrow="ALWAYS" prefWidth="350.0"
+              style="-fx-background-color: white; -fx-padding: 12; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 8, 0.3, 0, 3);">
+            <Label text="Temps Moyen de Résolution (Heures)"
+                   style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+            <BarChart fx:id="avgResolutionTimeChart" prefHeight="260.0">
+                <xAxis>
+                    <CategoryAxis label="Catégorie"/>
+                </xAxis>
+                <yAxis>
+                    <NumberAxis label="Heures"/>
+                </yAxis>
+            </BarChart>
+        </VBox>
+    </HBox>
 
 </VBox>

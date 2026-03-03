@@ -71,18 +71,35 @@ public class TicketCreateController implements Initializable {
             return;
         }
 
+        // Analyse de sentiment basique (mots-clés)
+        boolean isNegative = false;
+        if (description != null) {
+            String lowerDesc = description.toLowerCase();
+            if (lowerDesc.contains("furious") || lowerDesc.contains("bad service") ||
+                    lowerDesc.contains("angry") || lowerDesc.contains("nul") ||
+                    lowerDesc.contains("en colère") || lowerDesc.contains("mauvais service")) {
+                isNegative = true;
+            }
+        }
+
         Ticket t = new Ticket();
         t.setType(titre);
-        t.setDescription(description != null ? description : "");
-        t.setPriorite(priorite != null ? priorite : "LOW");
+
+        if (isNegative) {
+            t.setDescription("🔥 [URGENT: Sentiment Négatif] " + (description != null ? description : ""));
+            t.setPriorite("HIGH"); // Forcer la priorité haute
+        } else {
+            t.setDescription(description != null ? description : "");
+            t.setPriorite(priorite != null ? priorite : "LOW");
+        }
+
         t.setStatut("NOUVEAU");
 
         if (ticketDAO.create(t)) {
-            System.out.println("Ticket créé depuis la page création.");
+            System.out.println("Ticket créé avec succès. Sentiment négatif: " + isNegative);
             onCancel();
         } else {
             System.out.println("Erreur création ticket (page création).");
         }
     }
 }
-

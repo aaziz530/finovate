@@ -29,6 +29,13 @@
             <version>${javafx.version}</version>
         </dependency>
 
+        <!-- JLayer for MP3 TTS Audio Playback -->
+        <dependency>
+            <groupId>javazoom</groupId>
+            <artifactId>jlayer</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+
         
         <!-- JavaFX FXML -->
         <dependency>

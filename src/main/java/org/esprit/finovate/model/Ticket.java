@@ -10,8 +10,10 @@ public class Ticket {
     private String priorite;
     private String statut;
     private Timestamp dateCreation;
+    private Timestamp dateResolution;
 
-    public Ticket() {}
+    public Ticket() {
+    }
 
     public Ticket(String type, String description, String priorite, String statut) {
         this.type = type;
@@ -20,27 +22,66 @@ public class Ticket {
         this.statut = statut;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getType() {
+        return type;
+    }
 
-    public String getPriorite() { return priorite; }
-    public void setPriorite(String priorite) { this.priorite = priorite; }
+    public void setType(String type) {
+        this.type = type;
+    }
 
-    public String getStatut() { return statut; }
-    public void setStatut(String statut) { this.statut = statut; }
+    public String getDescription() {
+        return description;
+    }
 
-    public Timestamp getDateCreation() { return dateCreation; }
-    public void setDateCreation(Timestamp dateCreation) { this.dateCreation = dateCreation; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getPriorite() {
+        return priorite;
+    }
+
+    public void setPriorite(String priorite) {
+        this.priorite = priorite;
+    }
+
+    public String getStatut() {
+        return statut;
+    }
+
+    public void setStatut(String statut) {
+        this.statut = statut;
+    }
+
+    public Timestamp getDateCreation() {
+        return dateCreation;
+    }
+
+    public void setDateCreation(Timestamp dateCreation) {
+        this.dateCreation = dateCreation;
+    }
+
+    public Timestamp getDateResolution() {
+        return dateResolution;
+    }
+
+    public void setDateResolution(Timestamp dateResolution) {
+        this.dateResolution = dateResolution;
+    }
 
     @Override
     public String toString() {
         return "ID: " + id + "\nType: " + type + "\nDescription: " + description
-                + "\nPriorité: " + priorite + "\nStatut: " + statut + "\nDate: " + dateCreation;
+                + "\nPriorité: " + priorite + "\nStatut: " + statut + "\nDate: " + dateCreation + "\nDate Résolution: "
+                + dateResolution;
     }
 }
