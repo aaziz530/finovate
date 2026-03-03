@@ -17,24 +17,15 @@ import java.util.ResourceBundle;
 
 public class ProfileController implements Initializable {
 
-    @FXML
-    private TextField fieldFirstName;
-    @FXML
-    private TextField fieldLastName;
-    @FXML
-    private TextField fieldEmail;
-    @FXML
-    private PasswordField fieldOldPassword;
-    @FXML
-    private PasswordField fieldNewPassword;
-    @FXML
-    private PasswordField fieldConfirmPassword;
-    @FXML
-    private TextField fieldCIN;
-    @FXML
-    private TextField fieldCardNumber;
-    @FXML
-    private DatePicker fieldBirthDate;
+    @FXML private TextField     fieldFirstName;
+    @FXML private TextField     fieldLastName;
+    @FXML private TextField     fieldEmail;
+    @FXML private PasswordField fieldOldPassword;
+    @FXML private PasswordField fieldNewPassword;
+    @FXML private PasswordField fieldConfirmPassword;
+    @FXML private TextField     fieldCIN;
+    @FXML private TextField     fieldCardNumber;
+    @FXML private DatePicker    fieldBirthDate;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -42,21 +33,24 @@ public class ProfileController implements Initializable {
     }
 
     private void loadUser() {
-        if (Session.currentUser == null) {
+        // ✅ CORRECTION : Session.currentUser -> Session.isActive()
+        if (!Session.isActive()) {
             fieldFirstName.setPromptText("First name");
             fieldLastName.setPromptText("Last name");
             fieldEmail.setPromptText("Email");
             return;
         }
-        fieldFirstName.setText(Session.currentUser.getFirstName());
-        fieldLastName.setText(Session.currentUser.getLastName());
-        fieldEmail.setText(Session.currentUser.getEmail());
+        // ✅ CORRECTION : Session.currentUser.getX() -> Session.getCurrentUser().getX()
+        fieldFirstName.setText(Session.getCurrentUser().getFirstName());
+        fieldLastName.setText(Session.getCurrentUser().getLastName());
+        fieldEmail.setText(Session.getCurrentUser().getEmail());
         fieldCIN.setText("");
-        if (Session.currentUser.getNumeroCarte() != null) {
-            fieldCardNumber.setText(String.valueOf(Session.currentUser.getNumeroCarte()));
+
+        if (Session.getCurrentUser().getNumeroCarte() != null) {
+            fieldCardNumber.setText(String.valueOf(Session.getCurrentUser().getNumeroCarte()));
         }
-        if (Session.currentUser.getBirthdate() != null) {
-            LocalDate ld = Instant.ofEpochMilli(Session.currentUser.getBirthdate().getTime())
+        if (Session.getCurrentUser().getBirthdate() != null) {
+            LocalDate ld = Instant.ofEpochMilli(Session.getCurrentUser().getBirthdate().getTime())
                     .atZone(ZoneId.systemDefault()).toLocalDate();
             fieldBirthDate.setValue(ld);
         }
@@ -64,21 +58,26 @@ public class ProfileController implements Initializable {
 
     @FXML
     private void onSaveChanges() {
-        if (Session.currentUser == null) {
+        // ✅ CORRECTION : Session.currentUser -> Session.isActive()
+        if (!Session.isActive()) {
             showAlert(Alert.AlertType.INFORMATION, "Profile", "No user logged in. Data not saved.");
             return;
         }
-        Session.currentUser.setFirstName(fieldFirstName.getText());
-        Session.currentUser.setLastName(fieldLastName.getText());
-        Session.currentUser.setEmail(fieldEmail.getText());
+        // ✅ CORRECTION : Session.currentUser.setX() -> Session.getCurrentUser().setX()
+        Session.getCurrentUser().setFirstName(fieldFirstName.getText());
+        Session.getCurrentUser().setLastName(fieldLastName.getText());
+        Session.getCurrentUser().setEmail(fieldEmail.getText());
+
         if (fieldCardNumber.getText() != null && !fieldCardNumber.getText().isEmpty()) {
             try {
-                Session.currentUser.setNumeroCarte(Long.parseLong(fieldCardNumber.getText().trim()));
+                Session.getCurrentUser().setNumeroCarte(
+                        Long.parseLong(fieldCardNumber.getText().trim()));
             } catch (NumberFormatException ignored) {}
         }
         if (fieldBirthDate.getValue() != null) {
-            Date d = Date.from(fieldBirthDate.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
-            Session.currentUser.setBirthdate(d);
+            Date d = Date.from(fieldBirthDate.getValue()
+                    .atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Session.getCurrentUser().setBirthdate(d);
         }
         showAlert(Alert.AlertType.INFORMATION, "Profile", "Changes saved successfully.");
     }

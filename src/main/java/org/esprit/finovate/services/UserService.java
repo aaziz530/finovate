@@ -21,7 +21,8 @@ public class UserService implements IUserService {
     public User login(String email, String password) throws SQLException {
         if (DevAccount.EMAIL.equals(email) && DevAccount.PASSWORD.equals(password)) {
             User devUser = DevAccount.createUser();
-            Session.currentUser = devUser;
+            // ✅ CORRECTION : Session.currentUser = -> Session.login()
+            Session.login(devUser);
             return devUser;
         }
 
@@ -38,7 +39,8 @@ public class UserService implements IUserService {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     User u = mapResultSetToUser(rs);
-                    Session.currentUser = u;
+                    // ✅ CORRECTION : Session.currentUser = -> Session.login()
+                    Session.login(u);
                     return u;
                 }
             }
@@ -48,7 +50,8 @@ public class UserService implements IUserService {
 
     @Override
     public void logout() {
-        Session.currentUser = null;
+        // ✅ CORRECTION : Session.currentUser = null -> Session.clear()
+        Session.clear();
     }
 
     @Override

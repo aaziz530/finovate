@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.esprit.finovate.controllers.DashboardController"
+      spacing="20.0">
+
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
+
+    <!-- Stat cards -->
+    <HBox spacing="16.0">
+        <VBox spacing="4.0" prefWidth="180.0"
+              style="-fx-background-color: white; -fx-padding: 12; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 8, 0.3, 0, 3);">
+            <Label text="Tickets ouverts" style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
+            <Label fx:id="lblOpenTickets" text="0"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+        </VBox>
+
+        <VBox spacing="4.0" prefWidth="180.0"
+              style="-fx-background-color: white; -fx-padding: 12; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 8, 0.3, 0, 3);">
+            <Label text="En cours" style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
+            <Label fx:id="lblInProgressTickets" text="0"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+        </VBox>
+
+        <VBox spacing="4.0" prefWidth="180.0"
+              style="-fx-background-color: white; -fx-padding: 12; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(22,163,74,0.25), 10, 0.4, 0, 4);">
+            <Label text="Résolus" style="-fx-font-size: 12px; -fx-text-fill: #6b7280;"/>
+            <Label fx:id="lblResolvedTickets" text="0"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #16a34a;"/>
+        </VBox>
+
+        <VBox spacing="4.0" prefWidth="180.0"
+              style="-fx-background-color: #fef2f2; -fx-padding: 12; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(220,38,38,0.25), 10, 0.4, 0, 4);">
+            <Label text="Priorité haute" style="-fx-font-size: 12px; -fx-text-fill: #b91c1c;"/>
+            <Label fx:id="lblHighPriorityTickets" text="0"
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #b91c1c;"/>
+        </VBox>
+    </HBox>
+
+    <!-- Graphe tickets par mois -->
+    <VBox spacing="8.0"
+          style="-fx-background-color: white; -fx-padding: 12; -fx-background-radius: 8; -fx-effect: dropshadow(gaussian, rgba(15,23,42,0.08), 8, 0.3, 0, 3);">
+        <Label text="Tickets par mois"
+               style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #111827;"/>
+        <BarChart fx:id="ticketsByMonthChart" prefHeight="260.0">
+            <xAxis>
+                <CategoryAxis label="Mois"/>
+            </xAxis>
+            <yAxis>
+                <NumberAxis label="Nombre de tickets"/>
+            </yAxis>
+        </BarChart>
+    </VBox>
+
+</VBox>

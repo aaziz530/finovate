@@ -1,6 +1,5 @@
 package org.esprit.finovate.controllers;
 
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.BarChart;
@@ -8,6 +7,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import org.esprit.finovate.dao.TicketDAO;
 import org.esprit.finovate.model.Ticket;
+import org.esprit.finovate.utils.Session; // ← ajout
 
 import java.net.URL;
 import java.util.List;
@@ -25,16 +25,25 @@ public class DashboardController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        loadStatsAndData();
+        if (!Session.isAdmin()) {          // ← ajout
+            return;                        // ← ajout : bloque si pas admin
+        }
+        loadStatsAndData(); // ← ton code original intact
     }
 
+    // ── Ton code original — RIEN CHANGE ──────────────────────
     private void loadStatsAndData() {
         List<Ticket> all = ticketDAO.findAll();
 
-        long open = all.stream().filter(t -> "NOUVEAU".equalsIgnoreCase(t.getStatut())).count();
-        long inProgress = all.stream().filter(t -> "EN_COURS".equalsIgnoreCase(t.getStatut())).count();
-        long resolved = all.stream().filter(t -> "RESOLU".equalsIgnoreCase(t.getStatut())).count();
-        long highPriority = all.stream().filter(t -> "HAUTE".equalsIgnoreCase(t.getPriorite()) || "HIGH".equalsIgnoreCase(t.getPriorite())).count();
+        long open = all.stream()
+                .filter(t -> "NOUVEAU".equalsIgnoreCase(t.getStatut())).count();
+        long inProgress = all.stream()
+                .filter(t -> "EN_COURS".equalsIgnoreCase(t.getStatut())).count();
+        long resolved = all.stream()
+                .filter(t -> "RESOLU".equalsIgnoreCase(t.getStatut())).count();
+        long highPriority = all.stream()
+                .filter(t -> "HAUTE".equalsIgnoreCase(t.getPriorite())
+                        || "HIGH".equalsIgnoreCase(t.getPriorite())).count();
 
         lblOpenTickets.setText(String.valueOf(open));
         lblInProgressTickets.setText(String.valueOf(inProgress));

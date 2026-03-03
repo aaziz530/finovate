@@ -1,10 +1,10 @@
 package org.esprit.finovate;
+
 import org.esprit.finovate.entities.User;
 import org.esprit.finovate.services.IUserService;
 import org.esprit.finovate.services.UserService;
 import org.esprit.finovate.utils.Session;
 import java.util.Scanner;
-
 
 public class Main {
     public static void main(String[] args) {
@@ -22,12 +22,16 @@ public class Main {
                 System.out.println("Login failed");
             } else {
                 System.out.println("Login OK: " + logged.getEmail());
-                System.out.println("Session.currentUser: " + (Session.currentUser != null ? Session.currentUser.getEmail() : null));
+                // ✅ CORRECTION : Session.currentUser -> Session.getCurrentUser()
+                System.out.println("Session.currentUser: " +
+                        (Session.isActive() ? Session.getCurrentUser().getEmail() : null));
             }
 
             System.out.println("=== LOGOUT ===");
             userService.logout();
-            System.out.println("Session.currentUser after logout: " + Session.currentUser);
+            // ✅ CORRECTION : Session.currentUser -> Session.isActive()
+            System.out.println("Session.currentUser after logout: " +
+                    (Session.isActive() ? Session.getCurrentUser().getEmail() : null));
 
         } catch (Exception e) {
             System.out.println("Test failed: " + e.getMessage());

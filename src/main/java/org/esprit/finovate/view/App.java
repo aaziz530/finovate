@@ -5,6 +5,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.esprit.finovate.utils.DevAccount;  // ← ajout
+import org.esprit.finovate.utils.Session;      // ← ajout
 
 import java.io.IOException;
 import java.net.URL;
@@ -15,6 +17,11 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
+
+        // 🔧 Simulation session — change ADMIN/USER pour tester
+         //DevAccount.createUser();  retourne ton User ADMIN existant
+        Session.login(DevAccount.createUser()); // ← ajout
+
         URL fxml = getClass().getResource("/" + MAIN_LAYOUT);
         if (fxml == null) {
             throw new IOException("FXML non trouvé. Vérifiez que src/main/resources/" + MAIN_LAYOUT + " existe.");

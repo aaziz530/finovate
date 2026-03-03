@@ -26,30 +26,34 @@ import java.util.ResourceBundle;
 
 public class MessagingController implements Initializable {
 
-    @FXML private ListView<Ticket> ticketsList;
-    @FXML private Label lblTicketTitle;
-    @FXML private ScrollPane messagesScrollPane;
-    @FXML private VBox messagesContainer;
-    @FXML private TextField messageInput;
-    @FXML private TextField searchField;
+    @FXML
+    private ListView<Ticket> ticketsList;
+    @FXML
+    private Label lblTicketTitle;
+    @FXML
+    private ScrollPane messagesScrollPane;
+    @FXML
+    private VBox messagesContainer;
+    @FXML
+    private TextField messageInput;
+    @FXML
+    private TextField searchField;
 
     private final TicketDAO ticketDAO = new TicketDAO();
     private final MessageService messageService = new MessageService();
     private Ticket selectedTicket;
     private List<Ticket> allTickets = new ArrayList<>();
 
-    private static final DateTimeFormatter TIME_FMT =
-            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+    private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupTicketsList();
         loadTickets();
 
-        // Listener recherche
-        searchField.textProperty().addListener((obs, oldVal, newVal) -> filterTickets(newVal));
+        searchField.textProperty().addListener(
+                (obs, oldVal, newVal) -> filterTickets(newVal));
 
-        // Listener selection ticket
         ticketsList.getSelectionModel().selectedItemProperty().addListener(
                 (obs, oldVal, newVal) -> {
                     if (newVal != null) {
@@ -104,12 +108,14 @@ public class MessagingController implements Initializable {
 
     private void loadMessages() {
         messagesContainer.getChildren().clear();
-        if (selectedTicket == null) return;
+        if (selectedTicket == null)
+            return;
 
         List<Message> messages = messageService.getMessagesForTicket(selectedTicket.getId());
 
-        String currentRole = (Session.currentUser != null && Session.currentUser.getRole() != null)
-                ? Session.currentUser.getRole().toUpperCase()
+        // ✅ CORRECTION : Session.currentUser -> Session.getCurrentUser()
+        String currentRole = Session.isActive() && Session.getCurrentUser().getRole() != null
+                ? Session.getCurrentUser().getRole().toUpperCase()
                 : "USER";
 
         if (messages.isEmpty()) {
@@ -145,16 +151,14 @@ public class MessagingController implements Initializable {
                     "-fx-background-color: #2e8b57;" +
                             "-fx-text-fill: white;" +
                             "-fx-background-radius: 18 18 4 18;" +
-                            "-fx-font-size: 13px;"
-            );
+                            "-fx-font-size: 13px;");
         } else {
             bubble.setStyle(
                     "-fx-background-color: white;" +
                             "-fx-text-fill: #2D3748;" +
                             "-fx-background-radius: 18 18 18 4;" +
                             "-fx-font-size: 13px;" +
-                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 4, 0, 0, 1);"
-            );
+                            "-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 4, 0, 0, 1);");
         }
 
         Label time = new Label(msg.getSentAt() != null ? msg.getSentAt().format(TIME_FMT) : "");
@@ -163,9 +167,44 @@ public class MessagingController implements Initializable {
         Label roleTag = new Label(isMe ? "Vous" : msg.getSenderRole());
         roleTag.setStyle("-fx-font-size: 10px; -fx-text-fill: #718096; -fx-font-weight: bold;");
 
+        // TRANSLATE COMBOBOX
+        javafx.scene.control.ComboBox<String> langSelector = new javafx.scene.control.ComboBox<>();
+        langSelector.getItems().addAll("Original", "Français", "English");
+        langSelector.getSelectionModel().selectFirst();
+        langSelector.setStyle("-fx-font-size: 9px; -fx-padding: 0 4 0 4; -fx-min-height: 20px;");
+
+        final String originalText = bubble.getText();
+
+        langSelector.setOnAction(e -> {
+            String selected = langSelector.getValue();
+            if ("Original".equals(selected)) {
+                bubble.setText(originalText);
+                return;
+            }
+
+            String targetLang = "Français".equals(selected) ? "fr" : "en";
+            langSelector.setDisable(true);
+
+            org.esprit.finovate.services.ExternalApiService.translateText(originalText, targetLang)
+                    .thenAccept(translated -> javafx.application.Platform.runLater(() -> {
+                        langSelector.setDisable(false);
+                        // Prevent replacing the text with the API error if source and target are the
+                        // same
+                        if (translated != null
+                                && translated.toUpperCase().contains("PLEASE SELECT TWO DISTINCT LANGUAGES")) {
+                            bubble.setText(originalText); // It's already in the target language
+                        } else {
+                            bubble.setText(translated);
+                        }
+                    }));
+        });
+
+        HBox topRow = new HBox(8, roleTag, langSelector);
+        topRow.setAlignment(isMe ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
+
         VBox bubbleBox = new VBox(2);
         bubbleBox.setAlignment(isMe ? Pos.CENTER_RIGHT : Pos.CENTER_LEFT);
-        bubbleBox.getChildren().addAll(roleTag, bubble, time);
+        bubbleBox.getChildren().addAll(topRow, bubble, time);
 
         HBox row = new HBox(bubbleBox);
         row.setPadding(new Insets(4, 12, 4, 12));
@@ -176,16 +215,28 @@ public class MessagingController implements Initializable {
 
     @FXML
     private void onSendMessage() {
-        if (selectedTicket == null) return;
+        if (selectedTicket == null)
+            return;
         String text = messageInput.getText();
-        if (text == null || text.trim().isEmpty()) return;
+        if (text == null || text.trim().isEmpty())
+            return;
 
-        String role = (Session.currentUser != null && Session.currentUser.getRole() != null)
-                ? Session.currentUser.getRole().toUpperCase()
+        // ✅ CORRECTION : Session.currentUser -> Session.getCurrentUser()
+        String role = Session.isActive() && Session.getCurrentUser().getRole() != null
+                ? Session.getCurrentUser().getRole().toUpperCase()
                 : "USER";
 
         boolean sent = messageService.sendMessage(selectedTicket.getId(), text.trim(), role);
         if (sent) {
+            // TRIGGER WHATSAPP NOTIFICATION IF SENDER IS ADMIN
+            if ("ADMIN".equalsIgnoreCase(role)) {
+                // Since our User entity doesn't have a phone number yet, we use a placeholder:
+                String testUserNumber = "whatsapp:+1234567890"; // TODO: Configure test number
+                String waBody = "Finovate Admin a répondu à votre ticket #" + selectedTicket.getId() + ":\n"
+                        + text.trim();
+                org.esprit.finovate.services.ExternalApiService.sendWhatsAppMessage(testUserNumber, waBody);
+            }
+
             messageInput.clear();
             loadMessages();
         }
