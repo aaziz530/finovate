@@ -9,27 +9,73 @@ public class Investissement {
     private double amount;
     private Date investment_date;
     private String status;
+    private double revenuePercentage; // New attribute
 
-    public Investissement() {}
+    public Investissement() {
+    }
 
-    public Investissement(Long project_id, Long investor_id, double amount) {
+    public Investissement(Long project_id, Long investor_id, double amount, double revenuePercentage) {
         this.project_id = project_id;
         this.investor_id = investor_id;
         this.amount = amount;
+        this.revenuePercentage = revenuePercentage;
         this.status = "CONFIRMED";
         this.investment_date = new Date();
     }
 
-    public Long getInvestissement_id() { return investissement_id; }
-    public void setInvestissement_id(Long investissement_id) { this.investissement_id = investissement_id; }
-    public Long getProject_id() { return project_id; }
-    public void setProject_id(Long project_id) { this.project_id = project_id; }
-    public Long getInvestor_id() { return investor_id; }
-    public void setInvestor_id(Long investor_id) { this.investor_id = investor_id; }
-    public double getAmount() { return amount; }
-    public void setAmount(double amount) { this.amount = amount; }
-    public Date getInvestment_date() { return investment_date; }
-    public void setInvestment_date(Date investment_date) { this.investment_date = investment_date; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public Long getInvestissement_id() {
+        return investissement_id;
+    }
+
+    public void setInvestissement_id(Long investissement_id) {
+        this.investissement_id = investissement_id;
+    }
+
+    public Long getProject_id() {
+        return project_id;
+    }
+
+    public void setProject_id(Long project_id) {
+        this.project_id = project_id;
+    }
+
+    public Long getInvestor_id() {
+        return investor_id;
+    }
+
+    public void setInvestor_id(Long investor_id) {
+        this.investor_id = investor_id;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
+
+    public Date getInvestment_date() {
+        return investment_date;
+    }
+
+    public void setInvestment_date(Date investment_date) {
+        this.investment_date = investment_date;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public double getRevenuePercentage() {
+        return revenuePercentage;
+    }
+
+    public void setRevenuePercentage(double revenuePercentage) {
+        this.revenuePercentage = revenuePercentage;
+    }
 }

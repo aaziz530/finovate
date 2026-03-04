@@ -33,10 +33,14 @@ import java.util.stream.Collectors;
 
 public class MyProjectsController implements Initializable {
 
-    @FXML private VBox projectsContainer;
-    @FXML private TextField txtSearchDynamic;
-    @FXML private ComboBox<String> comboStatus;
-    @FXML private ComboBox<String> comboTri;
+    @FXML
+    private VBox projectsContainer;
+    @FXML
+    private TextField txtSearchDynamic;
+    @FXML
+    private ComboBox<String> comboStatus;
+    @FXML
+    private ComboBox<String> comboTri;
 
     private Stage stage;
     private List<Project> allProjects = List.of();
@@ -44,14 +48,21 @@ public class MyProjectsController implements Initializable {
     private final InvestissementController investissementController = new InvestissementController();
     private final ExchangeRateService exchangeRateService = new ExchangeRateService();
 
-    public void setStage(Stage stage) { this.stage = stage; }
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        if (comboStatus != null) comboStatus.setItems(FXCollections.observableArrayList("Tous", "OPEN", "FUNDED", "CLOSED"));
-        if (comboTri != null) comboTri.setItems(FXCollections.observableArrayList("Titre (A-Z)", "Titre (Z-A)", "Montant ↑", "Montant ↓", "Date (récent)", "Date (ancien)"));
-        if (txtSearchDynamic != null) txtSearchDynamic.textProperty().addListener((o, ov, nv) -> applyFiltersAndRender());
-        if (comboTri != null) comboTri.valueProperty().addListener((o, ov, nv) -> applyFiltersAndRender());
+        if (comboStatus != null)
+            comboStatus.setItems(FXCollections.observableArrayList("Tous", "OPEN", "FUNDED", "CLOSED"));
+        if (comboTri != null)
+            comboTri.setItems(FXCollections.observableArrayList("Titre (A-Z)", "Titre (Z-A)", "Montant ↑", "Montant ↓",
+                    "Date (récent)", "Date (ancien)"));
+        if (txtSearchDynamic != null)
+            txtSearchDynamic.textProperty().addListener((o, ov, nv) -> applyFiltersAndRender());
+        if (comboTri != null)
+            comboTri.valueProperty().addListener((o, ov, nv) -> applyFiltersAndRender());
         loadProjects();
     }
 
@@ -61,7 +72,8 @@ public class MyProjectsController implements Initializable {
     }
 
     private void loadProjects() {
-        if (Session.currentUser == null) return;
+        if (Session.currentUser == null)
+            return;
         try {
             allProjects = projectController.getProjectsByOwnerId(Session.currentUser.getId());
             applyFiltersAndRender();
@@ -74,7 +86,9 @@ public class MyProjectsController implements Initializable {
 
     private void applyFiltersAndRender() {
         projectsContainer.getChildren().clear();
-        String searchText = txtSearchDynamic != null && txtSearchDynamic.getText() != null ? txtSearchDynamic.getText().trim().toLowerCase() : "";
+        String searchText = txtSearchDynamic != null && txtSearchDynamic.getText() != null
+                ? txtSearchDynamic.getText().trim().toLowerCase()
+                : "";
         String statusFilter = comboStatus != null && comboStatus.getValue() != null ? comboStatus.getValue() : "Tous";
         String sortOption = comboTri != null && comboTri.getValue() != null ? comboTri.getValue() : null;
 
@@ -84,13 +98,20 @@ public class MyProjectsController implements Initializable {
                 .collect(Collectors.toList());
 
         Comparator<Project> cmp = switch (sortOption != null ? sortOption : "") {
-            case "Titre (A-Z)" -> Comparator.comparing(p -> p.getTitle() != null ? p.getTitle().toLowerCase() : "", String.CASE_INSENSITIVE_ORDER);
-            case "Titre (Z-A)" -> Comparator.comparing(p -> p.getTitle() != null ? p.getTitle().toLowerCase() : "", String.CASE_INSENSITIVE_ORDER.reversed());
+            case "Titre (A-Z)" -> Comparator.comparing(p -> p.getTitle() != null ? p.getTitle().toLowerCase() : "",
+                    String.CASE_INSENSITIVE_ORDER);
+            case "Titre (Z-A)" -> Comparator.comparing(p -> p.getTitle() != null ? p.getTitle().toLowerCase() : "",
+                    String.CASE_INSENSITIVE_ORDER.reversed());
             case "Montant ↑" -> Comparator.comparingDouble(Project::getCurrent_amount);
             case "Montant ↓" -> Comparator.comparingDouble(Project::getCurrent_amount).reversed();
-            case "Date (récent)" -> Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0), Comparator.nullsLast(Comparator.reverseOrder()));
-            case "Date (ancien)" -> Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0), Comparator.nullsLast(Comparator.naturalOrder()));
-            default -> Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0), Comparator.nullsLast(Comparator.reverseOrder()));
+            case "Date (récent)" ->
+                Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0),
+                        Comparator.nullsLast(Comparator.reverseOrder()));
+            case "Date (ancien)" ->
+                Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0),
+                        Comparator.nullsLast(Comparator.naturalOrder()));
+            default -> Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0),
+                    Comparator.nullsLast(Comparator.reverseOrder()));
         };
         filtered.sort(cmp);
 
@@ -130,7 +151,8 @@ public class MyProjectsController implements Initializable {
                 iv.setFitHeight(80);
                 iv.setPreserveRatio(true);
                 card.getChildren().add(iv);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         Label title = new Label(p.getTitle());
@@ -152,11 +174,14 @@ public class MyProjectsController implements Initializable {
         progressBar.getStyleClass().add("project-progress-bar");
         progressBar.setMaxWidth(Double.MAX_VALUE);
 
-        String metaStr = exchangeRateService.formatTndAndEur(p.getCurrent_amount()) + " / " + exchangeRateService.formatTndAndEur(p.getGoal_amount()) + "  •  " + p.getStatus();
+        String metaStr = exchangeRateService.formatTndAndEur(p.getCurrent_amount()) + " / "
+                + exchangeRateService.formatTndAndEur(p.getGoal_amount()) + "  •  " + p.getStatus();
         try {
             int investors = investissementController.getInvestorCount(p.getProject_id());
-            if (investors > 0) metaStr += "  •  " + investors + " investor(s)";
-        } catch (SQLException ignored) {}
+            if (investors > 0)
+                metaStr += "  •  " + investors + " investor(s)";
+        } catch (SQLException ignored) {
+        }
         if (p.getDeadline() != null && p.getDeadline().after(new java.util.Date())) {
             long days = TimeUnit.MILLISECONDS.toDays(p.getDeadline().getTime() - System.currentTimeMillis());
             metaStr += "  •  " + days + " days left";
@@ -182,7 +207,8 @@ public class MyProjectsController implements Initializable {
 
         try {
             boolean hasInvestments = investissementController.hasInvestments(p.getProject_id());
-            List<Investissement> pending = investissementController.getInvestissementsByProjectId(p.getProject_id()).stream()
+            List<Investissement> pending = investissementController.getInvestissementsByProjectId(p.getProject_id())
+                    .stream()
                     .filter(inv -> "PENDING".equals(inv.getStatus()))
                     .collect(Collectors.toList());
 
@@ -197,7 +223,8 @@ public class MyProjectsController implements Initializable {
                     invRow.getStyleClass().add("investment-card");
                     invRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
                     String dateStr = inv.getInvestment_date() != null ? sdf.format(inv.getInvestment_date()) : "—";
-                    Label invInfo = new Label(String.format("Investor #%d  •  %.2f TND  •  %s", inv.getInvestor_id(), inv.getAmount(), dateStr));
+                    Label invInfo = new Label(String.format("Investor #%d  •  %.2f TND  •  %s", inv.getInvestor_id(),
+                            inv.getAmount(), dateStr));
                     invInfo.getStyleClass().add("project-meta");
                     Button btnAccept = new Button("Accept");
                     btnAccept.getStyleClass().addAll("btn-primary", "btn-small");
@@ -226,11 +253,38 @@ public class MyProjectsController implements Initializable {
                 locked.getStyleClass().add("project-meta");
                 card.getChildren().add(locked);
             }
+
+            // Allow creator to manage revenues ONLY when the project is funded
+            if ("FUNDED".equals(p.getStatus())) {
+                Button btnRevenues = new Button("Gérer les Revenus");
+                btnRevenues.getStyleClass().addAll("btn-primary", "btn-small");
+                btnRevenues.setOnAction(e -> openRevenues(p));
+                card.getChildren().add(btnRevenues);
+            }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
         return card;
+    }
+
+    private void openRevenues(Project p) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/project_revenue.fxml"));
+            Parent root = loader.load();
+            ProjectRevenueController ctrl = loader.getController();
+            ctrl.setStage(stage);
+            ctrl.setProject(p);
+
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.setTitle("Finovate - Project Revenue Management");
+            SceneUtils.applyStageSize(stage);
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).showAndWait();
+            e.printStackTrace();
+        }
     }
 
     private void handleAccept(Investissement inv) {
@@ -266,10 +320,10 @@ public class MyProjectsController implements Initializable {
             ctrl.setProject(p);
             ctrl.setReturnToMyProjects(this);
 
-        Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setTitle("Finovate - Edit Project");
-        SceneUtils.applyStageSize(stage);
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.setTitle("Finovate - Edit Project");
+            SceneUtils.applyStageSize(stage);
         } catch (Exception e) {
             new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).showAndWait();
         }

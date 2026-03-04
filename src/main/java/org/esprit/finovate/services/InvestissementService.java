@@ -19,12 +19,11 @@ public class InvestissementService {
         this.projectService = new ProjectService();
     }
 
-    private static final double PLAFOND_PERCENT = 0.30;
     private static final int PENDING_DAYS_LIMIT = 7;
 
     /**
      * Create - Add an investment (investor = current logged user).
-     * Enforces: plafond 30% max per investor per project.
+     * Enforces: max amount investable is the remaining goal.
      */
     public Long addInvestissement(Investissement inv) throws SQLException {
         if (Session.currentUser == null) {
@@ -41,13 +40,10 @@ public class InvestissementService {
 
         double maxAllowed = getMaxInvestableAmount(inv.getProject_id(), Session.currentUser.getId());
         if (inv.getAmount() > maxAllowed) {
-            throw new IllegalStateException(String.format("Maximum investable amount: %.2f TND (30%% of goal per investor).", maxAllowed));
-        }
-        if (inv.getAmount() > project.getGoal_amount() - project.getCurrent_amount()) {
-            throw new IllegalStateException("Amount exceeds remaining funding needed.");
+            throw new IllegalStateException(String.format("Maximum investable amount: %.2f TND.", maxAllowed));
         }
 
-        String sql = "INSERT INTO investissement (project_id, investor_id, amount, investment_date, status) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO investissement (project_id, investor_id, amount, investment_date, status, revenue_percentage) VALUES (?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, inv.getProject_id());
@@ -57,6 +53,7 @@ public class InvestissementService {
                     ? new Timestamp(inv.getInvestment_date().getTime())
                     : new Timestamp(System.currentTimeMillis()));
             ps.setString(5, "PENDING");
+            ps.setDouble(6, inv.getRevenuePercentage());
 
             ps.executeUpdate();
 
@@ -64,7 +61,8 @@ public class InvestissementService {
                 if (keys.next()) {
                     long id = keys.getLong(1);
                     inv.setInvestissement_id(id);
-                    System.out.println("✅ Investment request sent with ID: " + id + " for project ID: " + inv.getProject_id() + " (awaiting owner approval)");
+                    System.out.println("✅ Investment request sent with ID: " + id + " for project ID: "
+                            + inv.getProject_id() + " (awaiting owner approval)");
                     return id;
                 }
             }
@@ -86,13 +84,15 @@ public class InvestissementService {
         }
         String status = inv.getStatus() != null ? inv.getStatus() : "PENDING";
 
-        String sql = "INSERT INTO investissement (project_id, investor_id, amount, investment_date, status) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO investissement (project_id, investor_id, amount, investment_date, status, revenue_percentage) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setLong(1, inv.getProject_id());
             ps.setLong(2, inv.getInvestor_id());
             ps.setDouble(3, inv.getAmount());
-            ps.setTimestamp(4, inv.getInvestment_date() != null ? new Timestamp(inv.getInvestment_date().getTime()) : new Timestamp(System.currentTimeMillis()));
+            ps.setTimestamp(4, inv.getInvestment_date() != null ? new Timestamp(inv.getInvestment_date().getTime())
+                    : new Timestamp(System.currentTimeMillis()));
             ps.setString(5, status);
+            ps.setDouble(6, inv.getRevenuePercentage());
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
@@ -116,18 +116,20 @@ public class InvestissementService {
             throw new IllegalStateException("Admin only.");
         }
         Investissement old = getInvestissementById(inv.getInvestissement_id());
-        if (old == null) throw new IllegalStateException("Investment not found.");
+        if (old == null)
+            throw new IllegalStateException("Investment not found.");
 
         String newStatus = inv.getStatus() != null ? inv.getStatus() : old.getStatus();
         double newAmount = inv.getAmount() >= 0 ? inv.getAmount() : old.getAmount();
 
-        String sql = "UPDATE investissement SET project_id=?, investor_id=?, amount=?, status=? WHERE investissement_id=?";
+        String sql = "UPDATE investissement SET project_id=?, investor_id=?, amount=?, status=?, revenue_percentage=? WHERE investissement_id=?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setLong(1, inv.getProject_id());
             ps.setLong(2, inv.getInvestor_id());
             ps.setDouble(3, newAmount);
             ps.setString(4, newStatus);
-            ps.setLong(5, inv.getInvestissement_id());
+            ps.setDouble(5, inv.getRevenuePercentage());
+            ps.setLong(6, inv.getInvestissement_id());
             ps.executeUpdate();
         }
 
@@ -147,7 +149,7 @@ public class InvestissementService {
         String sql = "SELECT * FROM investissement ORDER BY investment_date DESC";
 
         try (PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(mapResultSetToInvestissement(rs));
             }
@@ -231,7 +233,8 @@ public class InvestissementService {
                 ps.setInt(1, PENDING_DAYS_LIMIT);
                 ps.executeUpdate();
             }
-        } catch (SQLException ignored) {}
+        } catch (SQLException ignored) {
+        }
     }
 
     public double getTotalInvestedByUserForProject(Long projectId, Long userId) throws SQLException {
@@ -247,12 +250,10 @@ public class InvestissementService {
 
     public double getMaxInvestableAmount(Long projectId, Long userId) throws SQLException {
         Project p = projectService.getProjectById(projectId);
-        if (p == null) return 0;
+        if (p == null)
+            return 0;
         double remaining = p.getGoal_amount() - p.getCurrent_amount();
-        double plafondMax = p.getGoal_amount() * PLAFOND_PERCENT;
-        double alreadyInvested = getTotalInvestedByUserForProject(projectId, userId);
-        double plafondRemaining = plafondMax - alreadyInvested;
-        return Math.max(0, Math.min(remaining, plafondRemaining));
+        return Math.max(0, remaining);
     }
 
     public int getInvestorCount(Long projectId) throws SQLException {
@@ -265,12 +266,10 @@ public class InvestissementService {
         }
     }
 
-    /**
-     * Accept an investment: set status CONFIRMED and update project amount
-     */
     public void acceptInvestissement(Long investissementId) throws SQLException {
         Investissement inv = getInvestissementById(investissementId);
-        if (inv == null) throw new IllegalStateException("Investment not found.");
+        if (inv == null)
+            throw new IllegalStateException("Investment not found.");
         if (!"PENDING".equals(inv.getStatus())) {
             throw new IllegalStateException("Only pending investments can be accepted.");
         }
@@ -282,6 +281,17 @@ public class InvestissementService {
         }
         projectService.addToCurrentAmount(inv.getProject_id(), inv.getAmount());
         System.out.println("✅ Investment accepted for project " + inv.getProject_id());
+
+        // Check if project reached goal to mark funding completed date
+        Project proj = projectService.getProjectById(inv.getProject_id());
+        if (proj != null && proj.getCurrent_amount() >= proj.getGoal_amount()) {
+            String updateGoal = "UPDATE project SET status = 'FUNDED', funding_completed_date = ? WHERE project_id = ? AND funding_completed_date IS NULL";
+            try (PreparedStatement ugs = connection.prepareStatement(updateGoal)) {
+                ugs.setDate(1, new java.sql.Date(System.currentTimeMillis()));
+                ugs.setLong(2, proj.getProject_id());
+                ugs.executeUpdate();
+            }
+        }
     }
 
     /**
@@ -289,7 +299,8 @@ public class InvestissementService {
      */
     public void declineInvestissement(Long investissementId) throws SQLException {
         Investissement inv = getInvestissementById(investissementId);
-        if (inv == null) throw new IllegalStateException("Investment not found.");
+        if (inv == null)
+            throw new IllegalStateException("Investment not found.");
         if (!"PENDING".equals(inv.getStatus())) {
             throw new IllegalStateException("Only pending investments can be declined.");
         }
@@ -321,7 +332,8 @@ public class InvestissementService {
     }
 
     /**
-     * Update - Modify investment status (or amount - but updating amount would require adjusting project.current_amount)
+     * Update - Modify investment status (or amount - but updating amount would
+     * require adjusting project.current_amount)
      */
     public void updateInvestissement(Investissement inv) throws SQLException {
         String sql = "UPDATE investissement SET status=? WHERE investissement_id=?";
@@ -377,6 +389,7 @@ public class InvestissementService {
         Timestamp invDate = rs.getTimestamp("investment_date");
         inv.setInvestment_date(invDate != null ? new java.util.Date(invDate.getTime()) : null);
         inv.setStatus(rs.getString("status"));
+        inv.setRevenuePercentage(rs.getDouble("revenue_percentage"));
         return inv;
     }
 }

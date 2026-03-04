@@ -26,19 +26,24 @@ import java.util.stream.Collectors;
 
 public class MyInvestmentsController implements Initializable {
 
-    @FXML private VBox investmentsContainer;
-    @FXML private TextField txtSearchDynamic;
+    @FXML
+    private VBox investmentsContainer;
+    @FXML
+    private TextField txtSearchDynamic;
 
     private Stage stage;
     private List<Investissement> allInvestments = List.of();
     private final InvestissementController investissementController = new InvestissementController();
     private final ProjectController projectController = new ProjectController();
 
-    public void setStage(Stage stage) { this.stage = stage; }
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        if (txtSearchDynamic != null) txtSearchDynamic.textProperty().addListener((o, ov, nv) -> applyFiltersAndRender());
+        if (txtSearchDynamic != null)
+            txtSearchDynamic.textProperty().addListener((o, ov, nv) -> applyFiltersAndRender());
         loadInvestments();
     }
 
@@ -47,7 +52,8 @@ public class MyInvestmentsController implements Initializable {
     }
 
     private void loadInvestments() {
-        if (Session.currentUser == null) return;
+        if (Session.currentUser == null)
+            return;
         try {
             allInvestments = investissementController.getInvestissementsByInvestorId(Session.currentUser.getId());
             applyFiltersAndRender();
@@ -61,7 +67,8 @@ public class MyInvestmentsController implements Initializable {
     private void applyFiltersAndRender() {
         investmentsContainer.getChildren().clear();
         String search = txtSearchDynamic != null && txtSearchDynamic.getText() != null
-                ? txtSearchDynamic.getText().trim().toLowerCase() : "";
+                ? txtSearchDynamic.getText().trim().toLowerCase()
+                : "";
         Map<Long, String> projectTitles = new HashMap<>();
         try {
             for (Project p : projectController.getAllProjects()) {
@@ -124,6 +131,18 @@ public class MyInvestmentsController implements Initializable {
             btnCancel.getStyleClass().addAll("btn-danger", "btn-small");
             btnCancel.setOnAction(e -> handleDeleteInvestment(inv));
             card.getChildren().add(btnCancel);
+        } else if ("CONFIRMED".equals(inv.getStatus())) {
+            try {
+                Project p = projectController.getProjectById(inv.getProject_id());
+                if (p != null && "FUNDED".equals(p.getStatus())) {
+                    Button btnStats = new Button("Mes Revenus");
+                    btnStats.getStyleClass().addAll("btn-primary", "btn-small");
+                    btnStats.setOnAction(e -> handleViewStatsForProject(p, inv));
+                    card.getChildren().add(btnStats);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
 
         card.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
@@ -158,5 +177,23 @@ public class MyInvestmentsController implements Initializable {
         stage.setScene(scene);
         stage.setTitle("Finovate - Dashboard");
         SceneUtils.applyStageSize(stage);
+    }
+
+    private void handleViewStatsForProject(Project p, Investissement inv) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/investor_stats.fxml"));
+            Parent root = loader.load();
+            InvestorStatsController ctrl = loader.getController();
+            ctrl.setStage(stage);
+            ctrl.setProjectAndInvestment(p, inv);
+
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.setTitle("Finovate - Statistiques: " + p.getTitle());
+            SceneUtils.applyStageSize(stage);
+        } catch (IOException e) {
+            new Alert(Alert.AlertType.ERROR, "Erreur de chargement: " + e.getMessage()).showAndWait();
+            e.printStackTrace();
+        }
     }
 }

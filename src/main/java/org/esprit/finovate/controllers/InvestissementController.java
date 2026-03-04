@@ -9,14 +9,15 @@ import java.util.List;
 /**
  * MVC Controller for Investissement operations.
  * Handles user input and delegates to InvestissementService.
- * When a user invests in a project, the investment is added and project.current_amount is updated.
+ * When a user invests in a project, the investment is added and
+ * project.current_amount is updated.
  */
 public class InvestissementController {
 
     private final InvestissementService investissementService = new InvestissementService();
 
-    public void addInvestissement(Long projectId, double amount) throws SQLException {
-        Investissement inv = new Investissement(projectId, null, amount);
+    public void addInvestissement(Long projectId, double amount, double revenuePercentage) throws SQLException {
+        Investissement inv = new Investissement(projectId, null, amount, revenuePercentage);
         investissementService.addInvestissement(inv);
     }
 

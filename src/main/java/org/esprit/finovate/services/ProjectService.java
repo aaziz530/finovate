@@ -18,6 +18,7 @@ public class ProjectService {
 
     /**
      * Create - Add a new project (owner = current logged user).
+     * 
      * @return Generated project_id, or null if DB does not return keys.
      */
     public Long addProject(Project p) throws SQLException {
@@ -32,7 +33,8 @@ public class ProjectService {
             ps.setString(2, p.getDescription());
             ps.setDouble(3, p.getGoal_amount());
             ps.setDouble(4, p.getCurrent_amount());
-            ps.setTimestamp(5, p.getCreated_at() != null ? new Timestamp(p.getCreated_at().getTime()) : new Timestamp(System.currentTimeMillis()));
+            ps.setTimestamp(5, p.getCreated_at() != null ? new Timestamp(p.getCreated_at().getTime())
+                    : new Timestamp(System.currentTimeMillis()));
             ps.setTimestamp(6, p.getDeadline() != null ? new Timestamp(p.getDeadline().getTime()) : null);
             ps.setString(7, p.getStatus() != null ? p.getStatus() : "OPEN");
             ps.setLong(8, Session.currentUser.getId());
@@ -45,7 +47,8 @@ public class ProjectService {
                 if (keys.next()) {
                     long id = keys.getLong(1);
                     p.setProject_id(id);
-                    System.out.println("✅ Project added with ID: " + id + " for user ID: " + Session.currentUser.getId());
+                    System.out
+                            .println("✅ Project added with ID: " + id + " for user ID: " + Session.currentUser.getId());
                     return id;
                 }
             }
@@ -68,7 +71,8 @@ public class ProjectService {
             ps.setString(2, p.getDescription());
             ps.setDouble(3, p.getGoal_amount());
             ps.setDouble(4, p.getCurrent_amount() >= 0 ? p.getCurrent_amount() : 0);
-            ps.setTimestamp(5, p.getCreated_at() != null ? new Timestamp(p.getCreated_at().getTime()) : new Timestamp(System.currentTimeMillis()));
+            ps.setTimestamp(5, p.getCreated_at() != null ? new Timestamp(p.getCreated_at().getTime())
+                    : new Timestamp(System.currentTimeMillis()));
             ps.setTimestamp(6, p.getDeadline() != null ? new Timestamp(p.getDeadline().getTime()) : null);
             ps.setString(7, p.getStatus() != null ? p.getStatus() : "OPEN");
             ps.setLong(8, ownerId);
@@ -96,7 +100,7 @@ public class ProjectService {
         List<Project> list = new ArrayList<>();
         String sql = "SELECT * FROM project ORDER BY created_at DESC";
         try (PreparedStatement ps = connection.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+                ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(mapResultSetToProject(rs));
             }
@@ -201,7 +205,8 @@ public class ProjectService {
     private void recordAmountHistory(Long projectId, double deltaAmount) {
         try {
             Project p = getProjectById(projectId);
-            if (p == null) return;
+            if (p == null)
+                return;
             double newTotal = p.getCurrent_amount();
             String sql = "INSERT INTO project_amount_history (project_id, amount) VALUES (?, ?)";
             try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -209,15 +214,19 @@ public class ProjectService {
                 ps.setDouble(2, newTotal);
                 ps.executeUpdate();
             }
-        } catch (SQLException ignored) {}
+        } catch (SQLException ignored) {
+        }
     }
 
     public void applyAutoStatus(Long projectId) throws SQLException {
         Project p = getProjectById(projectId);
-        if (p == null) return;
+        if (p == null)
+            return;
         String newStatus = null;
-        if (p.getCurrent_amount() >= p.getGoal_amount()) newStatus = "FUNDED";
-        else if (p.getDeadline() != null && p.getDeadline().before(new java.util.Date())) newStatus = "CLOSED";
+        if (p.getCurrent_amount() >= p.getGoal_amount())
+            newStatus = "FUNDED";
+        else if (p.getDeadline() != null && p.getDeadline().before(new java.util.Date()))
+            newStatus = "CLOSED";
         if (newStatus != null && !newStatus.equals(p.getStatus())) {
             try (PreparedStatement ps = connection.prepareStatement("UPDATE project SET status=? WHERE project_id=?")) {
                 ps.setString(1, newStatus);
@@ -229,20 +238,25 @@ public class ProjectService {
 
     private void applyAutoStatusForAll() {
         try {
-            try (PreparedStatement ps1 = connection.prepareStatement("UPDATE project SET status='FUNDED' WHERE current_amount >= goal_amount AND status != 'FUNDED'")) {
+            try (PreparedStatement ps1 = connection.prepareStatement(
+                    "UPDATE project SET status='FUNDED' WHERE current_amount >= goal_amount AND status != 'FUNDED'")) {
                 ps1.executeUpdate();
             }
-            try (PreparedStatement ps2 = connection.prepareStatement("UPDATE project SET status='CLOSED' WHERE deadline < NOW() AND status = 'OPEN'")) {
+            try (PreparedStatement ps2 = connection.prepareStatement(
+                    "UPDATE project SET status='CLOSED' WHERE deadline < NOW() AND status = 'OPEN'")) {
                 ps2.executeUpdate();
             }
-        } catch (SQLException ignored) {}
+        } catch (SQLException ignored) {
+        }
     }
 
     public List<Project> getSimilarProjects(Long projectId, int limit) throws SQLException {
         Project ref = getProjectById(projectId);
-        if (ref == null) return List.of();
+        if (ref == null)
+            return List.of();
         String cat = ref.getCategory();
-        if (cat == null || cat.isBlank()) cat = ref.getTitle();
+        if (cat == null || cat.isBlank())
+            cat = ref.getTitle();
         List<Project> list = new ArrayList<>();
         String sql = "SELECT * FROM project WHERE project_id != ? AND status = 'OPEN' AND (category = ? OR title LIKE ?) ORDER BY created_at DESC LIMIT ?";
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -251,14 +265,17 @@ public class ProjectService {
             ps.setString(3, "%" + (ref.getTitle() != null ? ref.getTitle().split(" ")[0] : "") + "%");
             ps.setInt(4, limit);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(mapResultSetToProject(rs));
+                while (rs.next())
+                    list.add(mapResultSetToProject(rs));
             }
         } catch (SQLException e) {
-            String sql2 = "SELECT * FROM project WHERE project_id != ? AND status = 'OPEN' ORDER BY created_at DESC LIMIT " + limit;
+            String sql2 = "SELECT * FROM project WHERE project_id != ? AND status = 'OPEN' ORDER BY created_at DESC LIMIT "
+                    + limit;
             try (PreparedStatement ps = connection.prepareStatement(sql2)) {
                 ps.setLong(1, projectId);
                 try (ResultSet rs = ps.executeQuery()) {
-                    while (rs.next()) list.add(mapResultSetToProject(rs));
+                    while (rs.next())
+                        list.add(mapResultSetToProject(rs));
                 }
             }
         }
@@ -278,10 +295,27 @@ public class ProjectService {
         p.setDeadline(deadline != null ? new java.util.Date(deadline.getTime()) : null);
         p.setStatus(rs.getString("status"));
         p.setOwner_id(rs.getLong("owner_id"));
-        try { p.setImagePath(rs.getString("image_path")); } catch (SQLException ignored) {}
-        try { p.setLatitude(rs.getObject("latitude") != null ? rs.getDouble("latitude") : null); } catch (SQLException ignored) {}
-        try { p.setLongitude(rs.getObject("longitude") != null ? rs.getDouble("longitude") : null); } catch (SQLException ignored) {}
-        try { p.setCategory(rs.getString("category")); } catch (SQLException ignored) {}
+        try {
+            p.setImagePath(rs.getString("image_path"));
+        } catch (SQLException ignored) {
+        }
+        try {
+            p.setLatitude(rs.getObject("latitude") != null ? rs.getDouble("latitude") : null);
+        } catch (SQLException ignored) {
+        }
+        try {
+            p.setLongitude(rs.getObject("longitude") != null ? rs.getDouble("longitude") : null);
+        } catch (SQLException ignored) {
+        }
+        try {
+            p.setCategory(rs.getString("category"));
+        } catch (SQLException ignored) {
+        }
+        try {
+            java.sql.Date fcd = rs.getDate("funding_completed_date");
+            p.setFunding_completed_date(fcd != null ? new java.util.Date(fcd.getTime()) : null);
+        } catch (SQLException ignored) {
+        }
         return p;
     }
 }

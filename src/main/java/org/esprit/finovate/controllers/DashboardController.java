@@ -32,11 +32,16 @@ import java.util.stream.Collectors;
 
 public class DashboardController implements Initializable {
 
-    @FXML private VBox projectsContainer;
-    @FXML private TextField txtSearchDynamic;
-    @FXML private Button btnAdminDashboard;
-    @FXML private ComboBox<String> comboStatus;
-    @FXML private ComboBox<String> comboTri;
+    @FXML
+    private VBox projectsContainer;
+    @FXML
+    private TextField txtSearchDynamic;
+    @FXML
+    private Button btnAdminDashboard;
+    @FXML
+    private ComboBox<String> comboStatus;
+    @FXML
+    private ComboBox<String> comboTri;
 
     private Stage stage;
     private List<Project> allProjects = List.of();
@@ -51,7 +56,8 @@ public class DashboardController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         comboStatus.setItems(FXCollections.observableArrayList("Tous", "OPEN", "FUNDED", "CLOSED"));
-        comboTri.setItems(FXCollections.observableArrayList("Titre (A-Z)", "Titre (Z-A)", "Montant ↑", "Montant ↓", "Date (récent)", "Date (ancien)"));
+        comboTri.setItems(FXCollections.observableArrayList("Titre (A-Z)", "Titre (Z-A)", "Montant ↑", "Montant ↓",
+                "Date (récent)", "Date (ancien)"));
         ChangeListener<String> dynamicListener = (o, ov, nv) -> applyFiltersAndRender();
         txtSearchDynamic.textProperty().addListener(dynamicListener);
         comboTri.valueProperty().addListener((o, ov, nv) -> applyFiltersAndRender());
@@ -85,11 +91,14 @@ public class DashboardController implements Initializable {
     private void applyFiltersAndRender() {
         projectsContainer.getChildren().clear();
         String searchText = txtSearchDynamic != null && txtSearchDynamic.getText() != null
-                ? txtSearchDynamic.getText().trim().toLowerCase() : "";
+                ? txtSearchDynamic.getText().trim().toLowerCase()
+                : "";
         String statusFilter = comboStatus != null && comboStatus.getValue() != null
-                ? comboStatus.getValue() : "Tous";
+                ? comboStatus.getValue()
+                : "Tous";
         String sortOption = comboTri != null && comboTri.getValue() != null
-                ? comboTri.getValue() : null;
+                ? comboTri.getValue()
+                : null;
 
         List<Project> filtered = allProjects.stream()
                 .filter(p -> (searchText.isEmpty() || matchesSearch(p, searchText)))
@@ -97,13 +106,20 @@ public class DashboardController implements Initializable {
                 .collect(Collectors.toList());
 
         Comparator<Project> cmp = switch (sortOption != null ? sortOption : "") {
-            case "Titre (A-Z)" -> Comparator.comparing(p -> p.getTitle() != null ? p.getTitle().toLowerCase() : "", String.CASE_INSENSITIVE_ORDER);
-            case "Titre (Z-A)" -> Comparator.comparing(p -> p.getTitle() != null ? p.getTitle().toLowerCase() : "", String.CASE_INSENSITIVE_ORDER.reversed());
+            case "Titre (A-Z)" -> Comparator.comparing(p -> p.getTitle() != null ? p.getTitle().toLowerCase() : "",
+                    String.CASE_INSENSITIVE_ORDER);
+            case "Titre (Z-A)" -> Comparator.comparing(p -> p.getTitle() != null ? p.getTitle().toLowerCase() : "",
+                    String.CASE_INSENSITIVE_ORDER.reversed());
             case "Montant ↑" -> Comparator.comparingDouble(Project::getCurrent_amount);
             case "Montant ↓" -> Comparator.comparingDouble(Project::getCurrent_amount).reversed();
-            case "Date (récent)" -> Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0), Comparator.nullsLast(Comparator.reverseOrder()));
-            case "Date (ancien)" -> Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0), Comparator.nullsLast(Comparator.naturalOrder()));
-            default -> Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0), Comparator.nullsLast(Comparator.reverseOrder()));
+            case "Date (récent)" ->
+                Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0),
+                        Comparator.nullsLast(Comparator.reverseOrder()));
+            case "Date (ancien)" ->
+                Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0),
+                        Comparator.nullsLast(Comparator.naturalOrder()));
+            default -> Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0),
+                    Comparator.nullsLast(Comparator.reverseOrder()));
         };
         filtered.sort(cmp);
 
@@ -143,7 +159,8 @@ public class DashboardController implements Initializable {
                 iv.setFitHeight(80);
                 iv.setPreserveRatio(true);
                 card.getChildren().add(iv);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         Label title = new Label(p.getTitle());
@@ -165,11 +182,14 @@ public class DashboardController implements Initializable {
         progressBar.getStyleClass().add("project-progress-bar");
         progressBar.setMaxWidth(Double.MAX_VALUE);
 
-        String metaStr = exchangeRateService.formatTndAndEur(p.getCurrent_amount()) + " / " + exchangeRateService.formatTndAndEur(p.getGoal_amount()) + "  •  " + p.getStatus();
+        String metaStr = exchangeRateService.formatTndAndEur(p.getCurrent_amount()) + " / "
+                + exchangeRateService.formatTndAndEur(p.getGoal_amount()) + "  •  " + p.getStatus();
         try {
             int investors = investissementController.getInvestorCount(p.getProject_id());
-            if (investors > 0) metaStr += "  •  " + investors + " investor(s)";
-        } catch (SQLException ignored) {}
+            if (investors > 0)
+                metaStr += "  •  " + investors + " investor(s)";
+        } catch (SQLException ignored) {
+        }
         if (p.getDeadline() != null && p.getDeadline().after(new java.util.Date())) {
             long days = TimeUnit.MILLISECONDS.toDays(p.getDeadline().getTime() - System.currentTimeMillis());
             metaStr += "  •  " + days + " days left";
@@ -198,9 +218,11 @@ public class DashboardController implements Initializable {
             double maxHint = remaining;
             try {
                 if (Session.currentUser != null) {
-                    maxHint = investissementController.getMaxInvestableAmount(p.getProject_id(), Session.currentUser.getId());
+                    maxHint = investissementController.getMaxInvestableAmount(p.getProject_id(),
+                            Session.currentUser.getId());
                 }
-            } catch (SQLException ignored) {}
+            } catch (SQLException ignored) {
+            }
             txtAmount.setPromptText("Max " + String.format("%.0f", maxHint) + " TND");
             txtAmount.setPrefWidth(140);
             Button btnInvest = new Button("Invest");
@@ -219,21 +241,42 @@ public class DashboardController implements Initializable {
         String amountStr = txtAmount.getText() == null ? "" : txtAmount.getText().trim();
         Double maxAllowed = null;
         try {
-            if (Session.currentUser != null) maxAllowed = investissementController.getMaxInvestableAmount(p.getProject_id(), Session.currentUser.getId());
-        } catch (SQLException ignored) {}
+            if (Session.currentUser != null)
+                maxAllowed = investissementController.getMaxInvestableAmount(p.getProject_id(),
+                        Session.currentUser.getId());
+        } catch (SQLException ignored) {
+        }
         String err = ValidationUtils.validateInvestmentAmount(amountStr, maxAllowed);
         if (err != null) {
             new Alert(Alert.AlertType.WARNING, err).showAndWait();
             return;
         }
         double amount = ValidationUtils.parseAmount(amountStr);
-        try {
-            investissementController.addInvestissement(p.getProject_id(), amount);
-            new Alert(Alert.AlertType.INFORMATION, String.format("%.2f TND — Request sent. Check My Investments for status.", amount)).showAndWait();
-            txtAmount.clear();
-            loadProjects();
-        } catch (Exception ex) {
-            new Alert(Alert.AlertType.ERROR, "Failed: " + ex.getMessage()).showAndWait();
+
+        TextInputDialog dialog = new TextInputDialog("0");
+        dialog.setTitle("Revenue Percentage");
+        dialog.setHeaderText("Specify Desired Revenue Percentage");
+        dialog.setContentText("Enter the percentage (%) of project revenues you wish to claim:");
+        var result = dialog.showAndWait();
+
+        if (result.isPresent()) {
+            try {
+                double revenuePercentage = Double.parseDouble(result.get());
+                if (revenuePercentage < 0 || revenuePercentage > 100) {
+                    new Alert(Alert.AlertType.WARNING, "Percentage must be between 0 and 100").showAndWait();
+                    return;
+                }
+                investissementController.addInvestissement(p.getProject_id(), amount, revenuePercentage);
+                new Alert(Alert.AlertType.INFORMATION,
+                        String.format("%.2f TND — Request sent. Check My Investments for status.", amount))
+                        .showAndWait();
+                txtAmount.clear();
+                loadProjects();
+            } catch (NumberFormatException e) {
+                new Alert(Alert.AlertType.WARNING, "Invalid percentage format.").showAndWait();
+            } catch (Exception ex) {
+                new Alert(Alert.AlertType.ERROR, "Failed: " + ex.getMessage()).showAndWait();
+            }
         }
     }
 
@@ -251,9 +294,9 @@ public class DashboardController implements Initializable {
             ctrl.setDashboardController(this);
 
             Scene scene = new Scene(root);
-        stage.setScene(scene);
-        stage.setTitle("Finovate - Edit Project");
-        SceneUtils.applyStageSize(stage);
+            stage.setScene(scene);
+            stage.setTitle("Finovate - Edit Project");
+            SceneUtils.applyStageSize(stage);
         } catch (Exception e) {
             new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).showAndWait();
             e.printStackTrace();

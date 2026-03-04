@@ -33,7 +33,7 @@ public class InvestissementServiceTest {
     static void setup() {
         investissementService = new InvestissementService();
         projectService = new ProjectService();
-        ownerUser = new StubLoggedInUser(1L);   // Requires user 1 in DB
+        ownerUser = new StubLoggedInUser(1L); // Requires user 1 in DB
         investorUser = new StubLoggedInUser(2L); // Requires user 2 in DB
     }
 
@@ -58,7 +58,7 @@ public class InvestissementServiceTest {
         projectId = projId;
 
         Session.currentUser = investorUser;
-        Investissement inv = new Investissement(projId, null, 100.0);
+        Investissement inv = new Investissement(projId, null, 100.0, 5.0);
         Long invId = investissementService.addInvestissement(inv);
         investissementId = invId;
 
@@ -80,7 +80,7 @@ public class InvestissementServiceTest {
         Long projId = projectService.addProject(p);
         projectId = projId;
 
-        Investissement inv = new Investissement(projId, null, 50.0);
+        Investissement inv = new Investissement(projId, null, 50.0, 2.0);
         assertThrows(IllegalStateException.class, () -> investissementService.addInvestissement(inv),
                 "Should throw when trying to invest in own project");
     }
@@ -94,7 +94,7 @@ public class InvestissementServiceTest {
         projectId = projId;
 
         Session.currentUser = investorUser;
-        Investissement inv = new Investissement(projId, null, 200.0);
+        Investissement inv = new Investissement(projId, null, 200.0, 10.0);
         Long invId = investissementService.addInvestissement(inv);
         investissementId = invId;
 
@@ -112,7 +112,7 @@ public class InvestissementServiceTest {
         projectId = projId;
 
         Session.currentUser = investorUser;
-        Investissement inv = new Investissement(projId, null, 150.0);
+        Investissement inv = new Investissement(projId, null, 150.0, 7.5);
         Long invId = investissementService.addInvestissement(inv);
         investissementId = invId;
 
@@ -134,7 +134,7 @@ public class InvestissementServiceTest {
         projectId = projId;
 
         Session.currentUser = investorUser;
-        Investissement inv = new Investissement(projId, null, 75.0);
+        Investissement inv = new Investissement(projId, null, 75.0, 3.5);
         Long invId = investissementService.addInvestissement(inv);
         investissementId = invId;
 
@@ -156,7 +156,7 @@ public class InvestissementServiceTest {
         projectId = projId;
 
         Session.currentUser = investorUser;
-        Investissement inv = new Investissement(projId, null, 300.0);
+        Investissement inv = new Investissement(projId, null, 300.0, 15.0);
         Long invId = investissementService.addInvestissement(inv);
         investissementId = invId;
 
@@ -174,7 +174,7 @@ public class InvestissementServiceTest {
         projectId = projId;
 
         Session.currentUser = null;
-        Investissement inv = new Investissement(projId, null, 100.0);
+        Investissement inv = new Investissement(projId, null, 100.0, 5.0);
         assertThrows(IllegalStateException.class, () -> investissementService.addInvestissement(inv),
                 "Should throw when no user is logged in");
     }
