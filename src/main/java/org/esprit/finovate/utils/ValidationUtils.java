@@ -171,6 +171,31 @@ public final class ValidationUtils {
         return Double.parseDouble(value.trim().replace(",", "."));
     }
 
+    /** Forum / post validation (used by {@link org.esprit.finovate.services.ForumService} etc.). */
+    public static boolean isValidForumName(String name) {
+        return name != null && name.trim().length() >= 3 && name.trim().length() <= 100;
+    }
+
+    public static boolean isValidDescription(String description) {
+        return description != null && description.trim().length() >= 10 && description.trim().length() <= 1000;
+    }
+
+    public static boolean isValidPostTitle(String title) {
+        return title != null && title.trim().length() >= 5 && title.trim().length() <= 200;
+    }
+
+    public static boolean isValidPostContent(String content) {
+        return content != null && content.trim().length() >= 10 && content.trim().length() <= 5000;
+    }
+
+    public static boolean isValidCommentContent(String content) {
+        return content != null && content.trim().length() >= 1 && content.trim().length() <= 1000;
+    }
+
+    public static String sanitize(String input) {
+        return input == null ? "" : input.trim();
+    }
+
     /**
      * Configurable limits for validation (contrôle de saisie dynamique).
      */

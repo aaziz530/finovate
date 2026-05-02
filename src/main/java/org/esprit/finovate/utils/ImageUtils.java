@@ -61,11 +61,15 @@ public final class ImageUtils {
         return Files.exists(p) ? p.toAbsolutePath().toString() : null;
     }
 
-    /** Returns URL string for Image constructor (file:path or http(s) URL). */
+    /** Returns URL string for JavaFX {@code Image} (file URI or http(s) URL). */
     public static String toImageUrl(String storedPath) {
         String resolved = resolveImagePath(storedPath);
         if (resolved == null) return null;
         if (resolved.startsWith("http://") || resolved.startsWith("https://")) return resolved;
-        return "file:" + resolved;
+        try {
+            return Paths.get(resolved).toUri().toString();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

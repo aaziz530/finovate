@@ -1,6 +1,6 @@
 package org.esprit.finovate;
 
-import org.esprit.finovate.models.Project;
+import org.esprit.finovate.entities.Project;
 import org.esprit.finovate.services.ProjectService;
 import org.esprit.finovate.utils.Session;
 import org.esprit.finovate.utils.StubLoggedInUser;

@@ -1,8 +1,13 @@
-package org.esprit.finovate.models;
+package org.esprit.finovate.entities;
 
 import java.util.Date;
 
+/**
+ * Maps to table {@code project} (schema {@code finovate}).
+ * DB PK column is {@code id}; exposed as {@link #project_id} for application compatibility.
+ */
 public class Project {
+
     private Long project_id;
     private String title;
     private String description;
@@ -16,7 +21,8 @@ public class Project {
     private Double latitude;
     private Double longitude;
     private String category;
-    private Date funding_completed_date; // New attribute
+    /** DB column: {@code funding_completed_at} */
+    private Date funding_completed_at;
 
     public Project() {
     }
@@ -137,11 +143,23 @@ public class Project {
         this.category = category;
     }
 
-    public Date getFunding_completed_date() {
-        return funding_completed_date;
+    public Date getFunding_completed_at() {
+        return funding_completed_at;
     }
 
-    public void setFunding_completed_date(Date funding_completed_date) {
-        this.funding_completed_date = funding_completed_date;
+    public void setFunding_completed_at(Date funding_completed_at) {
+        this.funding_completed_at = funding_completed_at;
+    }
+
+    /** @deprecated use {@link #getFunding_completed_at()} — kept for older call sites */
+    @Deprecated
+    public Date getFunding_completed_date() {
+        return funding_completed_at;
+    }
+
+    /** @deprecated use {@link #setFunding_completed_at(Date)} */
+    @Deprecated
+    public void setFunding_completed_date(Date d) {
+        this.funding_completed_at = d;
     }
 }

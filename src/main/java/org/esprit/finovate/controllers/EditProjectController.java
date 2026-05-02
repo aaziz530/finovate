@@ -18,7 +18,7 @@ import javafx.application.Platform;
 import org.esprit.finovate.api.ApiConfig;
 import org.esprit.finovate.api.MapPicker;
 import org.esprit.finovate.api.UnsplashService;
-import org.esprit.finovate.models.Project;
+import org.esprit.finovate.entities.Project;
 import org.esprit.finovate.utils.ImageUtils;
 import org.esprit.finovate.utils.LiveValidationHelper;
 import org.esprit.finovate.utils.SceneUtils;

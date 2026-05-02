@@ -1,7 +1,7 @@
 package org.esprit.finovate.services;
 
 import org.esprit.finovate.models.DailyRevenue;
-import org.esprit.finovate.models.Project;
+import org.esprit.finovate.entities.Project;
 import org.esprit.finovate.utils.MyDataBase;
 
 import java.sql.*;
@@ -43,7 +43,11 @@ public class DailyRevenueService {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     DailyRevenue dr = new DailyRevenue();
-                    dr.setRevenue_id(rs.getLong("revenue_id"));
+                    try {
+                        dr.setRevenue_id(rs.getLong("revenue_id"));
+                    } catch (SQLException ex) {
+                        dr.setRevenue_id(rs.getLong("id"));
+                    }
                     dr.setProject_id(rs.getLong("project_id"));
                     dr.setRevenue_date(rs.getDate("revenue_date"));
                     dr.setAmount(rs.getDouble("amount"));
@@ -64,11 +68,11 @@ public class DailyRevenueService {
 
         // If project not funded yet, or doesn't have a completion date, no missing
         // revenues
-        if (project == null || !"FUNDED".equals(project.getStatus()) || project.getFunding_completed_date() == null) {
+        if (project == null || !"FUNDED".equals(project.getStatus()) || project.getFunding_completed_at() == null) {
             return missingDates;
         }
 
-        LocalDate start = new java.sql.Date(project.getFunding_completed_date().getTime()).toLocalDate();
+        LocalDate start = new java.sql.Date(project.getFunding_completed_at().getTime()).toLocalDate();
         LocalDate today = LocalDate.now();
 
         // Get declared dates from DB
@@ -105,7 +109,7 @@ public class DailyRevenueService {
         String sql = "SELECT i.revenue_percentage, (SELECT COALESCE(SUM(amount), 0) FROM daily_revenue dr WHERE dr.project_id = i.project_id) as total_project_revenue "
                 +
                 "FROM investissement i " +
-                "WHERE i.investor_id = ? AND i.status = 'CONFIRMED' AND i.revenue_percentage > 0";
+                "WHERE i.user_id = ? AND i.status = 'CONFIRMED' AND i.revenue_percentage > 0";
 
         double totalGained = 0;
 

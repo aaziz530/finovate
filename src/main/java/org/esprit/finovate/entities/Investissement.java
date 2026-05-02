@@ -1,15 +1,22 @@
-package org.esprit.finovate.models;
+package org.esprit.finovate.entities;
 
 import java.util.Date;
 
+/**
+ * Maps to table {@code investissement}.
+ * DB columns: {@code id}, {@code user_id}, {@code project_id}, …
+ * Java keeps legacy names {@link #investissement_id} and {@link #investor_id} mapped from {@code id} and {@code user_id}.
+ */
 public class Investissement {
+
     private Long investissement_id;
     private Long project_id;
+    /** Maps to DB column {@code user_id} */
     private Long investor_id;
     private double amount;
     private Date investment_date;
     private String status;
-    private double revenuePercentage; // New attribute
+    private Double revenuePercentage;
 
     public Investissement() {
     }
@@ -39,12 +46,21 @@ public class Investissement {
         this.project_id = project_id;
     }
 
+    /** Same as {@link #getUser_id()} — DB column {@code user_id} */
     public Long getInvestor_id() {
         return investor_id;
     }
 
     public void setInvestor_id(Long investor_id) {
         this.investor_id = investor_id;
+    }
+
+    public Long getUser_id() {
+        return investor_id;
+    }
+
+    public void setUser_id(Long user_id) {
+        this.investor_id = user_id;
     }
 
     public double getAmount() {
@@ -72,7 +88,7 @@ public class Investissement {
     }
 
     public double getRevenuePercentage() {
-        return revenuePercentage;
+        return revenuePercentage != null ? revenuePercentage : 0d;
     }
 
     public void setRevenuePercentage(double revenuePercentage) {

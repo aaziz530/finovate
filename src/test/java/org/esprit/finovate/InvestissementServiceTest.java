@@ -1,7 +1,7 @@
 package org.esprit.finovate;
 
-import org.esprit.finovate.models.Investissement;
-import org.esprit.finovate.models.Project;
+import org.esprit.finovate.entities.Investissement;
+import org.esprit.finovate.entities.Project;
 import org.esprit.finovate.services.InvestissementService;
 import org.esprit.finovate.services.ProjectService;
 import org.esprit.finovate.utils.Session;

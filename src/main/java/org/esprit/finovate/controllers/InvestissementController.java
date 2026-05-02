@@ -1,17 +1,11 @@
 package org.esprit.finovate.controllers;
 
-import org.esprit.finovate.models.Investissement;
+import org.esprit.finovate.entities.Investissement;
 import org.esprit.finovate.services.InvestissementService;
 
 import java.sql.SQLException;
 import java.util.List;
 
-/**
- * MVC Controller for Investissement operations.
- * Handles user input and delegates to InvestissementService.
- * When a user invests in a project, the investment is added and
- * project.current_amount is updated.
- */
 public class InvestissementController {
 
     private final InvestissementService investissementService = new InvestissementService();

@@ -1,27 +1,16 @@
 package org.esprit.finovate.utils;
 
-/** Stub for testing. Implements ILoggedInUser with id and role. */
-public class StubLoggedInUser implements ILoggedInUser {
-    private final Long id;
-    private final String role;
+import org.esprit.finovate.entities.User;
 
-    public StubLoggedInUser(Long id) {
-        this.id = id;
-        this.role = "USER";
-    }
+/** Minimal user for placeholder login and tests when only an id is known. */
+public final class StubLoggedInUser extends User {
 
-    public StubLoggedInUser(Long id, String role) {
-        this.id = id;
-        this.role = role != null ? role.toUpperCase() : "USER";
-    }
-
-    @Override
-    public Long getId() {
-        return id;
-    }
-
-    @Override
-    public String getRole() {
-        return role;
+    public StubLoggedInUser(long id) {
+        super();
+        setId(id);
+        setRole("USER");
+        setSolde(500f);
+        setFirstName("User");
+        setLastName("#" + id);
     }
 }

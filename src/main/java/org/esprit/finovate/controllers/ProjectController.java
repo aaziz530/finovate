@@ -1,6 +1,6 @@
 package org.esprit.finovate.controllers;
 
-import org.esprit.finovate.models.Project;
+import org.esprit.finovate.entities.Project;
 import org.esprit.finovate.services.ProjectService;
 
 import java.sql.SQLException;

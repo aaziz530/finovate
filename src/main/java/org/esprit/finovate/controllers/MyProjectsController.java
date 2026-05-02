@@ -14,8 +14,8 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.esprit.finovate.api.ExchangeRateService;
 import org.esprit.finovate.api.MapPicker;
-import org.esprit.finovate.models.Investissement;
-import org.esprit.finovate.models.Project;
+import org.esprit.finovate.entities.Investissement;
+import org.esprit.finovate.entities.Project;
 
 import java.text.SimpleDateFormat;
 import java.util.concurrent.TimeUnit;

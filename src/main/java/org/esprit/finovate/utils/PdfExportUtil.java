@@ -5,8 +5,8 @@ import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
-import org.esprit.finovate.models.Investissement;
-import org.esprit.finovate.models.Project;
+import org.esprit.finovate.entities.Investissement;
+import org.esprit.finovate.entities.Project;
 
 import java.io.File;
 import java.io.IOException;

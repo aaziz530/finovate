@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Main (JavaFX)" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="org.esprit.finovate.Main" />
+    <module name="Finovate" />
+    <option name="VM_PARAMETERS" value="--module-path &quot;$USER_HOME$/.m2/repository/org/openjfx/javafx-base/21.0.2/javafx-base-21.0.2.jar;$USER_HOME$/.m2/repository/org/openjfx/javafx-base/21.0.2/javafx-base-21.0.2-win.jar;$USER_HOME$/.m2/repository/org/openjfx/javafx-graphics/21.0.2/javafx-graphics-21.0.2.jar;$USER_HOME$/.m2/repository/org/openjfx/javafx-graphics/21.0.2/javafx-graphics-21.0.2-win.jar;$USER_HOME$/.m2/repository/org/openjfx/javafx-controls/21.0.2/javafx-controls-21.0.2.jar;$USER_HOME$/.m2/repository/org/openjfx/javafx-controls/21.0.2/javafx-controls-21.0.2-win.jar;$USER_HOME$/.m2/repository/org/openjfx/javafx-fxml/21.0.2/javafx-fxml-21.0.2.jar;$USER_HOME$/.m2/repository/org/openjfx/javafx-fxml/21.0.2/javafx-fxml-21.0.2-win.jar;$USER_HOME$/.m2/repository/org/openjfx/javafx-media/21.0.2/javafx-media-21.0.2.jar;$USER_HOME$/.m2/repository/org/openjfx/javafx-media/21.0.2/javafx-media-21.0.2-win.jar;$USER_HOME$/.m2/repository/org/openjfx/javafx-web/21.0.2/javafx-web-21.0.2.jar;$USER_HOME$/.m2/repository/org/openjfx/javafx-web/21.0.2/javafx-web-21.0.2-win.jar&quot; --add-modules javafx.controls,javafx.fxml,javafx.web,javafx.media --add-opens javafx.graphics/javafx.scene=ALL-UNNAMED --add-opens javafx.graphics/com.sun.javafx.sg.prism=ALL-UNNAMED" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

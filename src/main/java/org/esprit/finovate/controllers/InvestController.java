@@ -13,7 +13,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.esprit.finovate.api.ExchangeRateService;
 import org.esprit.finovate.api.MapPicker;
-import org.esprit.finovate.models.Project;
+import org.esprit.finovate.entities.Project;
 import org.esprit.finovate.utils.ImageUtils;
 import org.esprit.finovate.utils.SceneUtils;
 import org.esprit.finovate.utils.Session;

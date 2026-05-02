@@ -2,7 +2,6 @@ package org.esprit.finovate.utils;
 
 import javafx.beans.value.ChangeListener;
 import javafx.scene.control.*;
-import javafx.scene.control.TextInputControl;
 
 import java.time.LocalDate;
 import java.util.function.Supplier;
