@@ -98,7 +98,7 @@ public class CreatePostPageController {
         }
 
         try {
-            int userId = SessionManager.getCurrentUser().getId().intValue();
+            Long userId = SessionManager.getCurrentUser().getId();
             Post post = new Post(forumId, title, content, userId);
             
             PostService postService = new PostService();

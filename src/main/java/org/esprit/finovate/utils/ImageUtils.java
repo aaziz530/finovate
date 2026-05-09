@@ -7,6 +7,7 @@ import javafx.stage.Window;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -77,14 +78,10 @@ public class ImageUtils {
         }
         
         try {
-            File imageFile = new File(imagePath);
-            if (!imageFile.exists()) {
-                System.out.println("Image non trouvée: " + imagePath);
+            Image image = loadImage(imagePath, width, height);
+            if (image == null) {
                 return null;
             }
-            
-            String imageUrl = imageFile.toURI().toString();
-            Image image = new Image(imageUrl, width, height, true, true);
             
             if (image.isError()) {
                 System.out.println("Erreur de chargement de l'image: " + imagePath);
@@ -109,19 +106,41 @@ public class ImageUtils {
      * Charge une image depuis un chemin
      */
     public static Image loadImage(String imagePath) {
+        return loadImage(imagePath, 0, 0);
+    }
+
+    private static Image loadImage(String imagePath, double width, double height) {
         if (imagePath == null || imagePath.isEmpty()) {
             return null;
         }
         
         try {
-            File imageFile = new File(imagePath);
+            if (imagePath.startsWith("/")) {
+                InputStream in = ImageUtils.class.getResourceAsStream(imagePath);
+                if (in == null) {
+                    System.out.println("Image resource non trouvée: " + imagePath);
+                    return null;
+                }
+                return width > 0 || height > 0
+                        ? new Image(in, width, height, true, true)
+                        : new Image(in);
+            }
+
+            Path path = Paths.get(imagePath);
+            if (!path.isAbsolute()) {
+                path = Paths.get(System.getProperty("user.dir")).resolve(path).normalize();
+            }
+
+            File imageFile = path.toFile();
             if (!imageFile.exists()) {
-                System.out.println("Image non trouvée: " + imagePath);
+                System.out.println("Image non trouvée: " + imagePath + " (resolved: " + path + ")");
                 return null;
             }
-            
+
             String imageUrl = imageFile.toURI().toString();
-            Image image = new Image(imageUrl);
+            Image image = (width > 0 || height > 0)
+                    ? new Image(imageUrl, width, height, true, true)
+                    : new Image(imageUrl);
             
             if (image.isError()) {
                 System.out.println("Erreur de chargement de l'image: " + imagePath);

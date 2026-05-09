@@ -67,7 +67,7 @@ public class BillController implements Initializable {
 
     private void refreshData() {
         try {
-            int userId = Session.currentUser.getId().intValue();
+            Long userId = Session.currentUser.getId();
             float balance = transactionService.getUserBalance(userId);
             balanceLabel.setText(String.format("%.2f TND", balance));
 
@@ -91,7 +91,7 @@ public class BillController implements Initializable {
 
         try {
             double amount = Double.parseDouble(amountStr);
-            billService.payBill(Session.currentUser.getId().intValue(), reference, amount);
+            billService.payBill(Session.currentUser.getId(), reference, amount);
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Payment Successful");

@@ -20,11 +20,11 @@ public class VoteService {
         }
 
         // Vérifier si le vote existe déjà
-        Vote existingVote = getVoteByUserAndPost(vote.getUserId(), vote.getPostId());
+        Vote existingVote = getVoteByUserAndPost(vote.getUserId().intValue(), vote.getPostId().intValue());
 
         if (existingVote != null) {
             // Mise à jour du vote
-            if (existingVote.getVoteType() == vote.getVoteType()) {
+            if (existingVote.getVoteType().equals(vote.getVoteType())) {
                 // Même vote: on le supprime (toggle)
                 return deleteVote(existingVote.getId());
             } else {
@@ -46,9 +46,9 @@ public class VoteService {
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
-            stmt.setInt(1, vote.getPostId());
-            stmt.setInt(2, vote.getUserId());
-            stmt.setString(3, vote.getVoteType().name());
+            stmt.setLong(1, vote.getPostId());
+            stmt.setLong(2, vote.getUserId());
+            stmt.setString(3, vote.getVoteType());
 
             int rowsAffected = stmt.executeUpdate();
 
@@ -66,13 +66,13 @@ public class VoteService {
     /**
      * UPDATE - Modifier un vote
      */
-    private boolean updateVote(int voteId, Vote.VoteType newVoteType) throws SQLException {
+    private boolean updateVote(int voteId, String newVoteType) throws SQLException {
         String query = "UPDATE votes SET vote_type = ? WHERE id = ?";
 
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setString(1, newVoteType.name());
+            stmt.setString(1, newVoteType);
             stmt.setInt(2, voteId);
 
             return stmt.executeUpdate() > 0;
@@ -201,9 +201,9 @@ public class VoteService {
     private Vote mapResultSetToVote(ResultSet rs) throws SQLException {
         return new Vote(
                 rs.getInt("id"),
-                rs.getInt("post_id"),
-                rs.getInt("user_id"),
-                Vote.VoteType.valueOf(rs.getString("vote_type")),
+                rs.getLong("post_id"),
+                rs.getLong("user_id"),
+                rs.getString("vote_type"),
                 rs.getTimestamp("created_at")
         );
     }

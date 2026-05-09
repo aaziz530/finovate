@@ -50,7 +50,7 @@ public class FinancialAdviceService {
         }
 
         try {
-            int userId = Session.currentUser.getId().intValue();
+            Long userId = Session.currentUser.getId();
             String context = buildUserContext(userId);
             String prompt = buildPrompt(context);
             String advice = callGrokAPI(prompt);
@@ -72,7 +72,7 @@ public class FinancialAdviceService {
     /**
      * Build a text summary of the user's financial situation.
      */
-    private String buildUserContext(int userId) throws SQLException {
+    private String buildUserContext(Long userId) throws SQLException {
         StringBuilder sb = new StringBuilder();
 
         // User info
@@ -89,12 +89,12 @@ public class FinancialAdviceService {
         int txCount = Math.min(transactions.size(), 5);
         for (int i = 0; i < txCount; i++) {
             Transaction t = transactions.get(i);
-            boolean isSent = t.getSenderId() == userId;
+            boolean isSent = t.getSenderId().equals(userId);
             String type = isSent ? "ENVOYÉ" : "REÇU";
             sb.append(String.format("- [%s] %s: %.2f TND (%s) - %s\n",
                     sdf.format(t.getDate()),
                     type,
-                    t.getAmount(),
+                    Float.parseFloat(t.getAmount()),
                     isSent ? "À: " + t.getReceiverName() : "De: " + t.getSenderName(),
                     t.getDescription() != null ? t.getDescription() : "Sans description"));
         }
@@ -114,8 +114,8 @@ public class FinancialAdviceService {
         for (Goal g : goals) {
             sb.append(String.format("- %s: %.2f / %.2f TND (%.0f%%) - Statut: %s\n",
                     g.getTitle(),
-                    g.getCurrentAmount(),
-                    g.getTargetAmount(),
+                    Float.parseFloat(g.getCurrentAmount().isEmpty() ? "0" : g.getCurrentAmount()),
+                    Float.parseFloat(g.getTargetAmount().isEmpty() ? "0" : g.getTargetAmount()),
                     g.getProgress() * 100,
                     g.getStatus()));
             if (g.getDeadline() != null && !"Achieved".equalsIgnoreCase(g.getStatus())) {

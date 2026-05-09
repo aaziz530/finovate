@@ -4,27 +4,27 @@ import java.util.Date;
 
 public class Bill {
     private int id;
-    private int idUser;
+    private Long id_user;
     private String reference;
     private double amount;
-    private Date datePaiement;
+    private Date date_paiement;
 
     public Bill() {
     }
 
-    public Bill(int idUser, String reference, double amount, Date datePaiement) {
-        this.idUser = idUser;
+    public Bill(Long id_user, String reference, double amount, Date date_paiement) {
+        this.id_user = id_user;
         this.reference = reference;
         this.amount = amount;
-        this.datePaiement = datePaiement;
+        this.date_paiement = date_paiement;
     }
 
-    public Bill(int id, int idUser, String reference, double amount, Date datePaiement) {
+    public Bill(int id, Long id_user, String reference, double amount, Date date_paiement) {
         this.id = id;
-        this.idUser = idUser;
+        this.id_user = id_user;
         this.reference = reference;
         this.amount = amount;
-        this.datePaiement = datePaiement;
+        this.date_paiement = date_paiement;
     }
 
     public int getId() {
@@ -35,12 +35,12 @@ public class Bill {
         this.id = id;
     }
 
-    public int getIdUser() {
-        return idUser;
+    public Long getIdUser() {
+        return id_user;
     }
 
-    public void setIdUser(int idUser) {
-        this.idUser = idUser;
+    public void setIdUser(Long id_user) {
+        this.id_user = id_user;
     }
 
     public String getReference() {
@@ -60,10 +60,10 @@ public class Bill {
     }
 
     public Date getDatePaiement() {
-        return datePaiement;
+        return date_paiement;
     }
 
-    public void setDatePaiement(Date datePaiement) {
-        this.datePaiement = datePaiement;
+    public void setDatePaiement(Date date_paiement) {
+        this.date_paiement = date_paiement;
     }
 }

@@ -1,35 +1,33 @@
 package org.esprit.finovate.entities;
 
 import java.sql.Timestamp;
+import java.util.Date;
 
 public class Vote {
     private int id;
-    private int postId;
-    private int userId;
-    private VoteType voteType;
-    private Timestamp createdAt;
-
-    public enum VoteType {
-        UPVOTE, DOWNVOTE
-    }
+    private Long post_id;
+    private Long user_id;
+    private String vote_type;
+    private Date created_at;
 
     // Constructeur vide
     public Vote() {}
 
     // Constructeur complet
-    public Vote(int id, int postId, int userId, VoteType voteType, Timestamp createdAt) {
+    public Vote(int id, Long post_id, Long user_id, String vote_type, Date created_at) {
         this.id = id;
-        this.postId = postId;
-        this.userId = userId;
-        this.voteType = voteType;
-        this.createdAt = createdAt;
+        this.post_id = post_id;
+        this.user_id = user_id;
+        this.vote_type = vote_type;
+        this.created_at = created_at;
     }
 
     // Constructeur sans ID (pour création)
-    public Vote(int postId, int userId, VoteType voteType) {
-        this.postId = postId;
-        this.userId = userId;
-        this.voteType = voteType;
+    public Vote(Long post_id, Long user_id, String vote_type) {
+        this.post_id = post_id;
+        this.user_id = user_id;
+        this.vote_type = vote_type;
+        this.created_at = new Date();
     }
 
     // Getters et Setters
@@ -41,46 +39,46 @@ public class Vote {
         this.id = id;
     }
 
-    public int getPostId() {
-        return postId;
+    public Long getPostId() {
+        return post_id;
     }
 
-    public void setPostId(int postId) {
-        this.postId = postId;
+    public void setPostId(Long post_id) {
+        this.post_id = post_id;
     }
 
-    public int getUserId() {
-        return userId;
+    public Long getUserId() {
+        return user_id;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setUserId(Long user_id) {
+        this.user_id = user_id;
     }
 
-    public VoteType getVoteType() {
-        return voteType;
+    public String getVoteType() {
+        return vote_type;
     }
 
-    public void setVoteType(VoteType voteType) {
-        this.voteType = voteType;
+    public void setVoteType(String vote_type) {
+        this.vote_type = vote_type;
     }
 
-    public Timestamp getCreatedAt() {
-        return createdAt;
+    public Date getCreatedAt() {
+        return created_at;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
+    public void setCreatedAt(Date created_at) {
+        this.created_at = created_at;
     }
 
     @Override
     public String toString() {
         return "Vote{" +
                 "id=" + id +
-                ", postId=" + postId +
-                ", userId=" + userId +
-                ", voteType=" + voteType +
-                ", createdAt=" + createdAt +
+                ", post_id=" + post_id +
+                ", user_id=" + user_id +
+                ", vote_type=" + vote_type +
+                ", created_at=" + created_at +
                 '}';
     }
 }

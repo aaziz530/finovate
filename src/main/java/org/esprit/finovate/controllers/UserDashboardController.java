@@ -54,9 +54,6 @@ public class UserDashboardController implements Initializable {
     private Button btnMarketplace;
 
     @FXML
-    private Button btnAds;
-
-    @FXML
     private Button btnChatbot;
 
     @FXML
@@ -82,7 +79,7 @@ public class UserDashboardController implements Initializable {
     }
 
     private void setupHoverEffects() {
-        Button[] buttons = { btnHome, btnGoals, btnTransfer, btnTopUp, btnBills, btnForum, btnInvestissement, btnReclamations, btnMarketplace, btnAds, btnChatbot, btnProfile, btnLogout };
+        Button[] buttons = { btnHome, btnGoals, btnTransfer, btnTopUp, btnBills, btnForum, btnInvestissement, btnReclamations, btnMarketplace, btnChatbot, btnProfile, btnLogout };
         for (Button btn : buttons) {
             if (btn == null) {
                 continue;
@@ -152,6 +149,12 @@ public class UserDashboardController implements Initializable {
         updateButtonStyles(btnChatbot);
     }
 
+    @FXML
+    private void handleMarketplace() {
+        loadView("/marketplace-view.fxml");
+        updateButtonStyles(btnMarketplace);
+    }
+
     public void refreshUserInfo() {
         if (Session.currentUser != null) {
             userNameLabel.setText(Session.currentUser.getFirstName() + " " + Session.currentUser.getLastName());
@@ -189,7 +192,7 @@ public class UserDashboardController implements Initializable {
 
     private void updateButtonStyles(Button activeBtn) {
         this.activeButton = activeBtn;
-        Button[] buttons = { btnHome, btnGoals, btnTransfer, btnTopUp, btnBills, btnForum, btnInvestissement, btnReclamations, btnMarketplace, btnAds, btnChatbot, btnProfile };
+        Button[] buttons = { btnHome, btnGoals, btnTransfer, btnTopUp, btnBills, btnForum, btnInvestissement, btnReclamations, btnMarketplace, btnChatbot, btnProfile };
         for (Button btn : buttons) {
             if (btn == null)
                 continue;

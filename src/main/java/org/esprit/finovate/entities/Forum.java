@@ -1,30 +1,37 @@
 package org.esprit.finovate.entities;
 
 import java.sql.Timestamp;
+import java.util.Date;
 
  public class Forum {
-    private Long id;
-    private Long idCreator;
+    private int id;
+    private Long creator_id;
     private String title;
     private String description;
-    private String imageUrl;
-    private Timestamp createdAt;
+    private String image_url;
+    private Date created_at;
 
     // Constructors
     public Forum() {}
 
-    public Forum(Long idCreator, String title, String description) {
-        this.idCreator = idCreator;
+    public Forum(Long creator_id, String title, String description) {
+        this.creator_id = creator_id;
         this.title = title;
         this.description = description;
+        this.created_at = new Date();
     }
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public Long getIdCreator() { return idCreator; }
-    public void setIdCreator(Long idCreator) { this.idCreator = idCreator; }
+    public Long getCreatorId() {
+        return creator_id;
+    }
+
+    public void setCreatorId(Long creator_id) {
+        this.creator_id = creator_id;
+    }
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -32,14 +39,24 @@ import java.sql.Timestamp;
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public String getImageUrl() {
+        return image_url;
+    }
 
-    public Timestamp getCreatedAt() { return createdAt; }
-    public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+    public void setImageUrl(String image_url) {
+        this.image_url = image_url;
+    }
+
+    public Date getCreatedAt() {
+        return created_at;
+    }
+
+    public void setCreatedAt(Date created_at) {
+        this.created_at = created_at;
+    }
 
     @Override
     public String toString() {
-        return "Forum{id=" + id + ", title='" + title + "', creator=" + idCreator + "}";
+        return "Forum{id=" + id + ", title='" + title + "', creator=" + creator_id + "}";
     }
 }

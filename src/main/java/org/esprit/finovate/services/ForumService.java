@@ -28,14 +28,14 @@ public class ForumService {
 
             stmt.setString(1, ValidationUtils.sanitize(forum.getTitle()));
             stmt.setString(2, ValidationUtils.sanitize(forum.getDescription()));
-            stmt.setLong(3, forum.getIdCreator());
+            stmt.setLong(3, forum.getCreatorId());
             stmt.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
 
             int rows = stmt.executeUpdate();
 
             if (rows > 0) {
                 ResultSet keys = stmt.getGeneratedKeys();
-                if (keys.next()) forum.setId(keys.getLong(1));
+                if (keys.next()) forum.setId((int) keys.getLong(1));
                 return true;
             }
             return false;
@@ -75,10 +75,10 @@ public class ForumService {
     public boolean updateForum(Forum forum, Long userId, boolean isBlocked) throws SQLException {
         if (isBlocked) throw new SecurityException("Utilisateur bloqué");
 
-        Forum existing = getForumById(forum.getId());
+        Forum existing = getForumById((long) forum.getId());
         if (existing == null) return false;
 
-        if (!existing.getIdCreator().equals(userId))
+        if (!existing.getCreatorId().equals(userId))
             throw new SecurityException("Vous ne pouvez modifier que vos forums");
 
         String query = "UPDATE forums SET title = ?, description = ? WHERE id = ?";
@@ -98,7 +98,7 @@ public class ForumService {
         Forum forum = getForumById(forumId);
         if (forum == null) return false;
 
-        if (!forum.getIdCreator().equals(userId))
+        if (!forum.getCreatorId().equals(userId))
             throw new SecurityException("Vous ne pouvez supprimer que vos forums");
 
         String query = "DELETE FROM forums WHERE id = ?";
@@ -113,7 +113,7 @@ public class ForumService {
     // MAP ResultSet → Forum
     private Forum mapResultSetToForum(ResultSet rs) throws SQLException {
         Forum f = new Forum(rs.getLong("creator_id"), rs.getString("title"), rs.getString("description"));
-        f.setId(rs.getLong("id"));
+        f.setId((int) rs.getLong("id"));
         f.setCreatedAt(rs.getTimestamp("created_at"));
         return f;
     }

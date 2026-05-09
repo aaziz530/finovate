@@ -219,7 +219,7 @@ public class TopUpController implements Initializable {
                         userService.updateUser(Session.currentUser);
                         
                         // Log transaction
-                        transactionService.logTopUp(Session.currentUser.getId().intValue(), result.amount());
+                        transactionService.logTopUp(Session.currentUser.getId(), result.amount());
                         
                         return true;
                     } catch (SQLException e) {

@@ -33,7 +33,7 @@ public class CommentService {
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setInt(1, comment.getPostId());
-            stmt.setInt(2, comment.getAuthorId());
+            stmt.setLong(2, comment.getAuthorId());
             stmt.setString(3, ValidationUtils.sanitize(comment.getContent()));
 
             int rowsAffected = stmt.executeUpdate();
@@ -121,7 +121,7 @@ public class CommentService {
 
         // Vérifier les droits
         Comment existingComment = getCommentById(comment.getId());
-        if (existingComment == null || existingComment.getAuthorId() != requestingUserId) {
+        if (existingComment == null || !existingComment.getAuthorId().equals((long) requestingUserId)) {
             throw new SecurityException("Vous ne pouvez modifier que vos propres commentaires");
         }
 
@@ -150,7 +150,7 @@ public class CommentService {
     public boolean deleteComment(int commentId, int requestingUserId) throws SQLException {
         // Vérifier les droits
         Comment comment = getCommentById(commentId);
-        if (comment == null || comment.getAuthorId() != requestingUserId) {
+        if (comment == null || !comment.getAuthorId().equals((long) requestingUserId)) {
             throw new SecurityException("Vous ne pouvez supprimer que vos propres commentaires");
         }
 
@@ -171,7 +171,7 @@ public class CommentService {
         return new Comment(
                 rs.getInt("id"),
                 rs.getInt("post_id"),
-                rs.getInt("author_id"),
+                rs.getLong("author_id"),
                 rs.getString("content"),
                 rs.getTimestamp("created_at"),
                 rs.getTimestamp("updated_at")

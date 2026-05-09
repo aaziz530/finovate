@@ -15,7 +15,7 @@ public class User {
     private float solde;
     private Date birthdate;
     private Long numeroCarte;
-    private String cinNumber;
+    private String cin;
     private int phoneNumber;
 
     public User() {
@@ -23,13 +23,13 @@ public class User {
     }
 
     public User(String email, String password, String firstName, String lastName, Date birthdate,
-            String cinNumber, int phoneNumber) {
+            String cin, int phoneNumber) {
         this.email = email;
         this.password = password;
         this.firstname = firstName;
         this.lastname = lastName;
         this.birthdate = birthdate;
-        this.cinNumber = cinNumber;
+        this.cin = cin;
         this.phoneNumber = phoneNumber;
 
         this.role = "USER";
@@ -40,7 +40,7 @@ public class User {
     }
 
     public User(Long id, String email, String password, String firstName, String lastName, String role, int points,
-            Date createdAt, float solde, Date birthdate, Long numeroCarte, String cinNumber, int phoneNumber) {
+            Date createdAt, float solde, Date birthdate, Long numeroCarte, String cin, int phoneNumber) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -52,7 +52,7 @@ public class User {
         this.solde = solde;
         this.birthdate = birthdate;
         this.numeroCarte = numeroCarte;
-        this.cinNumber = cinNumber;
+        this.cin = cin;
         this.phoneNumber = phoneNumber;
     }
 
@@ -181,12 +181,12 @@ public class User {
         this.numeroCarte = numeroCarte;
     }
 
-    public String getCinNumber() {
-        return cinNumber;
+    public String getCin() {
+        return cin;
     }
 
-    public void setCinNumber(String cinNumber) {
-        this.cinNumber = cinNumber;
+    public void setCin(String cin) {
+        this.cin = cin;
     }
 
     public int getPhoneNumber() {
@@ -209,7 +209,7 @@ public class User {
                 ", solde=" + solde +
                 ", birthdate=" + birthdate +
                 ", numeroCarte=" + numeroCarte +
-                ", cinNumber='" + cinNumber + '\'' +
+                ", cin='" + cin + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", createdAt=" + createdAt +
                 '}';

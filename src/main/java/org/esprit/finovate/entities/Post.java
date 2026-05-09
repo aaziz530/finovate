@@ -4,35 +4,35 @@ import java.sql.Timestamp;
 
 public class Post {
     private int id;
-    private int forumId;
+    private int forum_id;
     private String title;
     private String content;
-    private String imageUrl;
-    private int authorId;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
+    private String image_url;
+    private Long author_id;
+    private Timestamp created_at;
+    private Timestamp updated_at;
 
     // Constructeur vide
     public Post() {}
 
     // Constructeur complet
-    public Post(int id, int forumId, String title, String content, int authorId,
-                Timestamp createdAt, Timestamp updatedAt) {
+    public Post(int id, int forum_id, String title, String content, Long author_id,
+                Timestamp created_at, Timestamp updated_at) {
         this.id = id;
-        this.forumId = forumId;
+        this.forum_id = forum_id;
         this.title = title;
         this.content = content;
-        this.authorId = authorId;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+        this.author_id = author_id;
+        this.created_at = created_at;
+        this.updated_at = updated_at;
     }
 
     // Constructeur sans ID (pour création)
-    public Post(int forumId, String title, String content, int authorId) {
-        this.forumId = forumId;
+    public Post(int forum_id, String title, String content, Long author_id) {
+        this.forum_id = forum_id;
         this.title = title;
         this.content = content;
-        this.authorId = authorId;
+        this.author_id = author_id;
     }
 
     // Getters et Setters
@@ -45,11 +45,11 @@ public class Post {
     }
 
     public int getForumId() {
-        return forumId;
+        return forum_id;
     }
 
-    public void setForumId(int forumId) {
-        this.forumId = forumId;
+    public void setForumId(int forum_id) {
+        this.forum_id = forum_id;
     }
 
     public String getTitle() {
@@ -69,46 +69,46 @@ public class Post {
     }
 
     public String getImageUrl() {
-        return imageUrl;
+        return image_url;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
+    public void setImageUrl(String image_url) {
+        this.image_url = image_url;
     }
 
-    public int getAuthorId() {
-        return authorId;
+    public Long getAuthorId() {
+        return author_id;
     }
 
-    public void setAuthorId(int authorId) {
-        this.authorId = authorId;
+    public void setAuthorId(Long author_id) {
+        this.author_id = author_id;
     }
 
     public Timestamp getCreatedAt() {
-        return createdAt;
+        return created_at;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
+    public void setCreatedAt(Timestamp created_at) {
+        this.created_at = created_at;
     }
 
     public Timestamp getUpdatedAt() {
-        return updatedAt;
+        return updated_at;
     }
 
-    public void setUpdatedAt(Timestamp updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setUpdatedAt(Timestamp updated_at) {
+        this.updated_at = updated_at;
     }
 
     @Override
     public String toString() {
         return "Post{" +
                 "id=" + id +
-                ", forumId=" + forumId +
+                ", forum_id=" + forum_id +
                 ", title='" + title + '\'' +
                 ", content='" + content + '\'' +
-                ", authorId=" + authorId +
-                ", createdAt=" + createdAt +
+                ", author_id=" + author_id +
+                ", created_at=" + created_at +
                 '}';
     }
 }

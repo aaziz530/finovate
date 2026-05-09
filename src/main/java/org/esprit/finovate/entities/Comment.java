@@ -1,33 +1,33 @@
 package org.esprit.finovate.entities;
 
 import java.sql.Timestamp;
+import java.util.Date;
 
 public class Comment {
     private int id;
-    private int postId;
-    private int authorId;
+    private int post_id;
+    private Long author_id;
     private String content;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
+    private Date created_at;
+    private Date updated_at;
 
     // Constructeur vide
     public Comment() {}
 
     // Constructeur complet
-    public Comment(int id, int postId, int authorId, String content,
-                   Timestamp createdAt, Timestamp updatedAt) {
+    public Comment(int id, int post_id, Long author_id, String content, Date created_at, Date updated_at) {
         this.id = id;
-        this.postId = postId;
-        this.authorId = authorId;
+        this.post_id = post_id;
+        this.author_id = author_id;
         this.content = content;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
+        this.created_at = created_at;
+        this.updated_at = updated_at;
     }
 
-    // Constructeur sans ID (pour création)
-    public Comment(int postId, int authorId, String content) {
-        this.postId = postId;
-        this.authorId = authorId;
+    // Constructeur pour création (sans ID)
+    public Comment(int post_id, Long author_id, String content) {
+        this.post_id = post_id;
+        this.author_id = author_id;
         this.content = content;
     }
 
@@ -41,19 +41,19 @@ public class Comment {
     }
 
     public int getPostId() {
-        return postId;
+        return post_id;
     }
 
-    public void setPostId(int postId) {
-        this.postId = postId;
+    public void setPostId(int post_id) {
+        this.post_id = post_id;
     }
 
-    public int getAuthorId() {
-        return authorId;
+    public Long getAuthorId() {
+        return author_id;
     }
 
-    public void setAuthorId(int authorId) {
-        this.authorId = authorId;
+    public void setAuthorId(Long author_id) {
+        this.author_id = author_id;
     }
 
     public String getContent() {
@@ -64,30 +64,30 @@ public class Comment {
         this.content = content;
     }
 
-    public Timestamp getCreatedAt() {
-        return createdAt;
+    public Date getCreatedAt() {
+        return created_at;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
+    public void setCreatedAt(Date created_at) {
+        this.created_at = created_at;
     }
 
-    public Timestamp getUpdatedAt() {
-        return updatedAt;
+    public Date getUpdatedAt() {
+        return updated_at;
     }
 
-    public void setUpdatedAt(Timestamp updatedAt) {
-        this.updatedAt = updatedAt;
+    public void setUpdatedAt(Date updated_at) {
+        this.updated_at = updated_at;
     }
 
     @Override
     public String toString() {
         return "Comment{" +
                 "id=" + id +
-                ", postId=" + postId +
-                ", authorId=" + authorId +
+                ", post_id=" + post_id +
+                ", author_id=" + author_id +
                 ", content='" + content + '\'' +
-                ", createdAt=" + createdAt +
+                ", created_at=" + created_at +
                 '}';
     }
 }

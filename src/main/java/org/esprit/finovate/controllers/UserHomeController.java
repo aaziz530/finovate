@@ -61,7 +61,7 @@ public class UserHomeController implements Initializable {
 
     private void refreshDashboard() {
         try {
-            int userId = Session.currentUser.getId().intValue();
+            Long userId = Session.currentUser.getId();
 
             // 1. Balance & Points
             float balance = transactionService.getUserBalance(userId);
@@ -77,7 +77,7 @@ public class UserHomeController implements Initializable {
                 featuredGoalTitle.setText(topGoal.getTitle());
                 featuredGoalProgress.setProgress(topGoal.getProgress());
                 featuredGoalAmount.setText(
-                        String.format("%.2f / %.2f TND", topGoal.getCurrentAmount(), topGoal.getTargetAmount()));
+                        String.format("%s / %s TND", topGoal.getCurrentAmount(), topGoal.getTargetAmount()));
             }
 
             // 3. Transactions
@@ -85,11 +85,11 @@ public class UserHomeController implements Initializable {
             recentTransactionsList.getItems().clear();
             for (int i = 0; i < Math.min(transactions.size(), 5); i++) {
                 Transaction t = transactions.get(i);
-                boolean isSent = t.getSenderId() == userId;
+                boolean isSent = t.getSenderId().equals(userId);
                 String sign = isSent ? "-" : "+";
                 String target = isSent ? "To: " + t.getReceiverName() : "From: " + t.getSenderName();
                 recentTransactionsList.getItems().add(String.format("%s %s %.2f TND - %s",
-                        target, sign, t.getAmount(), t.getDescription()));
+                        target, sign, Float.parseFloat(t.getAmount()), t.getDescription()));
             }
 
         } catch (SQLException e) {

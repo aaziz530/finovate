@@ -36,10 +36,10 @@ public class UserService implements IUserService {
         return null;
     }
 
-    public User registerGoogleUser(String email, String firstName, String lastName, Date birthdate, String cinNumber, String phoneNumber)
+    public User registerGoogleUser(String email, String firstName, String lastName, Date birthdate, String cin, String phoneNumber)
             throws SQLException {
         String randomPassword = generateRandomPassword();
-        return register(email, randomPassword, firstName, lastName, birthdate, cinNumber, phoneNumber);
+        return register(email, randomPassword, firstName, lastName, birthdate, cin, phoneNumber);
     }
 
     private String generateRandomPassword() {
@@ -84,14 +84,14 @@ public class UserService implements IUserService {
 
     @Override
     public User register(String email, String password, String firstName, String lastName, Date birthdate,
-            String cinNumber, String phoneNumber)
+            String cin, String phoneNumber)
             throws SQLException {
         int phone = 0;
         if (phoneNumber != null && !phoneNumber.trim().isEmpty()) {
             phone = Integer.parseInt(phoneNumber.trim());
         }
 
-        User user = new User(email, password, firstName, lastName, birthdate, cinNumber, phone);
+        User user = new User(email, password, firstName, lastName, birthdate, cin, phone);
         user.setPassword(PasswordUtils.sha256(password));
 
         if (connection == null) {
@@ -102,11 +102,11 @@ public class UserService implements IUserService {
             throw new IllegalStateException("Email already exists");
         }
 
-        if (cinExists(user.getCinNumber())) {
+        if (cinExists(user.getCin())) {
             throw new IllegalStateException("CIN already exists");
         }
 
-        String sql = "INSERT INTO `user` (email, password, firstname, lastname, role, points, createdAt, solde, numeroCarte, birthdate, cin, phone_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO `user` (email, password, firstname, lastname, role, points, created_at, solde, numero_carte, birthdate, cin, phone_number, is_verified, image_name, updated_at, face_auth_enabled, face_embedding) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, user.getEmail());
             ps.setString(2, user.getPassword());
@@ -127,8 +127,14 @@ public class UserService implements IUserService {
             else
                 ps.setDate(10, new java.sql.Date(user.getBirthdate().getTime()));
 
-            ps.setString(11, user.getCinNumber());
+            ps.setString(11, user.getCin());
             ps.setInt(12, user.getPhoneNumber());
+
+            ps.setInt(13, 1);
+            ps.setNull(14, Types.VARCHAR);
+            ps.setNull(15, Types.TIMESTAMP);
+            ps.setInt(16, 0);
+            ps.setNull(17, Types.LONGVARCHAR);
 
             ps.executeUpdate();
 
@@ -208,14 +214,14 @@ public class UserService implements IUserService {
         u.setLastName(rs.getString("lastname"));
         u.setRole(rs.getString("role"));
         u.setPoints(rs.getInt("points"));
-        u.setCreatedAt(rs.getTimestamp("createdAt"));
+        u.setCreatedAt(rs.getTimestamp("created_at"));
         u.setSolde(rs.getFloat("solde"));
 
-        long nc = rs.getLong("numeroCarte");
+        long nc = rs.getLong("numero_carte");
         u.setNumeroCarte(rs.wasNull() ? null : nc);
 
         u.setBirthdate(rs.getDate("birthdate"));
-        u.setCinNumber(rs.getString("cin"));
+        u.setCin(rs.getString("cin"));
         u.setPhoneNumber(rs.getInt("phone_number"));
         return u;
     }
@@ -227,7 +233,7 @@ public class UserService implements IUserService {
         }
 
         java.util.List<User> users = new java.util.ArrayList<>();
-        String sql = "SELECT * FROM `user` ORDER BY createdAt DESC";
+        String sql = "SELECT * FROM `user` ORDER BY created_at DESC";
 
         try (PreparedStatement ps = connection.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
@@ -268,7 +274,7 @@ public class UserService implements IUserService {
             throw new IllegalArgumentException("User ID cannot be null for update");
         }
 
-        String sql = "UPDATE `user` SET email=?, firstname=?, lastname=?, role=?, points=?, solde=?, birthdate=?, cin=?, numeroCarte=?, phone_number=? WHERE id=?";
+        String sql = "UPDATE `user` SET email=?, firstname=?, lastname=?, role=?, points=?, solde=?, birthdate=?, cin=?, numero_carte=?, phone_number=? WHERE id=?";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, user.getEmail());
@@ -284,7 +290,7 @@ public class UserService implements IUserService {
                 ps.setDate(7, new java.sql.Date(user.getBirthdate().getTime()));
             }
 
-            ps.setString(8, user.getCinNumber());
+            ps.setString(8, user.getCin());
 
             if (user.getNumeroCarte() == null) {
                 ps.setNull(9, Types.BIGINT);
@@ -349,7 +355,7 @@ public class UserService implements IUserService {
         }
 
         // Active users = users created in the last 30 days
-        String sql = "SELECT COUNT(*) as active FROM `user` WHERE createdAt >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
+        String sql = "SELECT COUNT(*) as active FROM `user` WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
 
         try (PreparedStatement ps = connection.prepareStatement(sql);
                 ResultSet rs = ps.executeQuery()) {
@@ -377,7 +383,7 @@ public class UserService implements IUserService {
                 "firstname LIKE ? OR " +
                 "lastname LIKE ? OR " +
                 "CONCAT(firstname, ' ', lastname) LIKE ? " +
-                "ORDER BY createdAt DESC";
+                "ORDER BY created_at DESC";
 
         try (PreparedStatement ps = connection.prepareStatement(sql)) {
             String searchPattern = "%" + searchTerm + "%";

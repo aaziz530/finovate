@@ -20,12 +20,12 @@ public class GoalService implements IGoalService {
             throw new SQLException("Database connection is null");
         }
 
-        String sql = "INSERT INTO goal (idUser, title, targetAmount, currentAmount, deadline, status, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO goal (id_user, title, target_amount, current_amount, deadline, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pst = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pst.setInt(1, goal.getIdUser());
+            pst.setLong(1, goal.getIdUser());
             pst.setString(2, goal.getTitle());
-            pst.setFloat(3, goal.getTargetAmount());
-            pst.setFloat(4, goal.getCurrentAmount());
+            pst.setString(3, goal.getTargetAmount());
+            pst.setString(4, goal.getCurrentAmount());
             pst.setDate(5, new java.sql.Date(goal.getDeadline().getTime()));
             pst.setString(6, goal.getStatus());
             pst.setDate(7, new java.sql.Date(goal.getCreatedAt().getTime()));
@@ -33,29 +33,29 @@ public class GoalService implements IGoalService {
 
             try (ResultSet rs = pst.getGeneratedKeys()) {
                 if (rs.next()) {
-                    goal.setId(rs.getInt(1));
+                    goal.setId(rs.getLong(1));
                 }
             }
         }
     }
 
     @Override
-    public List<Goal> getGoalsByUserId(int userId) throws SQLException {
+    public List<Goal> getGoalsByUserId(Long userId) throws SQLException {
         List<Goal> goals = new ArrayList<>();
-        String sql = "SELECT * FROM goal WHERE idUser = ?";
+        String sql = "SELECT * FROM goal WHERE id_user = ?";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
-            pst.setInt(1, userId);
+            pst.setLong(1, userId);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     Goal goal = new Goal(
-                            rs.getInt("id"),
-                            rs.getInt("idUser"),
+                            rs.getLong("id"),
+                            rs.getLong("id_user"),
                             rs.getString("title"),
-                            rs.getFloat("targetAmount"),
-                            rs.getFloat("currentAmount"),
+                            rs.getString("target_amount"),
+                            rs.getString("current_amount"),
                             rs.getDate("deadline"),
                             rs.getString("status"),
-                            rs.getDate("createdAt"));
+                            rs.getDate("created_at"));
                     goals.add(goal);
                 }
             }
@@ -65,33 +65,33 @@ public class GoalService implements IGoalService {
 
     @Override
     public void updateGoal(Goal goal) throws SQLException {
-        String sql = "UPDATE goal SET title = ?, targetAmount = ?, deadline = ?, status = ? WHERE id = ?";
+        String sql = "UPDATE goal SET title = ?, target_amount = ?, deadline = ?, status = ? WHERE id = ?";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setString(1, goal.getTitle());
-            pst.setFloat(2, goal.getTargetAmount());
+            pst.setString(2, goal.getTargetAmount());
             pst.setDate(3, new java.sql.Date(goal.getDeadline().getTime()));
             pst.setString(4, goal.getStatus());
-            pst.setInt(5, goal.getId());
+            pst.setLong(5, goal.getId());
             pst.executeUpdate();
         }
     }
 
     @Override
-    public void deleteGoal(int goalId) throws SQLException {
+    public void deleteGoal(Long goalId) throws SQLException {
         try {
             connection.setAutoCommit(false);
 
-            int userId;
+            Long userId;
             float goalAmount;
-            String selectSql = "SELECT idUser, currentAmount FROM goal WHERE id = ? FOR UPDATE";
+            String selectSql = "SELECT id_user, current_amount FROM goal WHERE id = ? FOR UPDATE";
             try (PreparedStatement pst = connection.prepareStatement(selectSql)) {
-                pst.setInt(1, goalId);
+                pst.setLong(1, goalId);
                 try (ResultSet rs = pst.executeQuery()) {
                     if (!rs.next()) {
                         throw new SQLException("Goal not found with ID: " + goalId);
                     }
-                    userId = rs.getInt("idUser");
-                    goalAmount = rs.getFloat("currentAmount");
+                    userId = rs.getLong("id_user");
+                    goalAmount = Float.parseFloat(rs.getString("current_amount").isEmpty() ? "0" : rs.getString("current_amount"));
                 }
             }
 
@@ -99,7 +99,7 @@ public class GoalService implements IGoalService {
                 String refundSql = "UPDATE user SET solde = solde + ? WHERE id = ?";
                 try (PreparedStatement pstRefund = connection.prepareStatement(refundSql)) {
                     pstRefund.setFloat(1, goalAmount);
-                    pstRefund.setInt(2, userId);
+                    pstRefund.setLong(2, userId);
                     int updated = pstRefund.executeUpdate();
                     if (updated == 0) {
                         throw new SQLException("User not found for refund. User ID: " + userId);
@@ -109,7 +109,7 @@ public class GoalService implements IGoalService {
 
             String deleteSql = "DELETE FROM goal WHERE id = ?";
             try (PreparedStatement pstDelete = connection.prepareStatement(deleteSql)) {
-                pstDelete.setInt(1, goalId);
+                pstDelete.setLong(1, goalId);
                 int deleted = pstDelete.executeUpdate();
                 if (deleted == 0) {
                     throw new SQLException("Delete failed. Goal not found with ID: " + goalId);
@@ -134,7 +134,7 @@ public class GoalService implements IGoalService {
     }
 
     @Override
-    public void addFundsToGoal(int userId, int goalId, float amount) throws SQLException {
+    public void addFundsToGoal(Long userId, Long goalId, float amount) throws SQLException {
         // This operation requires a transaction
         // 1. Check user balance
         // 2. Check goal exists and not completed
@@ -155,34 +155,47 @@ public class GoalService implements IGoalService {
             String updateUserSql = "UPDATE user SET solde = solde - ? WHERE id = ?";
             try (PreparedStatement pstUser = connection.prepareStatement(updateUserSql)) {
                 pstUser.setFloat(1, amount);
-                pstUser.setInt(2, userId);
+                pstUser.setLong(2, userId);
                 int updated = pstUser.executeUpdate();
                 if (updated == 0)
                     throw new SQLException("User not found or update failed");
             }
 
             // Update Goal Amount
-            String updateGoalSql = "UPDATE goal SET currentAmount = currentAmount + ? WHERE id = ?";
+            // Get current amount and add new amount
+            String getCurrentSql = "SELECT current_amount FROM goal WHERE id = ?";
+            float newAmount = 0;
+            try (PreparedStatement pstGetCurrent = connection.prepareStatement(getCurrentSql)) {
+                pstGetCurrent.setLong(1, goalId);
+                try (ResultSet rs = pstGetCurrent.executeQuery()) {
+                    if (rs.next()) {
+                        float current = Float.parseFloat(rs.getString("current_amount").isEmpty() ? "0" : rs.getString("current_amount"));
+                        newAmount = current + amount;
+                    }
+                }
+            }
+            
+            String updateGoalSql = "UPDATE goal SET current_amount = ? WHERE id = ?";
             try (PreparedStatement pstGoal = connection.prepareStatement(updateGoalSql)) {
-                pstGoal.setFloat(1, amount);
-                pstGoal.setInt(2, goalId);
+                pstGoal.setString(1, String.valueOf(newAmount));
+                pstGoal.setLong(2, goalId);
                 int updated = pstGoal.executeUpdate();
                 if (updated == 0)
                     throw new SQLException("Goal not found or update failed");
             }
 
             // Check if goal reached (This could be optimized but let's fetch first)
-            String checkGoalSql = "SELECT currentAmount, targetAmount FROM goal WHERE id = ?";
+            String checkGoalSql = "SELECT current_amount, target_amount FROM goal WHERE id = ?";
             try (PreparedStatement pstCheck = connection.prepareStatement(checkGoalSql)) {
-                pstCheck.setInt(1, goalId);
+                pstCheck.setLong(1, goalId);
                 try (ResultSet rs = pstCheck.executeQuery()) {
                     if (rs.next()) {
-                        float current = rs.getFloat("currentAmount");
-                        float target = rs.getFloat("targetAmount");
+                        float current = Float.parseFloat(rs.getString("current_amount").isEmpty() ? "0" : rs.getString("current_amount"));
+                        float target = Float.parseFloat(rs.getString("target_amount").isEmpty() ? "0" : rs.getString("target_amount"));
                         if (current >= target) {
                             String markDoneSql = "UPDATE goal SET status = 'Achieved' WHERE id = ?";
                             try (PreparedStatement pstDone = connection.prepareStatement(markDoneSql)) {
-                                pstDone.setInt(1, goalId);
+                                pstDone.setLong(1, goalId);
                                 pstDone.executeUpdate();
                             }
                         }
@@ -209,10 +222,10 @@ public class GoalService implements IGoalService {
     }
 
     @Override
-    public float getCurrentBalance(int userId) throws SQLException {
+    public float getCurrentBalance(Long userId) throws SQLException {
         String sql = "SELECT solde FROM user WHERE id = ?";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
-            pst.setInt(1, userId);
+            pst.setLong(1, userId);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     return rs.getFloat("solde");

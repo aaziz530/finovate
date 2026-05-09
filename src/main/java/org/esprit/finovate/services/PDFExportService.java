@@ -194,7 +194,7 @@ public class PDFExportService {
             addTableCell(table, user.getFirstName() != null ? user.getFirstName() : "-", regularFont, alternate, TextAlignment.LEFT);
             addTableCell(table, user.getLastName() != null ? user.getLastName() : "-", regularFont, alternate, TextAlignment.LEFT);
             addTableCell(table, user.getEmail() != null ? user.getEmail() : "-", regularFont, alternate, TextAlignment.LEFT);
-            addTableCell(table, user.getCinNumber() != null ? user.getCinNumber() : "-", regularFont, alternate, TextAlignment.CENTER);
+            addTableCell(table, user.getCin() != null ? user.getCin() : "-", regularFont, alternate, TextAlignment.CENTER);
             addTableCell(table, String.valueOf(user.getPhoneNumber()), regularFont, alternate, TextAlignment.CENTER);
             addTableCell(table, user.getBirthdate() != null ? dateFormat.format(user.getBirthdate()) : "-", regularFont, alternate, TextAlignment.CENTER);
             addTableCell(table, user.getRole() != null ? user.getRole() : "USER", regularFont, alternate, TextAlignment.CENTER);

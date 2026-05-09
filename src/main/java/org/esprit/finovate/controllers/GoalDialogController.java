@@ -43,13 +43,13 @@ public class GoalDialogController {
             LocalDate deadlineDate = deadlinePicker.getValue();
 
             if (!amountStr.isEmpty() && deadlineDate != null) {
-                float targetAmount = Float.parseFloat(amountStr);
+                String targetAmount = amountStr;
                 Date deadline = Date.from(deadlineDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
                 
                 // Calcul temporaire pour l'affichage
                 Goal tempGoal = new Goal();
                 tempGoal.setTargetAmount(targetAmount);
-                tempGoal.setCurrentAmount(createdGoal != null ? createdGoal.getCurrentAmount() : 0);
+                tempGoal.setCurrentAmount(createdGoal != null ? createdGoal.getCurrentAmount() : "0");
                 tempGoal.setDeadline(deadline);
                 
                 float suggested = tempGoal.getSuggestedMonthlySaving();
@@ -96,14 +96,14 @@ public class GoalDialogController {
     private void handleSave() {
         if (isValid()) {
             String title = titleField.getText().trim();
-            float amount = Float.parseFloat(amountField.getText().trim());
+            String amount = amountField.getText().trim();
             Date deadline = Date.from(deadlinePicker.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant());
 
             if (createdGoal == null) {
                 createdGoal = new Goal(); // IDUser will be set by caller
                 createdGoal.setCreatedAt(new Date());
                 createdGoal.setStatus("In Progress");
-                createdGoal.setCurrentAmount(0);
+                createdGoal.setCurrentAmount("0");
             }
             createdGoal.setTitle(title);
             createdGoal.setTargetAmount(amount);

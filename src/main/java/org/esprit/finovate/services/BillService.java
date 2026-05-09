@@ -15,7 +15,7 @@ public class BillService implements IBillService {
     }
 
     @Override
-    public void payBill(int userId, String reference, double amount) throws SQLException {
+    public void payBill(Long userId, String reference, double amount) throws SQLException {
         if (amount <= 0) {
             throw new SQLException("Amount must be positive");
         }
@@ -27,7 +27,7 @@ public class BillService implements IBillService {
             float currentBalance = 0;
             String checkBalanceSql = "SELECT solde FROM user WHERE id = ?";
             try (PreparedStatement pstCheck = connection.prepareStatement(checkBalanceSql)) {
-                pstCheck.setInt(1, userId);
+                pstCheck.setLong(1, userId);
                 try (ResultSet rs = pstCheck.executeQuery()) {
                     if (rs.next()) {
                         currentBalance = rs.getFloat("solde");
@@ -45,14 +45,14 @@ public class BillService implements IBillService {
             String updateBalanceSql = "UPDATE user SET solde = solde - ? WHERE id = ?";
             try (PreparedStatement pstUpdate = connection.prepareStatement(updateBalanceSql)) {
                 pstUpdate.setDouble(1, amount);
-                pstUpdate.setInt(2, userId);
+                pstUpdate.setLong(2, userId);
                 pstUpdate.executeUpdate();
             }
 
             // 3. Log Bill Payment
-            String logBillSql = "INSERT INTO bill (idUser, reference, amount, datePaiement) VALUES (?, ?, ?, ?)";
+            String logBillSql = "INSERT INTO bill (id_user, reference, amount, date_paiement) VALUES (?, ?, ?, ?)";
             try (PreparedStatement pstBill = connection.prepareStatement(logBillSql)) {
-                pstBill.setInt(1, userId);
+                pstBill.setLong(1, userId);
                 pstBill.setString(2, reference);
                 pstBill.setDouble(3, amount);
                 pstBill.setDate(4, new java.sql.Date(System.currentTimeMillis()));
@@ -70,19 +70,19 @@ public class BillService implements IBillService {
     }
 
     @Override
-    public List<Bill> getBillsByUserId(int userId) throws SQLException {
+    public List<Bill> getBillsByUserId(Long userId) throws SQLException {
         List<Bill> bills = new ArrayList<>();
-        String sql = "SELECT * FROM bill WHERE idUser = ? ORDER BY datePaiement DESC";
+        String sql = "SELECT * FROM bill WHERE id_user = ? ORDER BY date_paiement DESC";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
-            pst.setInt(1, userId);
+            pst.setLong(1, userId);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     Bill bill = new Bill(
                             rs.getInt("id"),
-                            rs.getInt("idUser"),
+                            rs.getLong("id_user"),
                             rs.getString("reference"),
                             rs.getDouble("amount"),
-                            rs.getDate("datePaiement"));
+                            rs.getDate("date_paiement"));
                     bills.add(bill);
                 }
             }

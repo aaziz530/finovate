@@ -5,6 +5,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -13,7 +14,127 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<BorderPane prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: #f5f7fa;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.esprit.finovate.controllers.AdminDashboardController">
+<BorderPane prefHeight="800.0" prefWidth="1200.0" style="-fx-background-color: #f7f9fc;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.esprit.finovate.controllers.AdminDashboardController">
+   <!-- Left Sidebar -->
+   <left>
+      <VBox prefWidth="250.0" style="-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 0);" BorderPane.alignment="CENTER">
+         <children>
+            <!-- Header Section -->
+            <VBox spacing="0.0" style="-fx-background-color: white;">
+               <padding>
+                  <Insets bottom="10.0" left="20.0" right="20.0" top="30.0" />
+               </padding>
+               <children>
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <children>
+                        <Label text="Finovate" textFill="#237f4e">
+                           <font>
+                              <Font name="System Bold" size="24.0" />
+                           </font>
+                        </Label>
+                     </children>
+                     <VBox.margin>
+                        <Insets bottom="40.0" />
+                     </VBox.margin>
+                  </HBox>
+
+                  <Label text="ADMIN MENU" textFill="#8898aa">
+                     <font>
+                        <Font name="System Bold" size="10.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets bottom="10.0" />
+                     </VBox.margin>
+                  </Label>
+
+                  <VBox spacing="10.0">
+                     <children>
+                        <Button fx:id="btnUsers" alignment="BASELINE_LEFT" maxWidth="Infinity" onAction="#handleUsers" style="-fx-background-color: #f0fdf4; -fx-text-fill: #237f4e; -fx-cursor: hand; -fx-background-radius: 8;" text="Users">
+                           <font>
+                              <Font name="System Bold" size="14.0" />
+                           </font>
+                           <padding>
+                              <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                           </padding>
+                        </Button>
+
+                        <Button fx:id="btnAds" alignment="BASELINE_LEFT" maxWidth="Infinity" onAction="#handleAds" style="-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="Ads">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                           <padding>
+                              <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                           </padding>
+                        </Button>
+
+                        <Button fx:id="btnProducts" alignment="BASELINE_LEFT" maxWidth="Infinity" onAction="#handleProducts" style="-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="Products">
+                           <font>
+                              <Font size="14.0" />
+                           </font>
+                           <padding>
+                              <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                           </padding>
+                        </Button>
+                     </children>
+                     <VBox.margin>
+                        <Insets bottom="30.0" />
+                     </VBox.margin>
+                  </VBox>
+               </children>
+            </VBox>
+
+            <!-- Fixed Bottom Section -->
+            <VBox spacing="10.0" style="-fx-background-color: white;">
+               <padding>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="10.0" />
+               </padding>
+               <children>
+                  <Separator />
+                  <Label text="ACCOUNT" textFill="#8898aa">
+                     <font>
+                        <Font name="System Bold" size="10.0" />
+                     </font>
+                     <VBox.margin>
+                        <Insets bottom="5.0" top="10.0" />
+                     </VBox.margin>
+                  </Label>
+
+                  <Button fx:id="logoutButton" alignment="BASELINE_LEFT" maxWidth="Infinity" onAction="#handleLogout" style="-fx-background-color: transparent; -fx-text-fill: #dc3545; -fx-cursor: hand;" text="Sign Out">
+                     <font>
+                        <Font size="14.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
+                     </padding>
+                  </Button>
+
+                  <HBox alignment="CENTER_LEFT" spacing="10.0">
+                     <padding>
+                        <Insets top="15.0" />
+                     </padding>
+                     <children>
+                        <VBox>
+                           <children>
+                              <Label fx:id="adminNameLabel" text="Admin" textFill="#32325d">
+                                 <font>
+                                    <Font name="System Bold" size="14.0" />
+                                 </font>
+                              </Label>
+                              <Label text="ADMIN" textFill="#8898aa">
+                                 <font>
+                                    <Font size="12.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+         </children>
+      </VBox>
+   </left>
+   
    <!-- Top Navigation Bar -->
    <top>
       <HBox alignment="CENTER_LEFT" style="-fx-background-color: #237f4e; -fx-padding: 20; -fx-font-family: 'Poppins';">
@@ -47,16 +168,6 @@
             </Label>
 
             <Button fx:id="chatbotButton" mnemonicParsing="false" onAction="#handleChatbotTop" style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand; -fx-font-weight: bold;" text="Finovate AI">
-               <padding>
-                  <Insets bottom="8.0" left="16.0" right="16.0" top="8.0" />
-               </padding>
-               <HBox.margin>
-                  <Insets right="12.0" />
-               </HBox.margin>
-            </Button>
-            
-            <!-- Logout Button -->
-            <Button fx:id="logoutButton" mnemonicParsing="false" onAction="#handleLogout" style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-background-radius: 6; -fx-cursor: hand; -fx-font-weight: bold;" text="Logout">
                <padding>
                   <Insets bottom="8.0" left="16.0" right="16.0" top="8.0" />
                </padding>

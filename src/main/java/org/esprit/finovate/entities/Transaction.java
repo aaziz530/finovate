@@ -3,10 +3,10 @@ package org.esprit.finovate.entities;
 import java.util.Date;
 
 public class Transaction {
-    private int id;
-    private int senderId;
-    private Integer receiverId; // Can be null for bills or fees
-    private float amount;
+    private Long id;
+    private Long sender_id;
+    private Long receiver_id; // Can be null for bills or fees
+    private String amount;
     private String type; // TRANSFER, BILL, GOAL_FUNDING, etc.
     private String description;
     private Date date;
@@ -32,54 +32,54 @@ public class Transaction {
     public Transaction() {
     }
 
-    public Transaction(int senderId, Integer receiverId, float amount, String type, String description) {
-        this.senderId = senderId;
-        this.receiverId = receiverId;
+    public Transaction(Long sender_id, Long receiver_id, String amount, String type, String description) {
+        this.sender_id = sender_id;
+        this.receiver_id = receiver_id;
         this.amount = amount;
         this.type = type;
         this.description = description;
     }
 
-    public Transaction(int id, int senderId, Integer receiverId, float amount, String type, String description,
+    public Transaction(Long id, Long sender_id, Long receiver_id, String amount, String type, String description,
             Date date) {
         this.id = id;
-        this.senderId = senderId;
-        this.receiverId = receiverId;
+        this.sender_id = sender_id;
+        this.receiver_id = receiver_id;
         this.amount = amount;
         this.type = type;
         this.description = description;
         this.date = date;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public int getSenderId() {
-        return senderId;
+    public Long getSenderId() {
+        return sender_id;
     }
 
-    public void setSenderId(int senderId) {
-        this.senderId = senderId;
+    public void setSenderId(Long sender_id) {
+        this.sender_id = sender_id;
     }
 
-    public Integer getReceiverId() {
-        return receiverId;
+    public Long getReceiverId() {
+        return receiver_id;
     }
 
-    public void setReceiverId(Integer receiverId) {
-        this.receiverId = receiverId;
+    public void setReceiverId(Long receiver_id) {
+        this.receiver_id = receiver_id;
     }
 
-    public float getAmount() {
+    public String getAmount() {
         return amount;
     }
 
-    public void setAmount(float amount) {
+    public void setAmount(String amount) {
         this.amount = amount;
     }
 

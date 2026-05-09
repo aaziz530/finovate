@@ -113,7 +113,7 @@ public class UserProfileController implements Initializable {
             lastNameField.setText(user.getLastName());
             emailField.setText(user.getEmail());
 
-            cinField.setText(user.getCinNumber());
+            cinField.setText(user.getCin());
             numeroCarteField.setText(user.getNumeroCarte().toString());
             phoneField.setText(String.valueOf(user.getPhoneNumber()));
 

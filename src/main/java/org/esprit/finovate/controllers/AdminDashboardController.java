@@ -48,6 +48,18 @@ public class AdminDashboardController implements Initializable {
     @FXML
     private Button chatbotButton;
 
+    // Sidebar navigation buttons
+    @FXML
+    private Button btnUsers;
+
+    @FXML
+    private Button btnAds;
+
+    @FXML
+    private Button btnProducts;
+
+    private Button activeSidebarButton;
+
     // Statistics cards
     @FXML
     private Label totalUsersLabel;
@@ -196,6 +208,7 @@ public class AdminDashboardController implements Initializable {
         setupUserTable();
         setupFilterControls();
         loadUsers();
+        activeSidebarButton = btnUsers; // Users is active by default
     }
 
     @FXML
@@ -289,7 +302,7 @@ public class AdminDashboardController implements Initializable {
                         user.getFirstName().toLowerCase().contains(searchTerm) ||
                         user.getLastName().toLowerCase().contains(searchTerm) ||
                         user.getEmail().toLowerCase().contains(searchTerm) ||
-                        user.getCinNumber().toLowerCase().contains(searchTerm);
+                        user.getCin().toLowerCase().contains(searchTerm);
 
                 // Role check
                 boolean matchesRole = "ALL".equals(roleFilter) || roleFilter.equalsIgnoreCase(user.getRole());
@@ -368,7 +381,7 @@ public class AdminDashboardController implements Initializable {
         roleColumn.setCellValueFactory(new PropertyValueFactory<>("role"));
         pointsColumn.setCellValueFactory(new PropertyValueFactory<>("points"));
         soldeColumn.setCellValueFactory(new PropertyValueFactory<>("solde"));
-        cinColumn.setCellValueFactory(new PropertyValueFactory<>("cinNumber"));
+        cinColumn.setCellValueFactory(new PropertyValueFactory<>("cin"));
         phoneColumn.setCellValueFactory(new PropertyValueFactory<>("phoneNumber"));
         numeroCarteColumn.setCellValueFactory(new PropertyValueFactory<>("numeroCarte"));
 
@@ -503,7 +516,7 @@ public class AdminDashboardController implements Initializable {
         if (updateSoldeField != null)
             updateSoldeField.setText(String.valueOf(user.getSolde()));
         if (updateCinNumberField != null)
-            updateCinNumberField.setText(user.getCinNumber());
+            updateCinNumberField.setText(user.getCin());
         if (updatePhoneField != null)
             updatePhoneField.setText(String.valueOf(user.getPhoneNumber()));
         if (updateNumeroCarteField != null)
@@ -614,7 +627,7 @@ public class AdminDashboardController implements Initializable {
             selectedUserForUpdate.setLastName(lastName);
             selectedUserForUpdate.setEmail(email);
             selectedUserForUpdate.setRole(updateRoleComboBox.getValue());
-            selectedUserForUpdate.setCinNumber(updateCinNumberField.getText().trim());
+            selectedUserForUpdate.setCin(updateCinNumberField.getText().trim());
 
             // Check phone uniqueness for other users
             if (userService.phoneExistsForOtherUser(editedPhone, selectedUserForUpdate.getId())) {
@@ -871,5 +884,70 @@ public class AdminDashboardController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    // --- Sidebar Navigation Methods ---
+
+    @FXML
+    private void handleUsers() {
+        updateSidebarButtonStyles(btnUsers);
+        // Restore original users view content
+        if (savedAdminContent != null) {
+            mainContentArea.getChildren().setAll(savedAdminContent);
+        }
+        if (chatbotVisible) {
+            chatbotVisible = false;
+            if (chatbotButton != null) {
+                chatbotButton.setText("Finovate AI");
+            }
+        }
+    }
+
+    @FXML
+    private void handleAds() {
+        // Save current content before switching
+        if (savedAdminContent == null) {
+            savedAdminContent = FXCollections.observableArrayList(mainContentArea.getChildren());
+        }
+        updateSidebarButtonStyles(btnAds);
+        try {
+            Parent adsView = FXMLLoader.load(getClass().getResource("/ads-admin-view.fxml"));
+            mainContentArea.getChildren().setAll(adsView);
+            VBox.setVgrow(adsView, Priority.ALWAYS);
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Failed to load Ads view: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleProducts() {
+        // Save current content before switching
+        if (savedAdminContent == null) {
+            savedAdminContent = FXCollections.observableArrayList(mainContentArea.getChildren());
+        }
+        updateSidebarButtonStyles(btnProducts);
+        try {
+            Parent productsView = FXMLLoader.load(getClass().getResource("/products-admin-view.fxml"));
+            mainContentArea.getChildren().setAll(productsView);
+            VBox.setVgrow(productsView, Priority.ALWAYS);
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Failed to load Products view: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void updateSidebarButtonStyles(Button activeBtn) {
+        String activeStyle = "-fx-background-color: #f0fdf4; -fx-text-fill: #237f4e; -fx-cursor: hand; -fx-background-radius: 8; -fx-font-weight: bold;";
+        String inactiveStyle = "-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;";
+
+        if (btnUsers != null) btnUsers.setStyle(inactiveStyle);
+        if (btnAds != null) btnAds.setStyle(inactiveStyle);
+        if (btnProducts != null) btnProducts.setStyle(inactiveStyle);
+
+        if (activeBtn != null) {
+            activeBtn.setStyle(activeStyle);
+            activeSidebarButton = activeBtn;
+        }
     }
 }

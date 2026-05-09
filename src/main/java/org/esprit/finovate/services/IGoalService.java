@@ -7,13 +7,13 @@ import java.util.List;
 public interface IGoalService {
     void addGoal(Goal goal) throws SQLException;
 
-    List<Goal> getGoalsByUserId(int userId) throws SQLException;
+    List<Goal> getGoalsByUserId(Long userId) throws SQLException;
 
     void updateGoal(Goal goal) throws SQLException;
 
-    void deleteGoal(int goalId) throws SQLException;
+    void deleteGoal(Long goalId) throws SQLException;
 
-    void addFundsToGoal(int userId, int goalId, float amount) throws SQLException;
+    void addFundsToGoal(Long userId, Long goalId, float amount) throws SQLException;
 
-    float getCurrentBalance(int userId) throws SQLException;
+    float getCurrentBalance(Long userId) throws SQLException;
 }

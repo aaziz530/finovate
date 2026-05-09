@@ -52,11 +52,11 @@ public class GoalsController implements Initializable {
     private void refreshDashboard() {
         try {
             // Update Balance
-            float balance = goalService.getCurrentBalance(Session.currentUser.getId().intValue());
+            float balance = goalService.getCurrentBalance(Session.currentUser.getId());
             balanceLabel.setText(String.format("%.2f TND", balance));
 
             // Get Goals
-            List<Goal> goals = goalService.getGoalsByUserId(Session.currentUser.getId().intValue());
+            List<Goal> goals = goalService.getGoalsByUserId(Session.currentUser.getId());
             activeGoalsLabel.setText(String.valueOf(goals.size()));
 
             // Populate Container
@@ -103,7 +103,7 @@ public class GoalsController implements Initializable {
         HBox progressInfo = new HBox(pb);
 
         // Amounts
-        Label amounts = new Label(String.format("%.2f / %.2f TND", goal.getCurrentAmount(), goal.getTargetAmount()));
+        Label amounts = new Label(String.format("%.2f / %.2f TND", Float.parseFloat(goal.getCurrentAmount()), Float.parseFloat(goal.getTargetAmount())));
         amounts.setStyle("-fx-font-weight: bold; -fx-text-fill: #525f7f;");
 
         // Deadline
@@ -168,7 +168,7 @@ public class GoalsController implements Initializable {
 
             if (controller.isSaveClicked() && controller.getGoal() != null) {
                 Goal newGoal = controller.getGoal();
-                newGoal.setIdUser(Session.currentUser.getId().intValue());
+                newGoal.setIdUser(Session.currentUser.getId());
                 goalService.addGoal(newGoal);
                 refreshDashboard();
             }
@@ -197,7 +197,7 @@ public class GoalsController implements Initializable {
                     return;
                 }
 
-                goalService.addFundsToGoal(Session.currentUser.getId().intValue(), goal.getId(), amount);
+                goalService.addFundsToGoal(Session.currentUser.getId(), goal.getId(), amount);
                 refreshDashboard();
 
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);

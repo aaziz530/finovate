@@ -3,54 +3,54 @@ package org.esprit.finovate.entities;
 import java.util.Date;
 
 public class Goal {
-    private int id;
-    private int idUser;
+    private Long id;
+    private Long id_user;
     private String title;
-    private float targetAmount;
-    private float currentAmount;
+    private String target_amount;
+    private String current_amount;
     private Date deadline;
     private String status;
-    private Date createdAt;
+    private Date created_at;
 
     public Goal() {
     }
 
-    public Goal(int idUser, String title, float targetAmount, Date deadline) {
-        this.idUser = idUser;
+    public Goal(Long id_user, String title, String target_amount, Date deadline) {
+        this.id_user = id_user;
         this.title = title;
-        this.targetAmount = targetAmount;
-        this.currentAmount = 0;
+        this.target_amount = target_amount;
+        this.current_amount = "0";
         this.deadline = deadline;
         this.status = "In Progress";
-        this.createdAt = new Date();
+        this.created_at = new Date();
     }
 
-    public Goal(int id, int idUser, String title, float targetAmount, float currentAmount, Date deadline, String status,
-            Date createdAt) {
+    public Goal(Long id, Long id_user, String title, String target_amount, String current_amount, Date deadline, String status,
+            Date created_at) {
         this.id = id;
-        this.idUser = idUser;
+        this.id_user = id_user;
         this.title = title;
-        this.targetAmount = targetAmount;
-        this.currentAmount = currentAmount;
+        this.target_amount = target_amount;
+        this.current_amount = current_amount;
         this.deadline = deadline;
         this.status = status;
-        this.createdAt = createdAt;
+        this.created_at = created_at;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public int getIdUser() {
-        return idUser;
+    public Long getIdUser() {
+        return id_user;
     }
 
-    public void setIdUser(int idUser) {
-        this.idUser = idUser;
+    public void setIdUser(Long id_user) {
+        this.id_user = id_user;
     }
 
     public String getTitle() {
@@ -61,20 +61,20 @@ public class Goal {
         this.title = title;
     }
 
-    public float getTargetAmount() {
-        return targetAmount;
+    public String getTargetAmount() {
+        return target_amount;
     }
 
-    public void setTargetAmount(float targetAmount) {
-        this.targetAmount = targetAmount;
+    public void setTargetAmount(String target_amount) {
+        this.target_amount = target_amount;
     }
 
-    public float getCurrentAmount() {
-        return currentAmount;
+    public String getCurrentAmount() {
+        return current_amount;
     }
 
-    public void setCurrentAmount(float currentAmount) {
-        this.currentAmount = currentAmount;
+    public void setCurrentAmount(String current_amount) {
+        this.current_amount = current_amount;
     }
 
     public Date getDeadline() {
@@ -94,17 +94,19 @@ public class Goal {
     }
 
     public Date getCreatedAt() {
-        return createdAt;
+        return created_at;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
+    public void setCreatedAt(Date created_at) {
+        this.created_at = created_at;
     }
 
     public float getProgress() {
-        if (targetAmount == 0)
+        float target = Float.parseFloat(target_amount.isEmpty() ? "0" : target_amount);
+        float current = Float.parseFloat(current_amount.isEmpty() ? "0" : current_amount);
+        if (target == 0)
             return 0;
-        return Math.min(1.0f, currentAmount / targetAmount);
+        return Math.min(1.0f, current / target);
     }
 
     /**
@@ -112,13 +114,15 @@ public class Goal {
      * @return montant suggéré par mois, ou 0 si deadline passée ou déjà atteint
      */
     public float getSuggestedMonthlySaving() {
-        if (targetAmount <= currentAmount || deadline == null) {
+        float target = Float.parseFloat(target_amount.isEmpty() ? "0" : target_amount);
+        float current = Float.parseFloat(current_amount.isEmpty() ? "0" : current_amount);
+        if (target <= current || deadline == null) {
             return 0;
         }
 
         long diffInMillies = deadline.getTime() - System.currentTimeMillis();
         if (diffInMillies <= 0) {
-            return targetAmount - currentAmount; // Doit être fait immédiatement
+            return target - current; // Doit être fait immédiatement
         }
 
         // Convertir en mois (approximatif : 30.44 jours par mois)
@@ -126,9 +130,9 @@ public class Goal {
         double diffInMonths = diffInDays / 30.44;
 
         if (diffInMonths < 1) {
-            return targetAmount - currentAmount; // Moins d'un mois restant
+            return target - current; // Moins d'un mois restant
         }
 
-        return (float) ((targetAmount - currentAmount) / diffInMonths);
+        return (float) ((target - current) / diffInMonths);
     }
 }

@@ -29,6 +29,19 @@ public class MyDataBase {
     }
 
     public Connection getConnection() {
+        try {
+            if (connection == null || connection.isClosed() || !connection.isValid(2)) {
+                connection = DriverManager.getConnection(URL, USER, PSR);
+                System.out.println("Reconnected to database");
+            }
+        } catch (SQLException e) {
+            try {
+                connection = DriverManager.getConnection(URL, USER, PSR);
+                System.out.println("Reconnected to database after error");
+            } catch (SQLException ex) {
+                System.out.println("Failed to reconnect: " + ex.getMessage());
+            }
+        }
         return connection;
     }
 }

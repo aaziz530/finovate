@@ -1,28 +1,30 @@
 package org.esprit.finovate.entities;
 
 import java.sql.Timestamp;
+import java.util.Date;
 
 public class UserForum {
     private int id;
-    private int userId;
-    private int forumId;
-    private Timestamp joinedAt;
+    private Long user_id;
+    private Long forum_id;
+    private Date joined_at;
 
     // Constructeur vide
     public UserForum() {}
 
     // Constructeur complet
-    public UserForum(int id, int userId, int forumId, Timestamp joinedAt) {
+    public UserForum(int id, Long user_id, Long forum_id, Date joined_at) {
         this.id = id;
-        this.userId = userId;
-        this.forumId = forumId;
-        this.joinedAt = joinedAt;
+        this.user_id = user_id;
+        this.forum_id = forum_id;
+        this.joined_at = joined_at;
     }
 
     // Constructeur sans ID (pour création)
-    public UserForum(int userId, int forumId) {
-        this.userId = userId;
-        this.forumId = forumId;
+    public UserForum(Long user_id, Long forum_id) {
+        this.user_id = user_id;
+        this.forum_id = forum_id;
+        this.joined_at = new Date();
     }
 
     // Getters et Setters
@@ -34,37 +36,37 @@ public class UserForum {
         this.id = id;
     }
 
-    public int getUserId() {
-        return userId;
+    public Long getUserId() {
+        return user_id;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setUserId(Long user_id) {
+        this.user_id = user_id;
     }
 
-    public int getForumId() {
-        return forumId;
+    public Long getForumId() {
+        return forum_id;
     }
 
-    public void setForumId(int forumId) {
-        this.forumId = forumId;
+    public void setForumId(Long forum_id) {
+        this.forum_id = forum_id;
     }
 
-    public Timestamp getJoinedAt() {
-        return joinedAt;
+    public Date getJoinedAt() {
+        return joined_at;
     }
 
-    public void setJoinedAt(Timestamp joinedAt) {
-        this.joinedAt = joinedAt;
+    public void setJoinedAt(Date joined_at) {
+        this.joined_at = joined_at;
     }
 
     @Override
     public String toString() {
         return "UserForum{" +
                 "id=" + id +
-                ", userId=" + userId +
-                ", forumId=" + forumId +
-                ", joinedAt=" + joinedAt +
+                ", user_id=" + user_id +
+                ", forum_id=" + forum_id +
+                ", joined_at=" + joined_at +
                 '}';
     }
 }

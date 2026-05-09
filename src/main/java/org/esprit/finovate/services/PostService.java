@@ -43,9 +43,9 @@ public class PostService {
 
             try (PreparedStatement checkStmt = conn.prepareStatement(checkPermissionQuery)) {
                 checkStmt.setInt(1, post.getForumId());
-                checkStmt.setInt(2, post.getAuthorId());
+                checkStmt.setLong(2, post.getAuthorId());
                 checkStmt.setInt(3, post.getForumId());
-                checkStmt.setInt(4, post.getAuthorId());
+                checkStmt.setLong(4, post.getAuthorId());
                 ResultSet permRs = checkStmt.executeQuery();
 
                 if (!permRs.next()) {
@@ -59,7 +59,7 @@ public class PostService {
                 stmt.setInt(1, post.getForumId());
                 stmt.setString(2, ValidationUtils.sanitize(post.getTitle()));
                 stmt.setString(3, ValidationUtils.sanitize(post.getContent()));
-                stmt.setInt(4, post.getAuthorId());
+                stmt.setLong(4, post.getAuthorId());
 
                 int rowsAffected = stmt.executeUpdate();
 
@@ -70,7 +70,7 @@ public class PostService {
                     }
 
                     // Vérifier les badges après création du post
-                    org.esprit.finovate.utils.BadgeManager.checkPostBadges(post.getAuthorId());
+                    org.esprit.finovate.utils.BadgeManager.checkPostBadges(post.getAuthorId().intValue());
 
                     return true;
                 }
@@ -128,7 +128,7 @@ public class PostService {
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, authorId);
+            stmt.setLong(1, authorId);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
@@ -151,7 +151,7 @@ public class PostService {
 
         // Vérifier les droits
         Post existingPost = getPostById(post.getId());
-        if (existingPost == null || existingPost.getAuthorId() != requestingUserId) {
+        if (existingPost == null || !existingPost.getAuthorId().equals((long) requestingUserId)) {
             throw new SecurityException("Vous ne pouvez modifier que vos propres posts");
         }
 
@@ -184,7 +184,7 @@ public class PostService {
     public boolean deletePost(int postId, int requestingUserId) throws SQLException {
         // Vérifier les droits
         Post post = getPostById(postId);
-        if (post == null || post.getAuthorId() != requestingUserId) {
+        if (post == null || !post.getAuthorId().equals((long) requestingUserId)) {
             throw new SecurityException("Vous ne pouvez supprimer que vos propres posts");
         }
 
@@ -226,7 +226,7 @@ public class PostService {
                 rs.getInt("forum_id"),
                 rs.getString("title"),
                 rs.getString("content"),
-                rs.getInt("author_id"),
+                rs.getLong("author_id"),
                 rs.getTimestamp("created_at"),
                 rs.getTimestamp("updated_at")
         );

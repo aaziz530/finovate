@@ -16,12 +16,12 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public float getDailyTransferTotal(int userId) throws SQLException {
-        String sql = "SELECT SUM(amount) as total FROM transaction " +
-                     "WHERE senderId = ? AND type = 'TRANSFER' " +
+    public float getDailyTransferTotal(Long userId) throws SQLException {
+        String sql = "SELECT SUM(CAST(amount AS DECIMAL(12,2))) as total FROM transaction " +
+                     "WHERE sender_id = ? AND type = 'TRANSFER' " +
                      "AND DATE(date) = CURDATE()";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
-            pst.setInt(1, userId);
+            pst.setLong(1, userId);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     return rs.getFloat("total");
@@ -32,7 +32,7 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public void transferMoney(int senderId, Long numeroCarte, String cin, float amount, String description)
+    public void transferMoney(Long senderId, Long numeroCarte, String cin, float amount, String description)
             throws SQLException {
         if (amount <= 0) {
             throw new SQLException("Amount must be positive");
@@ -57,14 +57,14 @@ public class TransactionService implements ITransactionService {
             connection.setAutoCommit(false);
 
             // 1. Get Receiver ID, name, and phone number
-            int receiverId = -1;
-            String getReceiverSql = "SELECT id, firstname, lastname, phone_number FROM user WHERE numeroCarte = ? AND cin = ?";
+            Long receiverId = -1L;
+            String getReceiverSql = "SELECT id, firstname, lastname, phone_number FROM user WHERE numero_carte = ? AND cin = ?";
             try (PreparedStatement pstReceiver = connection.prepareStatement(getReceiverSql)) {
                 pstReceiver.setLong(1, numeroCarte);
                 pstReceiver.setString(2, cin);
                 try (ResultSet rs = pstReceiver.executeQuery()) {
                     if (rs.next()) {
-                        receiverId = rs.getInt("id");
+                        receiverId = rs.getLong("id");
                         receiverFirstName = rs.getString("firstname");
                         receiverLastName = rs.getString("lastname");
                         receiverPhone = rs.getInt("phone_number");
@@ -81,7 +81,7 @@ public class TransactionService implements ITransactionService {
             // 1b. Get Sender name
             String getSenderSql = "SELECT firstname, lastname FROM user WHERE id = ?";
             try (PreparedStatement pstSender = connection.prepareStatement(getSenderSql)) {
-                pstSender.setInt(1, senderId);
+                pstSender.setLong(1, senderId);
                 try (ResultSet rs = pstSender.executeQuery()) {
                     if (rs.next()) {
                         senderFirstName = rs.getString("firstname");
@@ -100,7 +100,7 @@ public class TransactionService implements ITransactionService {
             String subtractSql = "UPDATE user SET solde = solde - ? WHERE id = ?";
             try (PreparedStatement pstSubtract = connection.prepareStatement(subtractSql)) {
                 pstSubtract.setFloat(1, amount);
-                pstSubtract.setInt(2, senderId);
+                pstSubtract.setLong(2, senderId);
                 pstSubtract.executeUpdate();
             }
 
@@ -108,18 +108,19 @@ public class TransactionService implements ITransactionService {
             String addSql = "UPDATE user SET solde = solde + ? WHERE id = ?";
             try (PreparedStatement pstAdd = connection.prepareStatement(addSql)) {
                 pstAdd.setFloat(1, amount);
-                pstAdd.setInt(2, receiverId);
+                pstAdd.setLong(2, receiverId);
                 pstAdd.executeUpdate();
             }
 
             // 5. Log Transaction
-            String logSql = "INSERT INTO transaction (senderId, receiverId, amount, type, description) VALUES (?, ?, ?, ?, ?)";
+            String logSql = "INSERT INTO transaction (sender_id, receiver_id, amount, type, description, date) VALUES (?, ?, ?, ?, ?, ?)";
             try (PreparedStatement pstLog = connection.prepareStatement(logSql)) {
-                pstLog.setInt(1, senderId);
-                pstLog.setInt(2, receiverId);
-                pstLog.setFloat(3, amount);
+                pstLog.setLong(1, senderId);
+                pstLog.setLong(2, receiverId);
+                pstLog.setString(3, String.valueOf(amount));
                 pstLog.setString(4, "TRANSFER");
                 pstLog.setString(5, description);
+                pstLog.setTimestamp(6, new java.sql.Timestamp(System.currentTimeMillis()));
                 pstLog.executeUpdate();
             }
 
@@ -147,26 +148,26 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public List<Transaction> getTransactionsByUserId(int userId) throws SQLException {
+    public List<Transaction> getTransactionsByUserId(Long userId) throws SQLException {
         List<Transaction> transactions = new ArrayList<>();
         String sql = "SELECT t.*, " +
                 "s.firstname as sender_fname, s.lastname as sender_lname, " +
                 "r.firstname as receiver_fname, r.lastname as receiver_lname " +
                 "FROM transaction t " +
-                "LEFT JOIN user s ON t.senderId = s.id " +
-                "LEFT JOIN user r ON t.receiverId = r.id " +
-                "WHERE (t.senderId = ? OR t.receiverId = ?) AND t.type = 'TRANSFER' " +
+                "LEFT JOIN user s ON t.sender_id = s.id " +
+                "LEFT JOIN user r ON t.receiver_id = r.id " +
+                "WHERE (t.sender_id = ? OR t.receiver_id = ?) AND t.type = 'TRANSFER' " +
                 "ORDER BY t.date DESC";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
-            pst.setInt(1, userId);
-            pst.setInt(2, userId);
+            pst.setLong(1, userId);
+            pst.setLong(2, userId);
             try (ResultSet rs = pst.executeQuery()) {
                 while (rs.next()) {
                     Transaction t = new Transaction(
-                            rs.getInt("id"),
-                            rs.getInt("senderId"),
-                            (Integer) rs.getObject("receiverId"),
-                            rs.getFloat("amount"),
+                            rs.getLong("id"),
+                            rs.getLong("sender_id"),
+                            rs.getLong("receiver_id"),
+                            rs.getString("amount"),
                             rs.getString("type"),
                             rs.getString("description"),
                             rs.getTimestamp("date"));
@@ -183,10 +184,10 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public float getUserBalance(int userId) throws SQLException {
+    public float getUserBalance(Long userId) throws SQLException {
         String sql = "SELECT solde FROM user WHERE id = ?";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
-            pst.setInt(1, userId);
+            pst.setLong(1, userId);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
                     return rs.getFloat("solde");
@@ -197,14 +198,15 @@ public class TransactionService implements ITransactionService {
     }
 
     @Override
-    public void logTopUp(int userId, float amount) throws SQLException {
-        String sql = "INSERT INTO transaction (senderId, receiverId, amount, type, description) VALUES (?, ?, ?, ?, ?)";
+    public void logTopUp(Long userId, float amount) throws SQLException {
+        String sql = "INSERT INTO transaction (sender_id, receiver_id, amount, type, description, date) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
-            pst.setInt(1, userId);
+            pst.setLong(1, userId);
             pst.setNull(2, java.sql.Types.INTEGER);
-            pst.setFloat(3, amount);
+            pst.setString(3, String.valueOf(amount));
             pst.setString(4, "TOPUP");
             pst.setString(5, "Alimentation carte via Stripe");
+            pst.setTimestamp(6, new java.sql.Timestamp(System.currentTimeMillis()));
             pst.executeUpdate();
         }
     }

@@ -101,12 +101,12 @@ public class TransferController implements Initializable {
     }
 
     private String findCardNumberByCin(String cin) throws SQLException {
-        String sql = "SELECT numeroCarte FROM user WHERE cin = ? LIMIT 1";
+        String sql = "SELECT numero_carte FROM user WHERE cin = ? LIMIT 1";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setString(1, cin);
             try (ResultSet rs = pst.executeQuery()) {
                 if (rs.next()) {
-                    return String.valueOf(rs.getLong("numeroCarte"));
+                    return String.valueOf(rs.getLong("numero_carte"));
                 }
             }
         }
@@ -124,7 +124,7 @@ public class TransferController implements Initializable {
 
         colRecipient.setCellValueFactory(cellData -> {
             Transaction t = cellData.getValue();
-            if (t.getSenderId() == Session.currentUser.getId().intValue()) {
+            if (t.getSenderId().equals(Session.currentUser.getId())) {
                 return new SimpleStringProperty("To: " + t.getReceiverName());
             } else {
                 return new SimpleStringProperty("From: " + t.getSenderName());
@@ -136,7 +136,7 @@ public class TransferController implements Initializable {
 
     private void refreshData() {
         try {
-            int userId = Session.currentUser.getId().intValue();
+            Long userId = Session.currentUser.getId();
             float balance = transactionService.getUserBalance(userId);
             balanceLabel.setText(String.format("%.2f TND", balance));
 
@@ -163,7 +163,7 @@ public class TransferController implements Initializable {
         try {
             float amount = Float.parseFloat(amountStr);
             Long numeroCarte = Long.parseLong(card);
-            transactionService.transferMoney(Session.currentUser.getId().intValue(), numeroCarte, cin, amount,
+            transactionService.transferMoney(Session.currentUser.getId(), numeroCarte, cin, amount,
                     description);
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
