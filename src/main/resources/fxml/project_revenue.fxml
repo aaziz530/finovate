@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.esprit.finovate.controllers.ProjectRevenueController"
+            prefHeight="700" prefWidth="1100"
+            styleClass="root" stylesheets="@../css/style.css">
+    <top>
+        <VBox alignment="CENTER_LEFT" styleClass="form-header">
+            <padding>
+                <Insets left="24" right="24" top="20" bottom="20"/>
+            </padding>
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Button text="← Retour" onAction="#handleBack" styleClass="btn-secondary"/>
+                <VBox>
+                    <Label fx:id="lblProjectTitle" text="Project Revenues" styleClass="form-title"/>
+                    <Label text="Manage daily revenues and view advanced statistics" styleClass="form-subtitle"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </top>
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="projects-scroll">
+            <VBox styleClass="form-outer" alignment="TOP_CENTER" spacing="24">
+                <padding>
+                    <Insets top="28" left="48" right="48" bottom="48"/>
+                </padding>
+                
+                <!-- KPI Section -->
+                <HBox spacing="20" alignment="CENTER_LEFT">
+                    <VBox styleClass="project-card" HBox.hgrow="ALWAYS" alignment="CENTER">
+                        <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                        <Label text="Total Revenues Declared" styleClass="section-title"/>
+                        <Label fx:id="lblTotalRevenue" text="0.00 TND" styleClass="form-title" style="-fx-text-fill: #43A047;"/>
+                    </VBox>
+                    <VBox styleClass="project-card" HBox.hgrow="ALWAYS" alignment="CENTER">
+                        <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                        <Label text="Total to Investors" styleClass="section-title"/>
+                        <Label fx:id="lblTotalToInvestors" text="0.00 TND" styleClass="form-title" style="-fx-text-fill: #E53935;"/>
+                    </VBox>
+                    <VBox styleClass="project-card" HBox.hgrow="ALWAYS" alignment="CENTER">
+                        <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                        <Label text="Net Creator Earnings" styleClass="section-title"/>
+                        <Label fx:id="lblNetEarnings" text="0.00 TND" styleClass="form-title" style="-fx-text-fill: #1E88E5;"/>
+                    </VBox>
+                </HBox>
+
+                <!-- Missing Days Section -->
+                <VBox styleClass="form-content" spacing="15">
+                    <Label text="Déclarations en attente (Missing Days)" styleClass="section-title"/>
+                    <VBox fx:id="vboxMissingDays" spacing="10"/>
+                </VBox>
+
+                <HBox spacing="24" alignment="TOP_CENTER">
+                    <!-- Line Chart -->
+                    <VBox styleClass="form-content" HBox.hgrow="ALWAYS" prefWidth="600">
+                        <Label text="Évolution des Revenus" styleClass="section-title"/>
+                        <LineChart fx:id="revenueChart" prefHeight="350">
+                            <xAxis><CategoryAxis label="Date"/></xAxis>
+                            <yAxis><NumberAxis label="Amount (TND)"/></yAxis>
+                        </LineChart>
+                    </VBox>
+
+                    <!-- Pie Chart -->
+                    <VBox styleClass="form-content" prefWidth="400">
+                        <Label text="Répartition des Gains" styleClass="section-title"/>
+                        <PieChart fx:id="distributionChart" prefHeight="350"/>
+                    </VBox>
+                </HBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

@@ -172,6 +172,7 @@ public class AuthController {
                     try {
                         User user = userService.login(savedUser, savedPass);
                         if (user != null) {
+                            Session.currentUser = user;
                             if ("ADMIN".equalsIgnoreCase(user.getRole())) {
                                 loadAdminDashboard();
                             } else {
@@ -417,6 +418,8 @@ public class AuthController {
                 showError("Invalid email or password");
                 return;
             }
+
+            Session.currentUser = user;
 
             // Save or clear credentials based on Remember Me checkbox
             if (rememberMeCheckbox.isSelected()) {

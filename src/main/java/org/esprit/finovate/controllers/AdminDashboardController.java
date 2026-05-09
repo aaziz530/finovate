@@ -38,6 +38,12 @@ import java.util.ResourceBundle;
  */
 public class AdminDashboardController implements Initializable {
 
+    private Stage stage;
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
+
     // Top navigation
     @FXML
     private Label adminNameLabel;

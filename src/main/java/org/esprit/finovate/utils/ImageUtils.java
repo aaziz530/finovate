@@ -215,4 +215,55 @@ public class ImageUtils {
     public static boolean isValidImageSize(File file, double maxSizeMB) {
         return getFileSizeMB(file) <= maxSizeMB;
     }
+
+    // ========== Investment module image methods ==========
+
+    /**
+     * Copies the selected file to uploads/projects/ and returns the relative path to store in DB.
+     */
+    public static String saveProjectImage(String sourcePath) {
+        if (sourcePath == null || sourcePath.isBlank()) return null;
+        try {
+            Path source = Paths.get(sourcePath);
+            if (!Files.exists(source)) return null;
+
+            String uploadDir = "uploads/projects";
+            Path uploadPath = Paths.get(uploadDir);
+            Files.createDirectories(uploadPath);
+
+            String ext = "";
+            String name = source.getFileName().toString();
+            int dot = name.lastIndexOf('.');
+            if (dot > 0) ext = name.substring(dot);
+
+            String filename = System.currentTimeMillis() + ext;
+            Path target = uploadPath.resolve(filename);
+            Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+
+            return uploadDir + "/" + filename;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Returns URL string for JavaFX Image (file URI or http(s) URL).
+     */
+    public static String toImageUrl(String storedPath) {
+        if (storedPath == null || storedPath.isBlank()) return null;
+        if (storedPath.startsWith("http://") || storedPath.startsWith("https://")) {
+            return storedPath;
+        }
+        Path p = Paths.get(storedPath);
+        if (!p.isAbsolute()) {
+            p = Paths.get(System.getProperty("user.dir")).resolve(storedPath);
+        }
+        if (!Files.exists(p)) return null;
+        try {
+            return p.toUri().toString();
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

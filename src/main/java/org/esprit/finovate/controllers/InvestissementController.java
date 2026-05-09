@@ -1,0 +1,73 @@
+package org.esprit.finovate.controllers;
+
+import org.esprit.finovate.entities.Investissement;
+import org.esprit.finovate.services.InvestissementService;
+
+import java.sql.SQLException;
+import java.util.List;
+
+public class InvestissementController {
+
+    private final InvestissementService investissementService = new InvestissementService();
+
+    public void addInvestissement(Long projectId, double amount, double revenuePercentage) throws SQLException {
+        Investissement inv = new Investissement(projectId, null, amount, revenuePercentage);
+        investissementService.addInvestissement(inv);
+    }
+
+    public List<Investissement> getAllInvestissements() throws SQLException {
+        return investissementService.getAllInvestissements();
+    }
+
+    public Investissement getInvestissementById(Long id) throws SQLException {
+        return investissementService.getInvestissementById(id);
+    }
+
+    public List<Investissement> getInvestissementsByProjectId(Long projectId) throws SQLException {
+        return investissementService.getInvestissementsByProjectId(projectId);
+    }
+
+    public List<Investissement> getInvestissementsByInvestorId(Long investorId) throws SQLException {
+        return investissementService.getInvestissementsByInvestorId(investorId);
+    }
+
+    public boolean hasInvestments(Long projectId) throws SQLException {
+        return investissementService.hasInvestments(projectId);
+    }
+
+    public double getMaxInvestableAmount(Long projectId, Long userId) throws SQLException {
+        return investissementService.getMaxInvestableAmount(projectId, userId);
+    }
+
+    public int getInvestorCount(Long projectId) throws SQLException {
+        return investissementService.getInvestorCount(projectId);
+    }
+
+    public List<Investissement> getPendingInvestmentsForOwner(Long ownerId) throws SQLException {
+        return investissementService.getPendingInvestmentsForOwner(ownerId);
+    }
+
+    public void acceptInvestissement(Long id) throws SQLException {
+        investissementService.acceptInvestissement(id);
+    }
+
+    public void declineInvestissement(Long id) throws SQLException {
+        investissementService.declineInvestissement(id);
+    }
+
+    public void updateInvestissement(Investissement inv) throws SQLException {
+        investissementService.updateInvestissement(inv);
+    }
+
+    public void deleteInvestissement(Long id) throws SQLException {
+        investissementService.deleteInvestissement(id);
+    }
+
+    public void addInvestissementAsAdmin(Investissement inv) throws SQLException {
+        investissementService.addInvestissementAsAdmin(inv);
+    }
+
+    public void updateInvestissementAsAdmin(Investissement inv) throws SQLException {
+        investissementService.updateInvestissementAsAdmin(inv);
+    }
+}

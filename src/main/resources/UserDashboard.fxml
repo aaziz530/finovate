@@ -101,7 +101,7 @@
                                     </padding>
                                 </Button>
 
-                                <Button fx:id="btnInvestissement" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="Investissement">
+                                <Button fx:id="btnInvestissement" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#toggleInvestMenu" style="-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="Investissement  ▼">
                                     <font>
                                         <Font size="14.0" />
                                     </font>
@@ -109,6 +109,26 @@
                                         <Insets bottom="10.0" left="15.0" right="15.0" top="10.0" />
                                     </padding>
                                 </Button>
+
+                                <!-- Investissement Submenu -->
+                                <VBox fx:id="investSubMenu" spacing="5.0" style="-fx-background-color: #f8f9fa; -fx-background-radius: 8; -fx-padding: 10;" visible="false" managed="false">
+                                    <Button fx:id="btnAddProject" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleAddProject" style="-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="  ➕ Add Project">
+                                        <font><Font size="13.0"/></font>
+                                        <padding><Insets bottom="8.0" left="25.0" right="15.0" top="8.0"/></padding>
+                                    </Button>
+                                    <Button fx:id="btnAllProjects" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleAllProjects" style="-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="  📋 All Projects">
+                                        <font><Font size="13.0"/></font>
+                                        <padding><Insets bottom="8.0" left="25.0" right="15.0" top="8.0"/></padding>
+                                    </Button>
+                                    <Button fx:id="btnMyProjects" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleMyProjects" style="-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="  📁 My Projects">
+                                        <font><Font size="13.0"/></font>
+                                        <padding><Insets bottom="8.0" left="25.0" right="15.0" top="8.0"/></padding>
+                                    </Button>
+                                    <Button fx:id="btnMyInvestments" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" onAction="#handleMyInvestments" style="-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="  💰 My Investments">
+                                        <font><Font size="13.0"/></font>
+                                        <padding><Insets bottom="8.0" left="25.0" right="15.0" top="8.0"/></padding>
+                                    </Button>
+                                </VBox>
 
                                 <Button fx:id="btnReclamations" alignment="BASELINE_LEFT" maxWidth="Infinity" mnemonicParsing="false" style="-fx-background-color: transparent; -fx-text-fill: #525f7f; -fx-cursor: hand;" text="Reclamations">
                                     <font>

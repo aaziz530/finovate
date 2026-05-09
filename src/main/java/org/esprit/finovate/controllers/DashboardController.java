@@ -1,0 +1,441 @@
+package org.esprit.finovate.controllers;
+
+import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import org.esprit.finovate.api.MapPicker;
+import org.esprit.finovate.entities.Project;
+import org.esprit.finovate.utils.ImageUtils;
+import org.esprit.finovate.utils.ValidationUtils;
+import org.esprit.finovate.utils.SceneUtils;
+import org.esprit.finovate.utils.Session;
+import org.esprit.finovate.api.ExchangeRateService;
+
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+import java.net.URL;
+import java.sql.SQLException;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
+public class DashboardController implements Initializable {
+
+    @FXML
+    private VBox projectsContainer;
+    @FXML
+    private TextField txtSearchDynamic;
+    @FXML
+    private Button btnAdminDashboard;
+    @FXML
+    private ComboBox<String> comboStatus;
+    @FXML
+    private ComboBox<String> comboTri;
+
+    private Stage stage;
+    private List<Project> allProjects = List.of();
+    private final ProjectController projectController = new ProjectController();
+    private final InvestissementController investissementController = new InvestissementController();
+    private final ExchangeRateService exchangeRateService = new ExchangeRateService();
+    private Runnable onEditReturnCallback; // For embedded navigation in UserDashboard
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
+
+    public void setOnEditReturnCallback(Runnable callback) {
+        this.onEditReturnCallback = callback;
+    }
+
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        comboStatus.setItems(FXCollections.observableArrayList("Tous", "OPEN", "FUNDED", "CLOSED"));
+        comboTri.setItems(FXCollections.observableArrayList("Titre (A-Z)", "Titre (Z-A)", "Montant ↑", "Montant ↓",
+                "Date (récent)", "Date (ancien)"));
+        ChangeListener<String> dynamicListener = (o, ov, nv) -> applyFiltersAndRender();
+        txtSearchDynamic.textProperty().addListener(dynamicListener);
+        comboTri.valueProperty().addListener((o, ov, nv) -> applyFiltersAndRender());
+        if (btnAdminDashboard != null && Session.currentUser != null && "ADMIN".equals(Session.currentUser.getRole())) {
+            btnAdminDashboard.setVisible(true);
+            btnAdminDashboard.setManaged(true);
+        }
+        loadProjects();
+    }
+
+    public void refresh() {
+        loadProjects();
+    }
+
+    private void loadProjects() {
+        try {
+            allProjects = projectController.getAllProjects();
+            applyFiltersAndRender();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            allProjects = List.of();
+            showError("Error loading projects.");
+        }
+    }
+
+    @FXML
+    private void handleStaticSearch() {
+        applyFiltersAndRender();
+    }
+
+    private void applyFiltersAndRender() {
+        projectsContainer.getChildren().clear();
+        String searchText = txtSearchDynamic != null && txtSearchDynamic.getText() != null
+                ? txtSearchDynamic.getText().trim().toLowerCase()
+                : "";
+        String statusFilter = comboStatus != null && comboStatus.getValue() != null
+                ? comboStatus.getValue()
+                : "Tous";
+        String sortOption = comboTri != null && comboTri.getValue() != null
+                ? comboTri.getValue()
+                : null;
+
+        List<Project> filtered = allProjects.stream()
+                .filter(p -> (searchText.isEmpty() || matchesSearch(p, searchText)))
+                .filter(p -> "Tous".equals(statusFilter) || statusFilter.equals(p.getStatus()))
+                .collect(Collectors.toList());
+
+        Comparator<Project> cmp = switch (sortOption != null ? sortOption : "") {
+            case "Titre (A-Z)" -> Comparator.comparing(p -> p.getTitle() != null ? p.getTitle().toLowerCase() : "",
+                    String.CASE_INSENSITIVE_ORDER);
+            case "Titre (Z-A)" -> Comparator.comparing(p -> p.getTitle() != null ? p.getTitle().toLowerCase() : "",
+                    String.CASE_INSENSITIVE_ORDER.reversed());
+            case "Montant ↑" -> Comparator.comparingDouble(Project::getCurrent_amount);
+            case "Montant ↓" -> Comparator.comparingDouble(Project::getCurrent_amount).reversed();
+            case "Date (récent)" ->
+                Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0),
+                        Comparator.nullsLast(Comparator.reverseOrder()));
+            case "Date (ancien)" ->
+                Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0),
+                        Comparator.nullsLast(Comparator.naturalOrder()));
+            default -> Comparator.comparing(p -> p.getCreated_at() != null ? p.getCreated_at() : new java.util.Date(0),
+                    Comparator.nullsLast(Comparator.reverseOrder()));
+        };
+        filtered.sort(cmp);
+
+        if (filtered.isEmpty()) {
+            Label empty = new Label("No projects match your filters.");
+            empty.getStyleClass().add("project-meta");
+            projectsContainer.getChildren().add(empty);
+        } else {
+            for (Project p : filtered) {
+                projectsContainer.getChildren().add(createProjectCard(p));
+            }
+        }
+    }
+
+    private boolean matchesSearch(Project p, String search) {
+        String t = p.getTitle() != null ? p.getTitle().toLowerCase() : "";
+        String d = p.getDescription() != null ? p.getDescription().toLowerCase() : "";
+        return t.contains(search) || d.contains(search);
+    }
+
+    private void showError(String msg) {
+        Label err = new Label(msg);
+        err.getStyleClass().add("error-label");
+        projectsContainer.getChildren().add(err);
+    }
+
+    private VBox createProjectCard(Project p) {
+        VBox card = new VBox(10);
+        card.getStyleClass().add("project-card");
+        card.setPrefWidth(800);
+
+        String imgUrl = ImageUtils.toImageUrl(p.getImagePath());
+        if (imgUrl != null) {
+            try {
+                ImageView iv = new ImageView(new Image(imgUrl));
+                iv.setFitWidth(120);
+                iv.setFitHeight(80);
+                iv.setPreserveRatio(true);
+                card.getChildren().add(iv);
+            } catch (Exception ignored) {
+            }
+        }
+
+        Label title = new Label(p.getTitle());
+        title.getStyleClass().add("project-title");
+        title.setWrapText(true);
+        card.getChildren().add(title);
+
+        String desc = p.getDescription();
+        if (desc != null && !desc.isEmpty()) {
+            String shortDesc = desc.length() > 120 ? desc.substring(0, 120) + "..." : desc;
+            Label descLabel = new Label(shortDesc);
+            descLabel.getStyleClass().add("project-desc");
+            descLabel.setWrapText(true);
+            card.getChildren().add(descLabel);
+        }
+
+        double progress = p.getGoal_amount() > 0 ? Math.min(1.0, p.getCurrent_amount() / p.getGoal_amount()) : 0;
+        ProgressBar progressBar = new ProgressBar(progress);
+        progressBar.getStyleClass().add("project-progress-bar");
+        progressBar.setMaxWidth(Double.MAX_VALUE);
+
+        String metaStr = exchangeRateService.formatTndAndEur(p.getCurrent_amount()) + " / "
+                + exchangeRateService.formatTndAndEur(p.getGoal_amount()) + "  •  " + p.getStatus();
+        try {
+            int investors = investissementController.getInvestorCount(p.getProject_id());
+            if (investors > 0)
+                metaStr += "  •  " + investors + " investor(s)";
+        } catch (SQLException ignored) {
+        }
+        if (p.getDeadline() != null && p.getDeadline().after(new java.util.Date())) {
+            long days = TimeUnit.MILLISECONDS.toDays(p.getDeadline().getTime() - System.currentTimeMillis());
+            metaStr += "  •  " + days + " days left";
+        }
+        Label meta = new Label(metaStr);
+        meta.getStyleClass().add("project-meta");
+
+        card.getChildren().add(progressBar);
+        card.getChildren().add(meta);
+
+        if (p.getLatitude() != null && p.getLongitude() != null) {
+            Button btnMap = new Button("View on Map");
+            btnMap.getStyleClass().addAll("btn-secondary", "btn-small");
+            btnMap.setOnAction(e -> showMapDialog(p.getLatitude(), p.getLongitude()));
+            card.getChildren().add(btnMap);
+        }
+
+        double remaining = p.getGoal_amount() - p.getCurrent_amount();
+        boolean canInvest = Session.currentUser != null
+                && (p.getOwner_id() == null || !p.getOwner_id().equals(Session.currentUser.getId()))
+                && "OPEN".equals(p.getStatus())
+                && remaining > 0;
+
+        if (canInvest) {
+            TextField txtAmount = new TextField();
+            double maxHint = remaining;
+            try {
+                if (Session.currentUser != null) {
+                    maxHint = investissementController.getMaxInvestableAmount(p.getProject_id(),
+                            Session.currentUser.getId());
+                }
+            } catch (SQLException ignored) {
+            }
+            txtAmount.setPromptText("Max " + String.format("%.0f", maxHint) + " TND");
+            txtAmount.setPrefWidth(140);
+            Button btnInvest = new Button("Invest");
+            btnInvest.getStyleClass().addAll("btn-primary", "btn-small");
+            btnInvest.setOnAction(e -> handleInvestFromCard(p, txtAmount));
+            HBox investRow = new HBox(8);
+            investRow.getChildren().addAll(txtAmount, btnInvest);
+            investRow.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+            card.getChildren().add(investRow);
+        }
+
+        return card;
+    }
+
+    private void handleInvestFromCard(Project p, TextField txtAmount) {
+        String amountStr = txtAmount.getText() == null ? "" : txtAmount.getText().trim();
+        Double maxAllowed = null;
+        try {
+            if (Session.currentUser != null)
+                maxAllowed = investissementController.getMaxInvestableAmount(p.getProject_id(),
+                        Session.currentUser.getId());
+        } catch (SQLException ignored) {
+        }
+        String err = ValidationUtils.validateInvestmentAmount(amountStr, maxAllowed);
+        if (err != null) {
+            new Alert(Alert.AlertType.WARNING, err).showAndWait();
+            return;
+        }
+        double amount = ValidationUtils.parseAmount(amountStr);
+
+        TextInputDialog dialog = new TextInputDialog("0");
+        dialog.setTitle("Revenue Percentage");
+        dialog.setHeaderText("Specify Desired Revenue Percentage");
+        dialog.setContentText("Enter the percentage (%) of project revenues you wish to claim:");
+        var result = dialog.showAndWait();
+
+        if (result.isPresent()) {
+            try {
+                double revenuePercentage = Double.parseDouble(result.get());
+                if (revenuePercentage < 0 || revenuePercentage > 100) {
+                    new Alert(Alert.AlertType.WARNING, "Percentage must be between 0 and 100").showAndWait();
+                    return;
+                }
+                investissementController.addInvestissement(p.getProject_id(), amount, revenuePercentage);
+                new Alert(Alert.AlertType.INFORMATION,
+                        String.format("%.2f TND — Request sent. Check My Investments for status.", amount))
+                        .showAndWait();
+                txtAmount.clear();
+                loadProjects();
+            } catch (NumberFormatException e) {
+                new Alert(Alert.AlertType.WARNING, "Invalid percentage format.").showAndWait();
+            } catch (Exception ex) {
+                new Alert(Alert.AlertType.ERROR, "Failed: " + ex.getMessage()).showAndWait();
+            }
+        }
+    }
+
+    void handleEditProject(Project p) {
+        try {
+            if (investissementController.hasInvestments(p.getProject_id())) {
+                new Alert(Alert.AlertType.WARNING, "Cannot edit: this project has investments.").showAndWait();
+                return;
+            }
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/edit_project.fxml"));
+            Parent root = loader.load();
+            EditProjectController ctrl = loader.getController();
+            ctrl.setStage(stage);
+            ctrl.setProject(p);
+            ctrl.setDashboardController(this);
+            // Set callback for embedded navigation
+            if (onEditReturnCallback != null) {
+                ctrl.setEmbeddedReturnCallback(onEditReturnCallback);
+            }
+
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.setTitle("Finovate - Edit Project");
+            SceneUtils.applyStageSize(stage);
+        } catch (Exception e) {
+            new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).showAndWait();
+            e.printStackTrace();
+        }
+    }
+
+    void handleDeleteProject(Project p) {
+        try {
+            if (investissementController.hasInvestments(p.getProject_id())) {
+                new Alert(Alert.AlertType.WARNING, "Cannot delete: this project has investments.").showAndWait();
+                return;
+            }
+        } catch (SQLException e) {
+            new Alert(Alert.AlertType.ERROR, "Error: " + e.getMessage()).showAndWait();
+            return;
+        }
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Delete Project");
+        confirm.setHeaderText("Delete \"" + p.getTitle() + "\"?");
+        confirm.setContentText("This cannot be undone.");
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+            try {
+                projectController.deleteProject(p.getProject_id());
+                loadProjects();
+                new Alert(Alert.AlertType.INFORMATION, "Project deleted.").showAndWait();
+            } catch (Exception e) {
+                new Alert(Alert.AlertType.ERROR, "Failed to delete: " + e.getMessage()).showAndWait();
+            }
+        }
+    }
+
+    @FXML
+    private void handleAddProject() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/add_project.fxml"));
+        Parent root = loader.load();
+        AddProjectController ctrl = loader.getController();
+        ctrl.setStage(stage);
+        ctrl.setDashboardController(this);
+
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle("Finovate - Add Project");
+        SceneUtils.applyStageSize(stage);
+    }
+
+    @FXML
+    private void handleMyProjects() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/my_projects.fxml"));
+        Parent root = loader.load();
+        MyProjectsController ctrl = loader.getController();
+        ctrl.setStage(stage);
+
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle("Finovate - My Projects");
+        SceneUtils.applyStageSize(stage);
+    }
+
+    @FXML
+    private void handleInvest() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/invest.fxml"));
+        Parent root = loader.load();
+        InvestController ctrl = loader.getController();
+        ctrl.setStage(stage);
+
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle("Finovate - Invest");
+        SceneUtils.applyStageSize(stage);
+    }
+
+    @FXML
+    private void handlePendingInvestments() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/pending_investments.fxml"));
+        Parent root = loader.load();
+        PendingInvestmentsController ctrl = loader.getController();
+        ctrl.setStage(stage);
+
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle("Finovate - Investment Requests");
+        SceneUtils.applyStageSize(stage);
+    }
+
+    @FXML
+    private void handleMyInvestments() throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/my_investments.fxml"));
+        Parent root = loader.load();
+        MyInvestmentsController ctrl = loader.getController();
+        ctrl.setStage(stage);
+
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle("Finovate - My Investments");
+        SceneUtils.applyStageSize(stage);
+    }
+
+    @FXML
+    private void handleAdminDashboard() throws IOException {
+        if (Session.currentUser == null || !"ADMIN".equals(Session.currentUser.getRole())) {
+            new Alert(Alert.AlertType.WARNING, "Access denied. Admin only.").showAndWait();
+            return;
+        }
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/admin_dashboard.fxml"));
+        Parent root = loader.load();
+        AdminDashboardController ctrl = loader.getController();
+        ctrl.setStage(stage);
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle("Finovate - Admin Dashboard");
+        SceneUtils.applyStageSize(stage);
+    }
+
+    private void showMapDialog(double lat, double lng) {
+        javafx.scene.web.WebView wv = MapPicker.createViewerWebView(lat, lng);
+        Dialog<Void> d = new Dialog<>();
+        d.setTitle("Project Location");
+        d.getDialogPane().setContent(wv);
+        d.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        d.showAndWait();
+    }
+
+    @FXML
+    private void handleSwitchUser() throws IOException {
+        Session.currentUser = null;
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/Login.fxml"));
+        Parent root = loader.load();
+        Scene scene = new Scene(root);
+        stage.setScene(scene);
+        stage.setTitle("Finovate - Login");
+        stage.centerOnScreen();
+    }
+}

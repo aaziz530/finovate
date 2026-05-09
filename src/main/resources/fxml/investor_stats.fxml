@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.esprit.finovate.controllers.InvestorStatsController"
+            prefHeight="700" prefWidth="1100"
+            styleClass="root" stylesheets="@../css/style.css">
+    <top>
+        <VBox alignment="CENTER_LEFT" styleClass="form-header">
+            <padding>
+                <Insets left="24" right="24" top="20" bottom="20"/>
+            </padding>
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Button text="← Retour au Dashboard" onAction="#handleBack" styleClass="btn-secondary"/>
+                <VBox>
+                    <Label text="Mes Statistiques Financières" styleClass="form-title"/>
+                    <Label text="Suivez les revenus générés par vos investissements en pourcentage" styleClass="form-subtitle"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </top>
+    <center>
+        <ScrollPane fitToWidth="true" styleClass="projects-scroll">
+            <VBox styleClass="form-outer" alignment="TOP_CENTER" spacing="24">
+                <padding>
+                    <Insets top="28" left="48" right="48" bottom="48"/>
+                </padding>
+                
+                <!-- KPI Section -->
+                <HBox spacing="20" alignment="CENTER_LEFT">
+                    <VBox styleClass="project-card" HBox.hgrow="ALWAYS" alignment="CENTER">
+                        <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                        <Label text="Capital Total Investi" styleClass="section-title"/>
+                        <Label fx:id="lblTotalInvested" text="0.00 TND" styleClass="form-title" style="-fx-text-fill: #1E88E5;"/>
+                    </VBox>
+                    <VBox styleClass="project-card" HBox.hgrow="ALWAYS" alignment="CENTER">
+                        <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+                        <Label text="Total des Gains (Revenus)" styleClass="section-title"/>
+                        <Label fx:id="lblTotalEarnings" text="0.00 TND" styleClass="form-title" style="-fx-text-fill: #43A047;"/>
+                    </VBox>
+                </HBox>
+
+                <HBox spacing="24" alignment="TOP_CENTER">
+                    <!-- Line Chart -->
+                    <VBox styleClass="form-content" HBox.hgrow="ALWAYS" prefWidth="900">
+                        <Label text="Évolution de Vos Revenus" styleClass="section-title"/>
+                        <LineChart fx:id="portfolioChart" prefHeight="450">
+                            <xAxis><CategoryAxis label="Date"/></xAxis>
+                            <yAxis><NumberAxis label="Gains (TND)"/></yAxis>
+                        </LineChart>
+                    </VBox>
+                </HBox>
+
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

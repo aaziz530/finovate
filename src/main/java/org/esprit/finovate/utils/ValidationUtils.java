@@ -1,5 +1,6 @@
 package org.esprit.finovate.utils;
 
+import java.time.LocalDate;
 import java.util.regex.Pattern;
 
 public class ValidationUtils {
@@ -80,5 +81,94 @@ public class ValidationUtils {
      */
     public static String sanitize(String input) {
         return input == null ? "" : input.trim();
+    }
+
+    public static String validateInvestmentAmount(String value) {
+        return validateAmount(value, CONFIG.getMinAmount(), CONFIG.getMaxAmount(), "Amount");
+    }
+
+    /**
+     * Validates investment amount with optional max (e.g. remaining to fund).
+     */
+    public static String validateInvestmentAmount(String value, Double maxAmount) {
+        String err = validateInvestmentAmount(value);
+        if (err != null) return err;
+        if (maxAmount != null && maxAmount > 0) {
+            double v = parseAmount(value.trim());
+            if (v > maxAmount) return "Amount cannot exceed " + String.format("%.2f", maxAmount) + " TND (remaining to fund).";
+        }
+        return null;
+    }
+
+    public static double parseAmount(String value) {
+        return Double.parseDouble(value.trim().replace(",", "."));
+    }
+
+    /**
+     * Validates amount (double) with configurable min/max.
+     */
+    public static String validateAmount(String value, double min, double max, String fieldName) {
+        String err = validateRequired(value, fieldName);
+        if (err != null) return err;
+        try {
+            double v = parseAmount(value);
+            if (v < min) return fieldName + " must be at least " + min + " TND.";
+            if (v > max) return fieldName + " must not exceed " + max + " TND.";
+            return null;
+        } catch (NumberFormatException e) {
+            return "Invalid " + fieldName + ". Use numbers (e.g. 100 or 100.50).";
+        }
+    }
+
+    public static String validateRequired(String value, String fieldName) {
+        if (value == null || (value = value.trim()).isEmpty()) {
+            return fieldName + " is required.";
+        }
+        return null;
+    }
+
+    /** Configurable validation limits */
+    public static final ValidationConfig CONFIG = new ValidationConfig();
+
+    // ========== Investment module validation methods ==========
+
+    public static String validateTitle(String title) {
+        return validateLength(title, 1, 150, "Title");
+    }
+
+    public static String validateDescription(String desc) {
+        return validateLength(desc, 1, 5000, "Description");
+    }
+
+    public static String validateGoalAmount(String value) {
+        return validateAmount(value, CONFIG.getMinAmount(), CONFIG.getMaxAmount(), "Goal amount");
+    }
+
+    public static String validateDeadline(LocalDate date, String fieldName) {
+        if (date == null) return fieldName + " is required.";
+        if (date.isBefore(LocalDate.now())) {
+            return fieldName + " must be today or in the future.";
+        }
+        return null;
+    }
+
+    public static String validateLength(String value, int minLen, int maxLen, String fieldName) {
+        String err = validateRequired(value, fieldName);
+        if (err != null) return err;
+        value = value.trim();
+        if (value.length() < minLen) return fieldName + " must be at least " + minLen + " characters.";
+        if (maxLen > 0 && value.length() > maxLen) return fieldName + " must not exceed " + maxLen + " characters.";
+        return null;
+    }
+
+    /**
+     * Configurable limits for validation.
+     */
+    public static class ValidationConfig {
+        private double minAmount = 0.01;
+        private double maxAmount = 999_999_999.99;
+
+        public double getMinAmount() { return minAmount; }
+        public double getMaxAmount() { return maxAmount; }
     }
 }

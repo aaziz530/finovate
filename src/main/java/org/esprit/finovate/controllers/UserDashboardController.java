@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.esprit.finovate.utils.Session;
 
@@ -46,6 +47,21 @@ public class UserDashboardController implements Initializable {
 
     @FXML
     private Button btnInvestissement;
+
+    @FXML
+    private VBox investSubMenu;
+
+    @FXML
+    private Button btnAddProject;
+
+    @FXML
+    private Button btnAllProjects;
+
+    @FXML
+    private Button btnMyProjects;
+
+    @FXML
+    private Button btnMyInvestments;
 
     @FXML
     private Button btnReclamations;
@@ -155,6 +171,82 @@ public class UserDashboardController implements Initializable {
         updateButtonStyles(btnMarketplace);
     }
 
+    @FXML
+    private void toggleInvestMenu() {
+        if (investSubMenu != null) {
+            boolean isVisible = investSubMenu.isVisible();
+            investSubMenu.setVisible(!isVisible);
+            investSubMenu.setManaged(!isVisible);
+            btnInvestissement.setText(isVisible ? "Investissement  ▼" : "Investissement  ▲");
+        }
+    }
+
+    @FXML
+    private void handleAddProject() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/add_project.fxml"));
+            Parent view = loader.load();
+
+            Object controller = loader.getController();
+            if (controller != null && contentArea != null && contentArea.getScene() != null) {
+                Stage stage = (Stage) contentArea.getScene().getWindow();
+                try {
+                    controller.getClass().getMethod("setStage", Stage.class).invoke(controller, stage);
+                } catch (Exception ignored) {}
+                // Set callback to navigate back to all projects list after creation
+                try {
+                    controller.getClass().getMethod("setOnProjectCreatedCallback", Runnable.class)
+                            .invoke(controller, (Runnable) this::handleAllProjects);
+                } catch (Exception ignored) {}
+            }
+
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(view);
+            updateButtonStyles(btnInvestissement);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleAllProjects() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/all_projects_embed.fxml"));
+            Parent view = loader.load();
+
+            Object controller = loader.getController();
+            if (controller != null && contentArea != null && contentArea.getScene() != null) {
+                Stage stage = (Stage) contentArea.getScene().getWindow();
+                try {
+                    controller.getClass().getMethod("setStage", Stage.class).invoke(controller, stage);
+                } catch (Exception ignored) {}
+                // Set callback for embedded navigation when editing projects
+                try {
+                    controller.getClass().getMethod("setOnEditReturnCallback", Runnable.class)
+                            .invoke(controller, (Runnable) this::handleAllProjects);
+                } catch (Exception ignored) {}
+            }
+
+            contentArea.getChildren().clear();
+            contentArea.getChildren().add(view);
+            updateButtonStyles(btnInvestissement);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @FXML
+    private void handleMyProjects() {
+        loadView("/fxml/my_projects.fxml");
+        updateButtonStyles(btnInvestissement);
+    }
+
+    @FXML
+    private void handleMyInvestments() {
+        loadView("/fxml/my_investments.fxml");
+        updateButtonStyles(btnInvestissement);
+    }
+
     public void refreshUserInfo() {
         if (Session.currentUser != null) {
             userNameLabel.setText(Session.currentUser.getFirstName() + " " + Session.currentUser.getLastName());
@@ -182,6 +274,17 @@ public class UserDashboardController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent view = loader.load();
+
+            Object controller = loader.getController();
+            if (controller != null && contentArea != null && contentArea.getScene() != null) {
+                Stage stage = (Stage) contentArea.getScene().getWindow();
+                try {
+                    controller.getClass().getMethod("setStage", Stage.class).invoke(controller, stage);
+                } catch (Exception ignored) {
+                    // Controller doesn't support setStage(Stage)
+                }
+            }
+
             contentArea.getChildren().clear();
             contentArea.getChildren().add(view);
         } catch (IOException e) {
