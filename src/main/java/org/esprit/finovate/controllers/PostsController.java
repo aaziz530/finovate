@@ -39,19 +39,19 @@ public class PostsController {
     private MainController mainController; // Optional - for backward compatibility
     private ForumsPageController forumsPageController; // New - for direct navigation
     private StackPane parentContentArea; // For loading post details view
-    private int currentForumId;
+    private long currentForumId;
     private String currentForumName;
-    private int currentUserId;
+    private long currentUserId;
     private boolean isForumCreator;
     private ObservableList<PostItem> allPosts = FXCollections.observableArrayList();
     private ObservableList<PostItem> filteredPosts = FXCollections.observableArrayList();
 
     // Classe interne pour représenter un post
     public static class PostItem {
-        private int id;
+        private long id;
         private String title;
         private String content;
-        private int authorId;
+        private long authorId;
         private String authorName;
         private int commentCount;
         private int upvotes;
@@ -60,7 +60,7 @@ public class PostsController {
         private Timestamp createdAt;
         private String imageUrl;
 
-        public PostItem(int id, String title, String content, int authorId, String authorName,
+        public PostItem(long id, String title, String content, long authorId, String authorName,
                         int commentCount, Timestamp createdAt) {
             this.id = id;
             this.title = title;
@@ -75,10 +75,10 @@ public class PostsController {
         }
 
         // Getters
-        public int getId() { return id; }
+        public long getId() { return id; }
         public String getTitle() { return title; }
         public String getContent() { return content; }
-        public int getAuthorId() { return authorId; }
+        public long getAuthorId() { return authorId; }
         public String getAuthorName() { return authorName; }
         public int getCommentCount() { return commentCount; }
         public Timestamp getCreatedAt() { return createdAt; }
@@ -146,7 +146,7 @@ public class PostsController {
         this.parentContentArea = contentArea;
     }
 
-    public void loadPosts(int forumId, String forumName, int userId) {
+    public void loadPosts(long forumId, String forumName, long userId) {
         this.currentForumId = forumId;
         this.currentForumName = forumName;
         this.currentUserId = userId;
@@ -171,11 +171,11 @@ public class PostsController {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, currentForumId);
+            stmt.setLong(1, currentForumId);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                isForumCreator = (rs.getInt("creator_id") == currentUserId);
+                isForumCreator = (rs.getLong("creator_id") == currentUserId);
             }
 
         } catch (SQLException e) {
@@ -195,8 +195,8 @@ public class PostsController {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, currentForumId);
-            stmt.setInt(2, currentUserId);
+            stmt.setLong(1, currentForumId);
+            stmt.setLong(2, currentUserId);
             ResultSet rs = stmt.executeQuery();
 
             return rs.next();
@@ -227,17 +227,17 @@ public class PostsController {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, currentForumId);
+            stmt.setLong(1, currentForumId);
             ResultSet rs = stmt.executeQuery();
             
             int count = 0;
             while (rs.next()) {
                 count++;
                 PostItem post = new PostItem(
-                        rs.getInt("id"),
+                        rs.getLong("id"),
                         rs.getString("title"),
                         rs.getString("content"),
-                        rs.getInt("author_id"),
+                        rs.getLong("author_id"),
                         rs.getString("author_name"),
                         rs.getInt("comment_count"),
                         rs.getTimestamp("created_at")
@@ -384,7 +384,7 @@ public class PostsController {
         }
     }
 
-    private void deletePost(int postId) {
+    private void deletePost(long postId) {
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
         confirmAlert.setTitle("Confirmation");
         confirmAlert.setHeaderText("Supprimer ce post ?");
@@ -397,8 +397,8 @@ public class PostsController {
             try (Connection conn = getConnection();
                  PreparedStatement stmt = conn.prepareStatement(query)) {
 
-                stmt.setInt(1, postId);
-                stmt.setInt(2, currentUserId);
+                stmt.setLong(1, postId);
+                stmt.setLong(2, currentUserId);
                 int rowsAffected = stmt.executeUpdate();
 
                 if (rowsAffected > 0) {
@@ -432,7 +432,7 @@ public class PostsController {
     /**
      * Load post details view directly into parent content area (without MainController)
      */
-    private void loadPostDetailsViewDirect(int postId, String postTitle) {
+    private void loadPostDetailsViewDirect(long postId, String postTitle) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/post-details.fxml"));
             Parent postDetailsView = loader.load();
@@ -457,14 +457,14 @@ public class PostsController {
         }
     }
 
-    private void sharePost(int postId) {
+    private void sharePost(long postId) {
         String query = "INSERT INTO shared_posts (post_id, user_id, shared_at) VALUES (?, ?, NOW())";
 
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, postId);
-            stmt.setInt(2, currentUserId);
+            stmt.setLong(1, postId);
+            stmt.setLong(2, currentUserId);
             stmt.executeUpdate();
 
             // Vérifier les badges de partage
@@ -483,15 +483,15 @@ public class PostsController {
         }
     }
 
-    private void votePost(int postId, String voteType) {
+    private void votePost(long postId, String voteType) {
         // Vérifier si l'utilisateur a déjà voté
         String checkQuery = "SELECT vote_type FROM votes WHERE post_id = ? AND user_id = ?";
         
         try (Connection conn = getConnection();
              PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
 
-            checkStmt.setInt(1, postId);
-            checkStmt.setInt(2, currentUserId);
+            checkStmt.setLong(1, postId);
+            checkStmt.setLong(2, currentUserId);
             ResultSet rs = checkStmt.executeQuery();
 
             boolean isNewVote = false;
@@ -503,8 +503,8 @@ public class PostsController {
                     // Même vote: on le retire (toggle)
                     String deleteQuery = "DELETE FROM votes WHERE post_id = ? AND user_id = ?";
                     try (PreparedStatement deleteStmt = conn.prepareStatement(deleteQuery)) {
-                        deleteStmt.setInt(1, postId);
-                        deleteStmt.setInt(2, currentUserId);
+                        deleteStmt.setLong(1, postId);
+                        deleteStmt.setLong(2, currentUserId);
                         deleteStmt.executeUpdate();
                     }
                 } else {
@@ -512,17 +512,17 @@ public class PostsController {
                     String updateQuery = "UPDATE votes SET vote_type = ? WHERE post_id = ? AND user_id = ?";
                     try (PreparedStatement updateStmt = conn.prepareStatement(updateQuery)) {
                         updateStmt.setString(1, voteType);
-                        updateStmt.setInt(2, postId);
-                        updateStmt.setInt(3, currentUserId);
+                        updateStmt.setLong(2, postId);
+                        updateStmt.setLong(3, currentUserId);
                         updateStmt.executeUpdate();
                     }
                 }
             } else {
                 // Nouveau vote
-                String insertQuery = "INSERT INTO votes (post_id, user_id, vote_type) VALUES (?, ?, ?)";
+                String insertQuery = "INSERT INTO votes (post_id, user_id, vote_type, created_at) VALUES (?, ?, ?, NOW())";
                 try (PreparedStatement insertStmt = conn.prepareStatement(insertQuery)) {
-                    insertStmt.setInt(1, postId);
-                    insertStmt.setInt(2, currentUserId);
+                    insertStmt.setLong(1, postId);
+                    insertStmt.setLong(2, currentUserId);
                     insertStmt.setString(3, voteType);
                     insertStmt.executeUpdate();
                 }

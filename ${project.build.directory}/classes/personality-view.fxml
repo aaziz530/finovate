@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.geometry.Insets?>
+
+<ScrollPane xmlns="http://javafx.com/javafx/21"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="org.esprit.finovate.controllers.PersonalityViewController"
+            fitToWidth="true"
+            style="-fx-background-color: #F8F9FA;">
+
+    <VBox spacing="25" style="-fx-padding: 30; -fx-background-color: #F8F9FA;">
+        
+        <!-- Header -->
+        <VBox alignment="CENTER" spacing="15" 
+              style="-fx-background-color: linear-gradient(to bottom, #F3E5F5, #E1BEE7); -fx-padding: 30; -fx-background-radius: 15;">
+            <Label fx:id="emojiLabel" text="🎭" 
+                   style="-fx-font-size: 64px;"/>
+            <Label fx:id="typeLabel" text="Analyse de Personnalité" 
+                   style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #9C27B0; -fx-text-alignment: center;" 
+                   wrapText="true" maxWidth="600"/>
+            <Label fx:id="usernameLabel" text="👤 Utilisateur" 
+                   style="-fx-font-size: 16px; -fx-text-fill: #666;"/>
+        </VBox>
+        
+        <!-- Title Section -->
+        <VBox spacing="10" 
+              style="-fx-background-color: #FFF9C4; -fx-padding: 20; -fx-background-radius: 12;">
+            <Label fx:id="titleLabel" text="🏆 Titre de Personnalité" 
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #F57C00;" 
+                   wrapText="true"/>
+        </VBox>
+        
+        <!-- Description Section -->
+        <VBox spacing="10" 
+              style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+            <Label text="📝 Description" 
+                   style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333;"/>
+            <Label fx:id="descriptionLabel" text="Description de la personnalité..." 
+                   style="-fx-font-size: 15px; -fx-text-fill: #555; -fx-line-spacing: 4px;" 
+                   wrapText="true"/>
+        </VBox>
+        
+        <!-- Sentiment Section -->
+        <VBox spacing="12" 
+              style="-fx-background-color: #E8F5E9; -fx-padding: 20; -fx-background-radius: 12; -fx-border-color: #4CAF50; -fx-border-width: 2; -fx-border-radius: 12;">
+            <Label text="📊 Analyse de Sentiment" 
+                   style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #2E7D32;"/>
+            <Label fx:id="positiveLabel" text="😊 Positif: 0%" 
+                   style="-fx-font-size: 14px; -fx-text-fill: #4CAF50; -fx-font-weight: 600;"/>
+            <Label fx:id="neutralLabel" text="😐 Neutre: 0%" 
+                   style="-fx-font-size: 14px; -fx-text-fill: #FF9800; -fx-font-weight: 600;"/>
+            <Label fx:id="negativeLabel" text="😔 Négatif: 0%" 
+                   style="-fx-font-size: 14px; -fx-text-fill: #F44336; -fx-font-weight: 600;"/>
+        </VBox>
+        
+        <!-- Traits Section -->
+        <VBox fx:id="traitsSection" spacing="10" 
+              style="-fx-background-color: #E3F2FD; -fx-padding: 20; -fx-background-radius: 12;">
+            <Label text="✨ Traits de Personnalité" 
+                   style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1976D2;"/>
+            <VBox fx:id="traitsContainer" spacing="8"/>
+        </VBox>
+        
+        <!-- Footer -->
+        <Label text="💡 Analyse générée par intelligence artificielle" 
+               style="-fx-font-size: 12px; -fx-text-fill: #999; -fx-font-style: italic; -fx-text-alignment: center;" 
+               wrapText="true" maxWidth="Infinity"/>
+        
+    </VBox>
+
+</ScrollPane>

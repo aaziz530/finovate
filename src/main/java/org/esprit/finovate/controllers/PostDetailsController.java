@@ -33,9 +33,9 @@ public class PostDetailsController {
     private MainController mainController; // Optional - for backward compatibility
     private ForumsPageController forumsPageController; // New - for direct navigation
     private StackPane parentContentArea; // For navigation back
-    private int currentPostId;
-    private int currentUserId;
-    private int currentForumId; // Store forum ID for back navigation
+    private long currentPostId;
+    private long currentUserId;
+    private long currentForumId; // Store forum ID for back navigation
     private String currentForumName; // Store forum name for back navigation
     private int upvotes = 0;
     private int downvotes = 0;
@@ -52,7 +52,7 @@ public class PostDetailsController {
         this.parentContentArea = contentArea;
     }
 
-    public void loadPostDetails(int postId, int userId) {
+    public void loadPostDetails(long postId, long userId) {
         this.currentPostId = postId;
         this.currentUserId = userId;
         
@@ -74,7 +74,7 @@ public class PostDetailsController {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, currentPostId);
+            stmt.setLong(1, currentPostId);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
@@ -87,7 +87,7 @@ public class PostDetailsController {
                 contentLabel.setText(rs.getString("content"));
                 
                 // Store forum info for back navigation
-                currentForumId = rs.getInt("forum_id");
+                currentForumId = rs.getLong("forum_id");
                 currentForumName = rs.getString("forum_name");
                 
                 int commentCount = rs.getInt("comment_count");
@@ -240,8 +240,8 @@ public class PostDetailsController {
         try (Connection conn = getConnection();
              PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
 
-            checkStmt.setInt(1, currentPostId);
-            checkStmt.setInt(2, currentUserId);
+            checkStmt.setLong(1, currentPostId);
+            checkStmt.setLong(2, currentUserId);
             ResultSet rs = checkStmt.executeQuery();
 
             if (rs.next()) {
@@ -251,8 +251,8 @@ public class PostDetailsController {
                     // Retirer le vote
                     String deleteQuery = "DELETE FROM votes WHERE post_id = ? AND user_id = ?";
                     try (PreparedStatement deleteStmt = conn.prepareStatement(deleteQuery)) {
-                        deleteStmt.setInt(1, currentPostId);
-                        deleteStmt.setInt(2, currentUserId);
+                        deleteStmt.setLong(1, currentPostId);
+                        deleteStmt.setLong(2, currentUserId);
                         deleteStmt.executeUpdate();
                     }
                 } else {
@@ -260,17 +260,17 @@ public class PostDetailsController {
                     String updateQuery = "UPDATE votes SET vote_type = ? WHERE post_id = ? AND user_id = ?";
                     try (PreparedStatement updateStmt = conn.prepareStatement(updateQuery)) {
                         updateStmt.setString(1, voteType);
-                        updateStmt.setInt(2, currentPostId);
-                        updateStmt.setInt(3, currentUserId);
+                        updateStmt.setLong(2, currentPostId);
+                        updateStmt.setLong(3, currentUserId);
                         updateStmt.executeUpdate();
                     }
                 }
             } else {
                 // Ajouter un nouveau vote
-                String insertQuery = "INSERT INTO votes (post_id, user_id, vote_type) VALUES (?, ?, ?)";
+                String insertQuery = "INSERT INTO votes (post_id, user_id, vote_type, created_at) VALUES (?, ?, ?, NOW())";
                 try (PreparedStatement insertStmt = conn.prepareStatement(insertQuery)) {
-                    insertStmt.setInt(1, currentPostId);
-                    insertStmt.setInt(2, currentUserId);
+                    insertStmt.setLong(1, currentPostId);
+                    insertStmt.setLong(2, currentUserId);
                     insertStmt.setString(3, voteType);
                     insertStmt.executeUpdate();
                 }
@@ -290,8 +290,8 @@ public class PostDetailsController {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, currentPostId);
-            stmt.setInt(2, currentUserId);
+            stmt.setLong(1, currentPostId);
+            stmt.setLong(2, currentUserId);
             stmt.executeUpdate();
 
             showInfo("Post partagé avec succès !");
@@ -331,16 +331,16 @@ public class PostDetailsController {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, currentPostId);
+            stmt.setLong(1, currentPostId);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
                 VBox commentCard = createCommentCard(
-                    rs.getInt("id"),
+                    rs.getLong("id"),
                     rs.getString("content"),
                     rs.getString("username"),
                     rs.getTimestamp("created_at"),
-                    rs.getInt("author_id")
+                    rs.getLong("author_id")
                 );
                 commentsBox.getChildren().add(commentCard);
             }
@@ -351,7 +351,7 @@ public class PostDetailsController {
         }
     }
 
-    private VBox createCommentCard(int commentId, String content, String author, Timestamp createdAt, int authorId) {
+    private VBox createCommentCard(long commentId, String content, String author, Timestamp createdAt, long authorId) {
         VBox card = new VBox(10);
         card.setPadding(new Insets(15));
         card.setStyle("-fx-background-color: #F5F5F5; -fx-border-color: #E0E0E0; " +
@@ -577,13 +577,13 @@ public class PostDetailsController {
     }
     
     private void addReply(String content) {
-        String query = "INSERT INTO comments (post_id, author_id, content, created_at) VALUES (?, ?, ?, NOW())";
+        String query = "INSERT INTO comments (post_id, author_id, content, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())";
 
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, currentPostId);
-            stmt.setInt(2, currentUserId);
+            stmt.setLong(1, currentPostId);
+            stmt.setLong(2, currentUserId);
             stmt.setString(3, content);
             stmt.executeUpdate();
 
@@ -675,13 +675,13 @@ public class PostDetailsController {
      * Submit comment to database (after moderation check)
      */
     private void submitComment(String content) {
-        String query = "INSERT INTO comments (post_id, author_id, content, created_at) VALUES (?, ?, ?, NOW())";
+        String query = "INSERT INTO comments (post_id, author_id, content, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())";
 
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, currentPostId);
-            stmt.setInt(2, currentUserId);
+            stmt.setLong(1, currentPostId);
+            stmt.setLong(2, currentUserId);
             stmt.setString(3, content);
             stmt.executeUpdate();
 
@@ -696,7 +696,7 @@ public class PostDetailsController {
         }
     }
 
-    private void deleteComment(int commentId) {
+    private void deleteComment(long commentId) {
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
         confirmAlert.setTitle("Confirmation");
         confirmAlert.setHeaderText("Supprimer ce commentaire ?");
@@ -707,8 +707,8 @@ public class PostDetailsController {
             try (Connection conn = getConnection();
                  PreparedStatement stmt = conn.prepareStatement(query)) {
 
-                stmt.setInt(1, commentId);
-                stmt.setInt(2, currentUserId);
+                stmt.setLong(1, commentId);
+                stmt.setLong(2, currentUserId);
                 stmt.executeUpdate();
 
                 loadComments();
@@ -720,7 +720,7 @@ public class PostDetailsController {
         }
     }
 
-    private void editComment(int commentId, String currentContent, VBox card) {
+    private void editComment(long commentId, String currentContent, VBox card) {
         // Remplacer le contenu par un TextArea éditable
         card.getChildren().clear();
         card.setStyle("-fx-background-color: #FFF3E0; -fx-border-color: #FF9800; " +
@@ -760,15 +760,15 @@ public class PostDetailsController {
         card.getChildren().addAll(headerLabel, editArea, buttonBox);
     }
 
-    private void saveEditedComment(int commentId, String newContent) {
+    private void saveEditedComment(long commentId, String newContent) {
         String query = "UPDATE comments SET content = ?, updated_at = NOW() WHERE id = ? AND author_id = ?";
 
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
             stmt.setString(1, newContent);
-            stmt.setInt(2, commentId);
-            stmt.setInt(3, currentUserId);
+            stmt.setLong(2, commentId);
+            stmt.setLong(3, currentUserId);
             
             int rowsAffected = stmt.executeUpdate();
             

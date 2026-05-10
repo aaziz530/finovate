@@ -27,8 +27,8 @@ public class CreateForumDialogController {
 
     private Stage dialogStage;
     private ForumsController forumsController;
-    private int currentUserId;
-    private Integer forumIdToEdit = null; // null = création, sinon = modification
+    private long currentUserId;
+    private Long forumIdToEdit = null; // null = création, sinon = modification
     private File selectedImageFile = null;
     private String existingImagePath = null;
 
@@ -40,17 +40,17 @@ public class CreateForumDialogController {
         this.forumsController = forumsController;
     }
 
-    public void setCurrentUserId(int userId) {
+    public void setCurrentUserId(long userId) {
         this.currentUserId = userId;
     }
 
-    public void setForumToEdit(int forumId, String name, String description) {
+    public void setForumToEdit(long forumId, String name, String description) {
         this.forumIdToEdit = forumId;
         nameField.setText(name);
         descriptionArea.setText(description);
     }
 
-    public void setForumToEdit(int forumId, String name, String description, String imagePath) {
+    public void setForumToEdit(long forumId, String name, String description, String imagePath) {
         this.forumIdToEdit = forumId;
         this.existingImagePath = imagePath;
         nameField.setText(name);
@@ -144,7 +144,7 @@ public class CreateForumDialogController {
             try (PreparedStatement stmt = conn.prepareStatement(queryWithImage)) {
                 stmt.setString(1, name);
                 stmt.setString(2, description);
-                stmt.setInt(3, currentUserId);
+                stmt.setLong(3, currentUserId);
                 stmt.setString(4, imagePath);
                 
                 System.out.println("Tentative d'insertion avec image_url...");
@@ -167,7 +167,7 @@ public class CreateForumDialogController {
             try (PreparedStatement stmt = conn.prepareStatement(queryWithoutImage)) {
                 stmt.setString(1, name);
                 stmt.setString(2, description);
-                stmt.setInt(3, currentUserId);
+                stmt.setLong(3, currentUserId);
                 
                 System.out.println("Query: " + queryWithoutImage);
                 stmt.executeUpdate();
@@ -216,8 +216,8 @@ public class CreateForumDialogController {
                 stmt.setString(1, name);
                 stmt.setString(2, description);
                 stmt.setString(3, imagePath);
-                stmt.setInt(4, forumIdToEdit);
-                stmt.setInt(5, currentUserId);
+                stmt.setLong(4, forumIdToEdit);
+                stmt.setLong(5, currentUserId);
                 rowsAffected = stmt.executeUpdate();
             } catch (SQLException e) {
                 // Si la colonne image_url n'existe pas, essayer sans
@@ -226,8 +226,8 @@ public class CreateForumDialogController {
                 try (PreparedStatement stmt = conn.prepareStatement(queryWithoutImage)) {
                     stmt.setString(1, name);
                     stmt.setString(2, description);
-                    stmt.setInt(3, forumIdToEdit);
-                    stmt.setInt(4, currentUserId);
+                    stmt.setLong(3, forumIdToEdit);
+                    stmt.setLong(4, currentUserId);
                     rowsAffected = stmt.executeUpdate();
                 }
             }

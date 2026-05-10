@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.esprit.finovate.controllers.ForumsPageController"
+      spacing="0">
+
+    <!-- Navbar horizontale -->
+    <HBox spacing="0" alignment="CENTER_LEFT" 
+          style="-fx-background-color: #237f4e; -fx-padding: 20 25; -fx-effect: dropshadow(gaussian, rgba(35,127,78,0.3), 10, 0, 0, 4);">
+        
+        <!-- Navigation Tabs -->
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Button fx:id="accueilBtn" text="🏠 Accueil"
+                    onAction="#showAccueil" 
+                    style="-fx-background-color: rgba(255,255,255,0.3); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 600; -fx-padding: 12 24; -fx-background-radius: 20; -fx-cursor: hand;"/>
+            
+            <Button fx:id="mesForumsBtn" text="📁 Mes Forums"
+                    onAction="#showMyForums" 
+                    style="-fx-background-color: rgba(255,255,255,0.3); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 600; -fx-padding: 12 24; -fx-background-radius: 20; -fx-cursor: hand;"/>
+            
+            <Button fx:id="forumsRejointsBtn" text="👥 Forums Rejoints"
+                    onAction="#showJoinedForums" 
+                    style="-fx-background-color: rgba(255,255,255,0.3); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 600; -fx-padding: 12 24; -fx-background-radius: 20; -fx-cursor: hand;"/>
+            
+            <Button fx:id="postesPartagesBtn" text="📤 Postes Partagés"
+                    onAction="#showSharedPosts" 
+                    style="-fx-background-color: rgba(255,255,255,0.3); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 600; -fx-padding: 12 24; -fx-background-radius: 20; -fx-cursor: hand;"/>
+            
+            <Button fx:id="badgesBtn" text="🏆 Mes Badges"
+                    onAction="#showBadges" 
+                    style="-fx-background-color: rgba(255,255,255,0.3); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 600; -fx-padding: 12 24; -fx-background-radius: 20; -fx-cursor: hand;"/>
+            
+            <Button fx:id="aiGeneratorBtn" text="✨ Générateur IA"
+                    onAction="#showAIGenerator" 
+                    style="-fx-background-color: rgba(255,255,255,0.3); -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 600; -fx-padding: 12 24; -fx-background-radius: 20; -fx-cursor: hand;"/>
+            
+            <!-- Séparateur vertical -->
+            <Region style="-fx-min-width: 2; -fx-background-color: rgba(255,255,255,0.3); -fx-pref-height: 30;"/>
+            
+            <!-- AI Features (icônes seulement) -->
+            <Button fx:id="personalityBtn" text="🎭"
+                    onAction="#showPersonality"
+                    style="-fx-background-color: rgba(255,255,255,0.3); -fx-text-fill: white; -fx-font-size: 20px; -fx-padding: 10; -fx-background-radius: 50%; -fx-cursor: hand; -fx-min-width: 45; -fx-min-height: 45;"/>
+            
+            <Button fx:id="recommendationsBtn" text="💡"
+                    onAction="#showRecommendations"
+                    style="-fx-background-color: rgba(255,255,255,0.3); -fx-text-fill: white; -fx-font-size: 20px; -fx-padding: 10; -fx-background-radius: 50%; -fx-cursor: hand; -fx-min-width: 45; -fx-min-height: 45;"/>
+            
+            <Button fx:id="alertesBtn" text="🔔"
+                    onAction="#showAlerts"
+                    style="-fx-background-color: rgba(255,255,255,0.3); -fx-text-fill: white; -fx-font-size: 20px; -fx-padding: 10; -fx-background-radius: 50%; -fx-cursor: hand; -fx-min-width: 45; -fx-min-height: 45;"/>
+        </HBox>
+        
+        <!-- Spacer -->
+        <Region HBox.hgrow="ALWAYS"/>
+    </HBox>
+
+    <!-- Barre de recherche et tri -->
+    <HBox spacing="15" alignment="CENTER_LEFT" 
+          style="-fx-background-color: #F8F9FA; -fx-padding: 20 25; -fx-border-color: #E1E8ED; -fx-border-width: 0 0 1 0;">
+        <TextField fx:id="searchField" promptText="🔍 Rechercher..."
+                   HBox.hgrow="ALWAYS" 
+                   style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10 15; -fx-font-size: 14px; -fx-border-color: #E1E8ED; -fx-border-width: 1;"/>
+        <ComboBox fx:id="sortBox" promptText="Trier par..."
+                  prefWidth="180" 
+                  style="-fx-background-color: white; -fx-background-radius: 8; -fx-border-radius: 8; -fx-padding: 10 15; -fx-font-size: 14px;"/>
+    </HBox>
+    
+    <!-- Zone de contenu -->
+    <StackPane fx:id="contentArea" VBox.vgrow="ALWAYS"
+               style="-fx-background-color: #F8F9FA; -fx-padding: 25;">
+    </StackPane>
+
+</VBox>

@@ -30,8 +30,8 @@ public class AIPostGeneratorController {
     @FXML private Label statusLabel;
 
     private MainController mainController;
-    private int currentUserId;
-    private int selectedForumId = -1;
+    private long currentUserId;
+    private long selectedForumId = -1;
     private AIPostGeneratorService.GeneratedPost currentPost;
     private String selectedImagePath = null;
 
@@ -43,7 +43,7 @@ public class AIPostGeneratorController {
         } else {
             // Fallback: utiliser Session si mainController est null
             if (org.esprit.finovate.utils.Session.currentUser != null) {
-                this.currentUserId = org.esprit.finovate.utils.Session.currentUser.getId().intValue();
+                this.currentUserId = org.esprit.finovate.utils.Session.currentUser.getId();
                 System.out.println("🔍 AIPostGenerator - User ID depuis Session: " + currentUserId);
             } else {
                 System.err.println("❌ ERREUR: Impossible de récupérer currentUserId!");
@@ -57,7 +57,7 @@ public class AIPostGeneratorController {
         
         // Initialiser currentUserId depuis Session si disponible
         if (org.esprit.finovate.utils.Session.currentUser != null) {
-            this.currentUserId = org.esprit.finovate.utils.Session.currentUser.getId().intValue();
+            this.currentUserId = org.esprit.finovate.utils.Session.currentUser.getId();
             System.out.println("🔍 AIPostGenerator - User ID depuis Session dans initialize: " + currentUserId);
         }
         
@@ -123,13 +123,13 @@ public class AIPostGeneratorController {
             System.out.println("📡 Connexion DB établie");
             System.out.println("🔍 Exécution requête SQL...");
             
-            stmt.setInt(1, currentUserId);
-            stmt.setInt(2, currentUserId);
+            stmt.setLong(1, currentUserId);
+            stmt.setLong(2, currentUserId);
             ResultSet rs = stmt.executeQuery();
             
             int count = 0;
             while (rs.next()) {
-                int forumId = rs.getInt("id");
+                long forumId = rs.getLong("id");
                 String forumTitle = rs.getString("title");
                 forumComboBox.getItems().add(forumTitle);
                 count++;
@@ -169,7 +169,7 @@ public class AIPostGeneratorController {
                 // Vérifier les forums créés par l'utilisateur
                 String myForumsQuery = "SELECT COUNT(*) as total FROM forums WHERE creator_id = ?";
                 try (PreparedStatement myStmt = conn.prepareStatement(myForumsQuery)) {
-                    myStmt.setInt(1, currentUserId);
+                    myStmt.setLong(1, currentUserId);
                     ResultSet myRs = myStmt.executeQuery();
                     if (myRs.next()) {
                         int myForums = myRs.getInt("total");
@@ -180,7 +180,7 @@ public class AIPostGeneratorController {
                 // Vérifier les forums rejoints
                 String joinedQuery = "SELECT COUNT(*) as total FROM user_forum WHERE user_id = ?";
                 try (PreparedStatement joinedStmt = conn.prepareStatement(joinedQuery)) {
-                    joinedStmt.setInt(1, currentUserId);
+                    joinedStmt.setLong(1, currentUserId);
                     ResultSet joinedRs = joinedStmt.executeQuery();
                     if (joinedRs.next()) {
                         int joinedForums = joinedRs.getInt("total");
@@ -221,13 +221,13 @@ public class AIPostGeneratorController {
              PreparedStatement stmt = conn.prepareStatement(query)) {
             
             stmt.setString(1, selectedForumTitle);
-            stmt.setInt(2, currentUserId);
+            stmt.setLong(2, currentUserId);
             stmt.setString(3, selectedForumTitle);
-            stmt.setInt(4, currentUserId);
+            stmt.setLong(4, currentUserId);
             ResultSet rs = stmt.executeQuery();
             
             if (rs.next()) {
-                selectedForumId = rs.getInt("id");
+                selectedForumId = rs.getLong("id");
                 System.out.println("✅ Forum sélectionné: " + selectedForumTitle + " (ID: " + selectedForumId + ")");
             } else {
                 System.err.println("⚠️ Forum non autorisé: " + selectedForumTitle);
@@ -413,10 +413,10 @@ public class AIPostGeneratorController {
             
             // Vérifier les permissions
             try (PreparedStatement checkStmt = conn.prepareStatement(checkPermissionQuery)) {
-                checkStmt.setInt(1, selectedForumId);
-                checkStmt.setInt(2, currentUserId);
-                checkStmt.setInt(3, selectedForumId);
-                checkStmt.setInt(4, currentUserId);
+                checkStmt.setLong(1, selectedForumId);
+                checkStmt.setLong(2, currentUserId);
+                checkStmt.setLong(3, selectedForumId);
+                checkStmt.setLong(4, currentUserId);
                 ResultSet permRs = checkStmt.executeQuery();
                 
                 if (!permRs.next()) {
@@ -435,10 +435,10 @@ public class AIPostGeneratorController {
             
             // Essayer avec image_url
             try (PreparedStatement stmt = conn.prepareStatement(queryWithImage)) {
-                stmt.setInt(1, selectedForumId);
+                stmt.setLong(1, selectedForumId);
                 stmt.setString(2, title);
                 stmt.setString(3, content);
-                stmt.setInt(4, currentUserId);
+                stmt.setLong(4, currentUserId);
                 stmt.setString(5, imagePath);
                 
                 System.out.println("🔄 Exécution INSERT avec image_url...");
@@ -450,10 +450,10 @@ public class AIPostGeneratorController {
                     String checkQuery = "SELECT id FROM posts WHERE title = ? AND author_id = ? ORDER BY created_at DESC LIMIT 1";
                     try (PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
                         checkStmt.setString(1, title);
-                        checkStmt.setInt(2, currentUserId);
+                        checkStmt.setLong(2, currentUserId);
                         ResultSet rs = checkStmt.executeQuery();
                         if (rs.next()) {
-                            int postId = rs.getInt("id");
+                            long postId = rs.getLong("id");
                             System.out.println("✅ Post vérifié dans la DB ! ID: " + postId);
                             
                             // Vérifier et attribuer les badges
@@ -476,10 +476,10 @@ public class AIPostGeneratorController {
                 
                 // Essayer sans image_url
                 try (PreparedStatement stmt = conn.prepareStatement(queryWithoutImage)) {
-                    stmt.setInt(1, selectedForumId);
+                    stmt.setLong(1, selectedForumId);
                     stmt.setString(2, title);
                     stmt.setString(3, content);
-                    stmt.setInt(4, currentUserId);
+                    stmt.setLong(4, currentUserId);
                     
                     System.out.println("🔄 Exécution INSERT sans image_url...");
                     int rows = stmt.executeUpdate();
@@ -490,10 +490,10 @@ public class AIPostGeneratorController {
                         String checkQuery = "SELECT id FROM posts WHERE title = ? AND author_id = ? ORDER BY created_at DESC LIMIT 1";
                         try (PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
                             checkStmt.setString(1, title);
-                            checkStmt.setInt(2, currentUserId);
+                            checkStmt.setLong(2, currentUserId);
                             ResultSet rs = checkStmt.executeQuery();
                             if (rs.next()) {
-                                int postId = rs.getInt("id");
+                                long postId = rs.getLong("id");
                                 System.out.println("✅ Post vérifié dans la DB ! ID: " + postId);
                                 
                                 // Vérifier et attribuer les badges

@@ -28,9 +28,9 @@ public class CreatePostDialogController {
 
     private Stage dialogStage;
     private PostsController postsController;
-    private int forumId;
-    private int authorId;
-    private Integer postIdToEdit = null; // null = création, sinon = modification
+    private long forumId;
+    private long authorId;
+    private Long postIdToEdit = null; // null = création, sinon = modification
     private File selectedImageFile = null;
     private String existingImagePath = null;
 
@@ -42,15 +42,15 @@ public class CreatePostDialogController {
         this.postsController = postsController;
     }
 
-    public void setForumId(int forumId) {
+    public void setForumId(long forumId) {
         this.forumId = forumId;
     }
 
-    public void setAuthorId(int authorId) {
+    public void setAuthorId(long authorId) {
         this.authorId = authorId;
     }
     
-    public void setPostToEdit(int postId, String title, String content, String imagePath) {
+    public void setPostToEdit(long postId, String title, String content, String imagePath) {
         this.postIdToEdit = postId;
         this.existingImagePath = imagePath;
         titleField.setText(title);
@@ -147,10 +147,10 @@ public class CreatePostDialogController {
                                          "WHERE f.id = ? AND uf.user_id = ?";
             
             try (PreparedStatement checkStmt = conn.prepareStatement(checkPermissionQuery)) {
-                checkStmt.setInt(1, forumId);
-                checkStmt.setInt(2, authorId);
-                checkStmt.setInt(3, forumId);
-                checkStmt.setInt(4, authorId);
+                checkStmt.setLong(1, forumId);
+                checkStmt.setLong(2, authorId);
+                checkStmt.setLong(3, forumId);
+                checkStmt.setLong(4, authorId);
                 java.sql.ResultSet permRs = checkStmt.executeQuery();
                 
                 if (!permRs.next()) {
@@ -162,15 +162,15 @@ public class CreatePostDialogController {
             }
             
             // Essayer d'abord avec image_url
-            String queryWithImage = "INSERT INTO posts (forum_id, title, content, author_id, image_url, created_at) VALUES (?, ?, ?, ?, ?, NOW())";
-            String queryWithoutImage = "INSERT INTO posts (forum_id, title, content, author_id, created_at) VALUES (?, ?, ?, ?, NOW())";
+            String queryWithImage = "INSERT INTO posts (forum_id, title, content, author_id, image_url, created_at, updated_at) VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
+            String queryWithoutImage = "INSERT INTO posts (forum_id, title, content, author_id, created_at, updated_at) VALUES (?, ?, ?, ?, NOW(), NOW())";
 
             // Essayer d'abord avec la colonne image_url
             try (PreparedStatement stmt = conn.prepareStatement(queryWithImage)) {
-                stmt.setInt(1, forumId);
+                stmt.setLong(1, forumId);
                 stmt.setString(2, title);
                 stmt.setString(3, content);
-                stmt.setInt(4, authorId);
+                stmt.setLong(4, authorId);
                 stmt.setString(5, imagePath);
                 int rows = stmt.executeUpdate();
                 
@@ -192,10 +192,10 @@ public class CreatePostDialogController {
             
             // Essayer sans la colonne image_url
             try (PreparedStatement stmt = conn.prepareStatement(queryWithoutImage)) {
-                stmt.setInt(1, forumId);
+                stmt.setLong(1, forumId);
                 stmt.setString(2, title);
                 stmt.setString(3, content);
-                stmt.setInt(4, authorId);
+                stmt.setLong(4, authorId);
                 int rows = stmt.executeUpdate();
                 
                 System.out.println("Post created without image! Rows: " + rows);
@@ -245,8 +245,8 @@ public class CreatePostDialogController {
             stmt.setString(1, title);
             stmt.setString(2, content);
             stmt.setString(3, imagePath);
-            stmt.setInt(4, postIdToEdit);
-            stmt.setInt(5, authorId);
+            stmt.setLong(4, postIdToEdit);
+            stmt.setLong(5, authorId);
             
             int rowsAffected = stmt.executeUpdate();
 

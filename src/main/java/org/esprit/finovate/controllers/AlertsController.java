@@ -17,10 +17,10 @@ public class AlertsController {
     @FXML private Button clearAllBtn;
 
     private MainController mainController;
-    private int currentUserId;
+    private long currentUserId;
 
     public static class AlertItem {
-        private int postId;
+        private long postId;
         private String postTitle;
         private String forumName;
         private String authorName;
@@ -29,7 +29,7 @@ public class AlertsController {
         private String alertType;
         private String voteType;
 
-        public AlertItem(int postId, String postTitle, String forumName, String authorName, 
+        public AlertItem(long postId, String postTitle, String forumName, String authorName, 
                         Timestamp createdAt, boolean isRead, String alertType, String voteType) {
             this.postId = postId;
             this.postTitle = postTitle;
@@ -41,7 +41,7 @@ public class AlertsController {
             this.voteType = voteType;
         }
 
-        public int getPostId() { return postId; }
+        public long getPostId() { return postId; }
         public String getPostTitle() { return postTitle; }
         public String getForumName() { return forumName; }
         public String getAuthorName() { return authorName; }
@@ -64,7 +64,7 @@ public class AlertsController {
         this.mainController = mainController;
     }
 
-    public void loadAlerts(int userId) {
+    public void loadAlerts(long userId) {
         this.currentUserId = userId;
         System.out.println("=== loadAlerts() appelé pour userId: " + userId + " ===");
         if (titleLabel != null) {
@@ -93,8 +93,8 @@ public class AlertsController {
 
             System.out.println("Exécution requête votes pour userId=" + currentUserId);
             try (PreparedStatement stmt = conn.prepareStatement(queryVotes)) {
-                stmt.setInt(1, currentUserId);
-                stmt.setInt(2, currentUserId);
+                stmt.setLong(1, currentUserId);
+                stmt.setLong(2, currentUserId);
                 ResultSet rs = stmt.executeQuery();
                 
                 int count = 0;
@@ -104,7 +104,7 @@ public class AlertsController {
                     System.out.println("  Vote trouvé: " + voteType + " sur '" + title + "'");
                     
                     alerts.add(new AlertItem(
-                            rs.getInt("id"),
+                            rs.getLong("id"),
                             title,
                             rs.getString("forum_name"),
                             rs.getString("username"),
@@ -163,7 +163,7 @@ public class AlertsController {
         }
     }
 
-    private void openPost(int postId) {
+    private void openPost(long postId) {
         if (mainController != null) {
             mainController.showPostDetails(postId, currentUserId);
         }

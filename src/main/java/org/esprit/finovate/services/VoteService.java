@@ -41,7 +41,7 @@ public class VoteService {
      * CREATE - Créer un vote
      */
     private boolean createVote(Vote vote) throws SQLException {
-        String query = "INSERT INTO votes (post_id, user_id, vote_type) VALUES (?, ?, ?)";
+        String query = "INSERT INTO votes (post_id, user_id, vote_type, created_at) VALUES (?, ?, ?, NOW())";
 
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {

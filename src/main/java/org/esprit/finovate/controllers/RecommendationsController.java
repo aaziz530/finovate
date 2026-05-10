@@ -24,7 +24,7 @@ public class RecommendationsController {
     @FXML private Button refreshBtn;
 
     private MainController mainController;
-    private int currentUserId;
+    private long currentUserId;
 
     @FXML
     public void initialize() {
@@ -35,7 +35,7 @@ public class RecommendationsController {
         this.mainController = mainController;
     }
 
-    public void loadRecommendations(int userId) {
+    public void loadRecommendations(long userId) {
         this.currentUserId = userId;
         titleLabel.setText("🤖 Recommandations AI pour vous");
         
@@ -55,11 +55,11 @@ public class RecommendationsController {
         loadRecommendationsFromEngine();
     }
     
-    private boolean userExists(int userId) {
+    private boolean userExists(long userId) {
         String query = "SELECT id FROM user WHERE id = ?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, userId);
+            stmt.setLong(1, userId);
             ResultSet rs = stmt.executeQuery();
             return rs.next();
         } catch (SQLException e) {
@@ -102,14 +102,14 @@ public class RecommendationsController {
         emptyLabel.setManaged(items.isEmpty());
     }
 
-    private void joinForum(int forumId) {
+    private void joinForum(long forumId) {
         String query = "INSERT INTO user_forum (forum_id, user_id, joined_at) VALUES (?, ?, NOW())";
 
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, forumId);
-            stmt.setInt(2, currentUserId);
+            stmt.setLong(1, forumId);
+            stmt.setLong(2, currentUserId);
             stmt.executeUpdate();
 
             // Tracker l'interaction
@@ -129,7 +129,7 @@ public class RecommendationsController {
         }
     }
 
-    private void viewForum(int forumId) {
+    private void viewForum(long forumId) {
         // Tracker l'interaction
         RecommendationEngine.trackInteraction(currentUserId, forumId, 
             RecommendationEngine.InteractionType.VIEW);

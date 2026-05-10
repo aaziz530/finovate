@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="org.esprit.finovate.controllers.CreateForumPageController"
+      spacing="0"
+      style="-fx-background-color: #F5F5F5;">
+
+    <!-- Header -->
+    <HBox alignment="CENTER_LEFT" spacing="15" style="-fx-background-color: linear-gradient(to right, #4CAF50, #66BB6A); -fx-padding: 20;">
+        <Button fx:id="backBtn" text="←" onAction="#handleBack"
+                style="-fx-background-color: rgba(255,255,255,0.2); -fx-text-fill: white; -fx-font-size: 24px; -fx-font-weight: bold; -fx-padding: 8 15; -fx-background-radius: 8; -fx-cursor: hand;"/>
+        <Label text="🏠" style="-fx-font-size: 32px;"/>
+        <Label text="Créer un Nouveau Forum" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"/>
+    </HBox>
+
+    <!-- Content -->
+    <ScrollPane fitToWidth="true" style="-fx-background-color: transparent;" VBox.vgrow="ALWAYS">
+        <VBox spacing="25" style="-fx-padding: 40;">
+            
+            <!-- Form Card -->
+            <VBox spacing="20" style="-fx-background-color: white; -fx-padding: 30; -fx-background-radius: 15; -fx-border-color: #E0E0E0; -fx-border-width: 1; -fx-border-radius: 15; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 3);">
+                
+                <!-- Title Field -->
+                <VBox spacing="8">
+                    <Label text="Titre du Forum *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2E7D32;"/>
+                    <TextField fx:id="nameField" promptText="Ex: Blockchain et Cryptomonnaies" 
+                               style="-fx-font-size: 14px; -fx-padding: 12; -fx-background-radius: 8; -fx-border-color: #4CAF50; -fx-border-width: 2; -fx-border-radius: 8;"/>
+                    <Label fx:id="nameError" style="-fx-text-fill: #D32F2F; -fx-font-size: 12px;" visible="false" managed="false"/>
+                </VBox>
+
+                <!-- Description Field -->
+                <VBox spacing="8">
+                    <Label text="Description *" style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2E7D32;"/>
+                    <TextArea fx:id="descriptionField" promptText="Décrivez le sujet et l'objectif de votre forum..." 
+                              wrapText="true" prefRowCount="6"
+                              style="-fx-font-size: 14px; -fx-padding: 12; -fx-background-radius: 8; -fx-border-color: #4CAF50; -fx-border-width: 2; -fx-border-radius: 8;"/>
+                    <Label fx:id="descriptionError" style="-fx-text-fill: #D32F2F; -fx-font-size: 12px;" visible="false" managed="false"/>
+                </VBox>
+
+                <!-- Info Box -->
+                <HBox spacing="10" style="-fx-background-color: #E8F5E9; -fx-padding: 15; -fx-background-radius: 8;">
+                    <Label text="💡" style="-fx-font-size: 20px;"/>
+                    <Label text="Un bon forum a un titre clair et une description détaillée qui explique son objectif." 
+                           wrapText="true" style="-fx-font-size: 13px; -fx-text-fill: #2E7D32;" HBox.hgrow="ALWAYS"/>
+                </HBox>
+
+            </VBox>
+
+            <!-- Buttons -->
+            <HBox spacing="15" alignment="CENTER">
+                <Button fx:id="cancelBtn" text="Annuler" onAction="#handleCancel"
+                        style="-fx-background-color: #E0E0E0; -fx-text-fill: #666; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 12 40; -fx-background-radius: 10; -fx-cursor: hand;"/>
+                <Button fx:id="createBtn" text="Créer le Forum" onAction="#handleCreate"
+                        style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 12 40; -fx-background-radius: 10; -fx-cursor: hand;"/>
+            </HBox>
+
+        </VBox>
+    </ScrollPane>
+
+</VBox>
