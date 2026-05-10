@@ -202,7 +202,7 @@ public class TransactionService implements ITransactionService {
         String sql = "INSERT INTO transaction (sender_id, receiver_id, amount, type, description, date) VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement pst = connection.prepareStatement(sql)) {
             pst.setLong(1, userId);
-            pst.setNull(2, java.sql.Types.INTEGER);
+            pst.setLong(2, userId); // Pour un TOPUP, l'utilisateur est à la fois sender et receiver
             pst.setString(3, String.valueOf(amount));
             pst.setString(4, "TOPUP");
             pst.setString(5, "Alimentation carte via Stripe");

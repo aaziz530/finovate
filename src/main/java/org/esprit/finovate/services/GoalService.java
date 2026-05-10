@@ -20,22 +20,29 @@ public class GoalService implements IGoalService {
             throw new SQLException("Database connection is null");
         }
 
-        String sql = "INSERT INTO goal (id_user, title, target_amount, current_amount, deadline, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement pst = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            pst.setLong(1, goal.getIdUser());
-            pst.setString(2, goal.getTitle());
-            pst.setString(3, goal.getTargetAmount());
-            pst.setString(4, goal.getCurrentAmount());
-            pst.setDate(5, new java.sql.Date(goal.getDeadline().getTime()));
-            pst.setString(6, goal.getStatus());
-            pst.setDate(7, new java.sql.Date(goal.getCreatedAt().getTime()));
+        // Générer l'ID manuellement (la colonne id n'est pas en AUTO_INCREMENT)
+        long newId = 1;
+        String maxIdSql = "SELECT MAX(id) FROM goal";
+        try (PreparedStatement pstMax = connection.prepareStatement(maxIdSql);
+             ResultSet rs = pstMax.executeQuery()) {
+            if (rs.next() && rs.getLong(1) > 0) {
+                newId = rs.getLong(1) + 1;
+            }
+        }
+
+        String sql = "INSERT INTO goal (id, id_user, title, target_amount, current_amount, deadline, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement pst = connection.prepareStatement(sql)) {
+            pst.setLong(1, newId);
+            pst.setLong(2, goal.getIdUser());
+            pst.setString(3, goal.getTitle());
+            pst.setString(4, goal.getTargetAmount());
+            pst.setString(5, goal.getCurrentAmount());
+            pst.setDate(6, new java.sql.Date(goal.getDeadline().getTime()));
+            pst.setString(7, goal.getStatus());
+            pst.setDate(8, new java.sql.Date(goal.getCreatedAt().getTime()));
             pst.executeUpdate();
 
-            try (ResultSet rs = pst.getGeneratedKeys()) {
-                if (rs.next()) {
-                    goal.setId(rs.getLong(1));
-                }
-            }
+            goal.setId(newId);
         }
     }
 

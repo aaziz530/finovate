@@ -106,43 +106,50 @@ public class UserService implements IUserService {
             throw new IllegalStateException("CIN already exists");
         }
 
-        String sql = "INSERT INTO `user` (email, password, firstname, lastname, role, points, created_at, solde, numero_carte, birthdate, cin, phone_number, is_verified, image_name, updated_at, face_auth_enabled, face_embedding) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-            ps.setString(1, user.getEmail());
-            ps.setString(2, user.getPassword());
-            ps.setString(3, user.getFirstName());
-            ps.setString(4, user.getLastName());
-            ps.setString(5, user.getRole());
-            ps.setInt(6, user.getPoints());
-            ps.setTimestamp(7, new Timestamp(user.getCreatedAt().getTime()));
-            ps.setFloat(8, user.getSolde());
+        // Generate ID manually (id column is not AUTO_INCREMENT)
+        long newUserId = 1;
+        String maxIdSql = "SELECT MAX(id) FROM `user`";
+        try (PreparedStatement psMax = connection.prepareStatement(maxIdSql);
+             ResultSet rs = psMax.executeQuery()) {
+            if (rs.next() && rs.getLong(1) > 0) {
+                newUserId = rs.getLong(1) + 1;
+            }
+        }
+
+        String sql = "INSERT INTO `user` (id, email, password, firstname, lastname, role, points, created_at, solde, numero_carte, birthdate, cin, phone_number, is_verified, image_name, updated_at, face_auth_enabled, face_embedding) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setLong(1, newUserId);
+            ps.setString(2, user.getEmail());
+            ps.setString(3, user.getPassword());
+            ps.setString(4, user.getFirstName());
+            ps.setString(5, user.getLastName());
+            ps.setString(6, user.getRole());
+            ps.setInt(7, user.getPoints());
+            ps.setTimestamp(8, new Timestamp(user.getCreatedAt().getTime()));
+            ps.setFloat(9, user.getSolde());
 
             if (user.getNumeroCarte() == null)
-                ps.setNull(9, Types.BIGINT);
+                ps.setNull(10, Types.BIGINT);
             else
-                ps.setLong(9, user.getNumeroCarte());
+                ps.setLong(10, user.getNumeroCarte());
 
             if (user.getBirthdate() == null)
-                ps.setNull(10, Types.DATE);
+                ps.setNull(11, Types.DATE);
             else
-                ps.setDate(10, new java.sql.Date(user.getBirthdate().getTime()));
+                ps.setDate(11, new java.sql.Date(user.getBirthdate().getTime()));
 
-            ps.setString(11, user.getCin());
-            ps.setInt(12, user.getPhoneNumber());
+            ps.setString(12, user.getCin());
+            ps.setInt(13, user.getPhoneNumber());
 
-            ps.setInt(13, 1);
-            ps.setNull(14, Types.VARCHAR);
-            ps.setNull(15, Types.TIMESTAMP);
-            ps.setInt(16, 0);
-            ps.setNull(17, Types.LONGVARCHAR);
+            ps.setInt(14, 1);
+            ps.setNull(15, Types.VARCHAR);
+            ps.setNull(16, Types.TIMESTAMP);
+            ps.setInt(17, 0);
+            ps.setNull(18, Types.LONGVARCHAR);
 
             ps.executeUpdate();
 
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                if (keys.next()) {
-                    user.setId(keys.getLong(1));
-                }
-            }
+            user.setId(newUserId);
         }
 
         return user;

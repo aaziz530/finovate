@@ -49,13 +49,24 @@ public class BillService implements IBillService {
                 pstUpdate.executeUpdate();
             }
 
-            // 3. Log Bill Payment
-            String logBillSql = "INSERT INTO bill (id_user, reference, amount, date_paiement) VALUES (?, ?, ?, ?)";
+            // 3. Generate ID manually (id column is not AUTO_INCREMENT)
+            int newBillId = 1;
+            String maxIdSql = "SELECT MAX(id) FROM bill";
+            try (PreparedStatement pstMax = connection.prepareStatement(maxIdSql);
+                 ResultSet rs = pstMax.executeQuery()) {
+                if (rs.next() && rs.getInt(1) > 0) {
+                    newBillId = rs.getInt(1) + 1;
+                }
+            }
+
+            // 4. Log Bill Payment
+            String logBillSql = "INSERT INTO bill (id, id_user, reference, amount, date_paiement) VALUES (?, ?, ?, ?, ?)";
             try (PreparedStatement pstBill = connection.prepareStatement(logBillSql)) {
-                pstBill.setLong(1, userId);
-                pstBill.setString(2, reference);
-                pstBill.setDouble(3, amount);
-                pstBill.setDate(4, new java.sql.Date(System.currentTimeMillis()));
+                pstBill.setInt(1, newBillId);
+                pstBill.setLong(2, userId);
+                pstBill.setString(3, reference);
+                pstBill.setDouble(4, amount);
+                pstBill.setDate(5, new java.sql.Date(System.currentTimeMillis()));
                 pstBill.executeUpdate();
             }
 
