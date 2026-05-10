@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<VBox alignment="TOP_CENTER" prefHeight="700.0" prefWidth="900.0" spacing="20.0" style="-fx-background-color: #f7f9fc;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.esprit.finovate.controllers.TopUpController">
+   <padding>
+      <Insets bottom="30.0" left="40.0" right="40.0" top="30.0" />
+   </padding>
+
+   <!-- Header -->
+   <HBox alignment="CENTER_LEFT" spacing="15.0">
+      <Label text="💳 Alimenter ma carte" textFill="#32325d">
+         <font>
+            <Font name="System Bold" size="28.0" />
+         </font>
+      </Label>
+   </HBox>
+
+   <Separator />
+
+   <!-- Current Balance -->
+   <HBox alignment="CENTER" style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 0);">
+      <padding>
+         <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+      </padding>
+      <VBox alignment="CENTER" spacing="5.0">
+         <Label text="Solde actuel" textFill="#8898aa">
+            <font>
+               <Font size="14.0" />
+            </font>
+         </Label>
+         <Label fx:id="currentBalanceLabel" text="0.000 TND" textFill="#237f4e">
+            <font>
+               <Font name="System Bold" size="32.0" />
+            </font>
+         </Label>
+      </VBox>
+   </HBox>
+
+   <!-- Amount Input Section -->
+   <VBox spacing="15.0" style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 0);">
+      <padding>
+         <Insets bottom="25.0" left="30.0" right="30.0" top="25.0" />
+      </padding>
+
+      <Label text="Montant à ajouter" textFill="#32325d">
+         <font>
+            <Font name="System Bold" size="16.0" />
+         </font>
+      </Label>
+
+      <HBox alignment="CENTER_LEFT" spacing="10.0">
+         <TextField fx:id="amountField" promptText="Entrez le montant" style="-fx-background-color: #f8f9fa; -fx-border-color: #e9ecef; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 12; -fx-font-size: 16; -fx-pref-width: 250;">
+         </TextField>
+         <Label text="TND" textFill="#525f7f">
+            <font>
+               <Font size="16.0" />
+            </font>
+         </Label>
+      </HBox>
+
+      <!-- Quick Amount Buttons -->
+      <Label text="Montants rapides" textFill="#8898aa">
+         <font>
+            <Font size="12.0" />
+         </font>
+      </Label>
+      <HBox spacing="10.0">
+         <Button onAction="#setAmount10" style="-fx-background-color: #e9ecef; -fx-text-fill: #525f7f; -fx-background-radius: 8; -fx-cursor: hand;" text="10 TND">
+            <font>
+               <Font size="13.0" />
+            </font>
+         </Button>
+         <Button onAction="#setAmount50" style="-fx-background-color: #e9ecef; -fx-text-fill: #525f7f; -fx-background-radius: 8; -fx-cursor: hand;" text="50 TND">
+            <font>
+               <Font size="13.0" />
+            </font>
+         </Button>
+         <Button onAction="#setAmount100" style="-fx-background-color: #e9ecef; -fx-text-fill: #525f7f; -fx-background-radius: 8; -fx-cursor: hand;" text="100 TND">
+            <font>
+               <Font size="13.0" />
+            </font>
+         </Button>
+         <Button onAction="#setAmount500" style="-fx-background-color: #e9ecef; -fx-text-fill: #525f7f; -fx-background-radius: 8; -fx-cursor: hand;" text="500 TND">
+            <font>
+               <Font size="13.0" />
+            </font>
+         </Button>
+      </HBox>
+   </VBox>
+
+   <!-- Pay Button -->
+   <Button fx:id="payButton" onAction="#handlePay" style="-fx-background-color: #237f4e; -fx-text-fill: white; -fx-background-radius: 10; -fx-cursor: hand; -fx-pref-width: 300; -fx-pref-height: 50;" text="Payer avec Stripe">
+      <font>
+         <Font name="System Bold" size="16.0" />
+      </font>
+   </Button>
+
+   <!-- Error Label -->
+   <Label fx:id="errorLabel" textFill="#dc3545" visible="false">
+      <font>
+         <Font size="13.0" />
+      </font>
+   </Label>
+
+   <!-- Info Section -->
+   <VBox spacing="10.0" style="-fx-background-color: #f0fdf4; -fx-background-radius: 12; -fx-border-color: #237f4e; -fx-border-radius: 12;">
+      <padding>
+         <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+      </padding>
+      <Label text="ℹ️ Mode Test" textFill="#237f4e">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
+      <Label text="Utilisez la carte de test Stripe: 4242 4242 4242 4242" textFill="#525f7f" wrapText="true">
+         <font>
+            <Font size="12.0" />
+         </font>
+      </Label>
+      <Label text="Date: n'importe quelle date future | CVV: n'importe quels 3 chiffres" textFill="#525f7f" wrapText="true">
+         <font>
+            <Font size="12.0" />
+         </font>
+      </Label>
+   </VBox>
+
+   <!-- Payment Status (initially hidden) -->
+   <VBox fx:id="statusBox" spacing="10.0" visible="false" style="-fx-background-color: white; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 0);">
+      <padding>
+         <Insets bottom="20.0" left="30.0" right="30.0" top="20.0" />
+      </padding>
+      <Label fx:id="statusLabel" text="Statut du paiement" textFill="#32325d">
+         <font>
+            <Font name="System Bold" size="16.0" />
+         </font>
+      </Label>
+      <ProgressBar fx:id="progressBar" prefWidth="300" visible="false" />
+   </VBox>
+</VBox>

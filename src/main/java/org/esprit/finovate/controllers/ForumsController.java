@@ -40,10 +40,10 @@ public class ForumsController {
 
     // Classe interne pour représenter un forum
     public static class ForumItem {
-        private int id;
+        private long id;
         private String name;
         private String description;
-        private int creatorId;
+        private long creatorId;
         private int memberCount;
         private int upvotes;
         private int downvotes;
@@ -51,7 +51,7 @@ public class ForumsController {
         private Timestamp createdAt;
         private String imageUrl;
 
-        public ForumItem(int id, String name, String description, int creatorId, int memberCount, Timestamp createdAt) {
+        public ForumItem(long id, String name, String description, long creatorId, int memberCount, Timestamp createdAt) {
             this.id = id;
             this.name = name;
             this.description = description;
@@ -64,10 +64,10 @@ public class ForumsController {
         }
 
         // Getters
-        public int getId() { return id; }
+        public long getId() { return id; }
         public String getName() { return name; }
         public String getDescription() { return description; }
-        public int getCreatorId() { return creatorId; }
+        public long getCreatorId() { return creatorId; }
         public int getMemberCount() { return memberCount; }
         public Timestamp getCreatedAt() { return createdAt; }
         public int getUpvotes() { return upvotes; }
@@ -164,10 +164,10 @@ public class ForumsController {
             while (rs.next()) {
                 count++;
                 ForumItem forum = new ForumItem(
-                        rs.getInt("id"),
+                        rs.getLong("id"),
                         rs.getString("title"),
                         rs.getString("description"),
-                        rs.getInt("creator_id"),
+                        rs.getLong("creator_id"),
                         rs.getInt("member_count"),
                         rs.getTimestamp("created_at")
                 );
@@ -211,10 +211,10 @@ public class ForumsController {
 
             while (rs.next()) {
                 ForumItem forum = new ForumItem(
-                        rs.getInt("id"),
+                        rs.getLong("id"),
                         rs.getString("title"),
                         rs.getString("description"),
-                        rs.getInt("creator_id"),
+                        rs.getLong("creator_id"),
                         rs.getInt("member_count"),
                         rs.getTimestamp("created_at")
                 );
@@ -262,8 +262,8 @@ public class ForumsController {
             int count = 0;
             while (rs.next()) {
                 count++;
-                int forumId = rs.getInt("id");
-                int creatorId = rs.getInt("creator_id");
+                long forumId = rs.getLong("id");
+                long creatorId = rs.getLong("creator_id");
                 
                 ForumItem forum = new ForumItem(
                         forumId,
@@ -294,8 +294,8 @@ public class ForumsController {
                     int userForumCount = 0;
                     while (checkRs.next()) {
                         userForumCount++;
-                        System.out.println("user_forum entry: user_id=" + checkRs.getInt("user_id") + 
-                                         ", forum_id=" + checkRs.getInt("forum_id") + 
+                        System.out.println("user_forum entry: user_id=" + checkRs.getLong("user_id") + 
+                                         ", forum_id=" + checkRs.getLong("forum_id") + 
                                          ", joined_at=" + checkRs.getTimestamp("joined_at"));
                     }
                     System.out.println("Total entrées user_forum pour userId " + currentUserId + ": " + userForumCount);
@@ -414,7 +414,7 @@ public class ForumsController {
         }
     }
 
-    private void deleteForum(int forumId) {
+    private void deleteForum(long forumId) {
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
         confirmAlert.setTitle("Confirmation");
         confirmAlert.setHeaderText("Supprimer ce forum ?");
@@ -427,8 +427,8 @@ public class ForumsController {
             try (Connection conn = getConnection();
                  PreparedStatement stmt = conn.prepareStatement(query)) {
 
-                stmt.setInt(1, forumId);
-                stmt.setInt(2, currentUserId);
+                stmt.setLong(1, forumId);
+                stmt.setLong(2, currentUserId);
                 int rowsAffected = stmt.executeUpdate();
 
                 if (rowsAffected > 0) {
@@ -445,7 +445,7 @@ public class ForumsController {
         }
     }
 
-    private void joinForum(int forumId) {
+    private void joinForum(long forumId) {
         System.out.println("\n=== REJOINDRE FORUM ===");
         System.out.println("forumId: " + forumId);
         System.out.println("currentUserId: " + currentUserId);
@@ -455,8 +455,8 @@ public class ForumsController {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, forumId);
-            stmt.setInt(2, currentUserId);
+            stmt.setLong(1, forumId);
+            stmt.setLong(2, currentUserId);
             int rows = stmt.executeUpdate();
             
             System.out.println("Lignes insérées: " + rows);
@@ -475,7 +475,7 @@ public class ForumsController {
         }
     }
 
-    private void leaveForum(int forumId) {
+    private void leaveForum(long forumId) {
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
         confirmAlert.setTitle("Confirmation");
         confirmAlert.setHeaderText("Quitter ce forum ?");
@@ -487,8 +487,8 @@ public class ForumsController {
             try (Connection conn = getConnection();
                  PreparedStatement stmt = conn.prepareStatement(query)) {
 
-                stmt.setInt(1, forumId);
-                stmt.setInt(2, currentUserId);
+                stmt.setLong(1, forumId);
+                stmt.setLong(2, currentUserId);
                 stmt.executeUpdate();
 
                 showInfo("Vous avez quitté le forum");
@@ -501,14 +501,14 @@ public class ForumsController {
         }
     }
 
-    private boolean checkIfMember(int forumId) {
+    private boolean checkIfMember(long forumId) {
         String query = "SELECT 1 FROM user_forum WHERE forum_id = ? AND user_id = ?";
         
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, forumId);
-            stmt.setInt(2, currentUserId);
+            stmt.setLong(1, forumId);
+            stmt.setLong(2, currentUserId);
             ResultSet rs = stmt.executeQuery();
 
             return rs.next();
@@ -549,7 +549,7 @@ public class ForumsController {
     /**
      * Load posts view directly into parent content area (without MainController)
      */
-    private void loadPostsViewDirect(int forumId, String forumName) {
+    private void loadPostsViewDirect(long forumId, String forumName) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/posts.fxml"));
             Parent postsView = loader.load();

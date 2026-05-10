@@ -19,7 +19,7 @@ public class MainController {
     @FXML private Button alertsMenuBtn;
 
     private String currentView = "forums";
-    private int currentUserId;
+    private long currentUserId;
 
     @FXML
     public void initialize() {
@@ -179,7 +179,7 @@ public class MainController {
                     // Récupérer les posts
                     String postsQuery = "SELECT title, content FROM posts WHERE author_id = ? ORDER BY created_at DESC LIMIT 20";
                     try (java.sql.PreparedStatement stmt = conn.prepareStatement(postsQuery)) {
-                        stmt.setInt(1, currentUserId);
+                        stmt.setLong(1, currentUserId);
                         java.sql.ResultSet rs = stmt.executeQuery();
                         while (rs.next()) {
                             userContent.append(rs.getString("title")).append("\n");
@@ -190,7 +190,7 @@ public class MainController {
                     // Récupérer les commentaires
                     String commentsQuery = "SELECT content FROM comments WHERE author_id = ? ORDER BY created_at DESC LIMIT 30";
                     try (java.sql.PreparedStatement stmt = conn.prepareStatement(commentsQuery)) {
-                        stmt.setInt(1, currentUserId);
+                        stmt.setLong(1, currentUserId);
                         java.sql.ResultSet rs = stmt.executeQuery();
                         while (rs.next()) {
                             userContent.append(rs.getString("content")).append("\n");
@@ -391,11 +391,11 @@ public class MainController {
         dialog.showAndWait();
     }
     
-    private String getUsernameById(int userId) {
+    private String getUsernameById(long userId) {
         try (java.sql.Connection conn = getConnection()) {
             String query = "SELECT CONCAT(firstname, ' ', lastname) as username FROM user WHERE id = ?";
             try (java.sql.PreparedStatement stmt = conn.prepareStatement(query)) {
-                stmt.setInt(1, userId);
+                stmt.setLong(1, userId);
                 java.sql.ResultSet rs = stmt.executeQuery();
                 if (rs.next()) {
                     return rs.getString("username");
@@ -452,7 +452,7 @@ public class MainController {
     }
 
     // Méthodes appelées depuis ForumsController
-    public void showPostsView(int forumId, String forumName) {
+    public void showPostsView(long forumId, String forumName) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/posts.fxml"));
             Parent postsView = loader.load();
@@ -470,7 +470,7 @@ public class MainController {
         }
     }
 
-    public void showPostDetailsView(int postId, String postTitle) {
+    public void showPostDetailsView(long postId, String postTitle) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/post-details.fxml"));
             Parent postDetailsView = loader.load();
@@ -492,7 +492,7 @@ public class MainController {
         showForumsPage();
     }
 
-    public void showPostDetails(int postId, int userId) {
+    public void showPostDetails(long postId, long userId) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/post-details.fxml"));
             Parent postDetailsView = loader.load();
@@ -510,7 +510,7 @@ public class MainController {
         }
     }
 
-    public int getCurrentUserId() {
+    public long getCurrentUserId() {
         return currentUserId;
     }
 
@@ -566,6 +566,6 @@ public class MainController {
 
     // Show Posts (for navigation)
     public void showPosts(Long forumId) {
-        showPostsView(forumId.intValue(), "");
+        showPostsView(forumId, "");
     }
 }

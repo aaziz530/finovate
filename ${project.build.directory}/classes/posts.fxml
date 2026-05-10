@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="org.esprit.finovate.controllers.PostsController"
+      spacing="0"
+      style="-fx-background-color: #F5F5F5;">
+
+    <!-- Header avec titre forum et bouton retour -->
+    <HBox spacing="15" alignment="CENTER_LEFT" 
+          style="-fx-background-color: white; -fx-padding: 20 30; -fx-border-color: #E0E0E0; -fx-border-width: 0 0 1 0;">
+        <Button text="←" onAction="#goBack" 
+                style="-fx-background-color: #F0F2F5; -fx-text-fill: #237f4e; -fx-font-size: 20px; -fx-font-weight: 600; -fx-padding: 10 15; -fx-background-radius: 8; -fx-cursor: hand;"/>
+        <Label fx:id="forumNameLabel" text="Nom du Forum" 
+               style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #237f4e;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="createPostBtn" text="+ Créer un Post"
+                onAction="#openCreatePostDialog" 
+                style="-fx-background-color: #237f4e; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 600; -fx-padding: 10 24; -fx-background-radius: 8; -fx-cursor: hand; -fx-effect: dropshadow(gaussian, rgba(35,127,78,0.3), 10, 0, 0, 4);"/>
+    </HBox>
+
+    <!-- Barre de recherche et filtres -->
+    <HBox spacing="15" alignment="CENTER_LEFT" 
+          style="-fx-background-color: white; -fx-padding: 15 30; -fx-border-color: #E0E0E0; -fx-border-width: 0 0 1 0;">
+        <Label text="🔍" style="-fx-font-size: 18px;"/>
+        <TextField fx:id="searchField" promptText="Rechercher des posts..." 
+                   HBox.hgrow="ALWAYS"
+                   style="-fx-background-color: #F0F2F5; -fx-padding: 10 15; -fx-font-size: 14px; -fx-background-radius: 8; -fx-border-width: 0;"/>
+        <Label text="Trier par:" style="-fx-font-size: 14px; -fx-text-fill: #666;"/>
+        <ComboBox fx:id="sortComboBox" prefWidth="180"
+                  style="-fx-background-color: #F0F2F5; -fx-font-size: 14px; -fx-background-radius: 8;"/>
+    </HBox>
+
+    <!-- Conteneur principal avec cadre vert -->
+    <VBox VBox.vgrow="ALWAYS" style="-fx-padding: 20 30;">
+        <!-- Cadre vert autour de la zone des posts -->
+        <VBox VBox.vgrow="ALWAYS" 
+              style="-fx-border-color: #237f4e; -fx-border-width: 3; -fx-border-radius: 12; -fx-background-color: white; -fx-background-radius: 12; -fx-padding: 20;">
+            
+            <!-- Message si vide -->
+            <Label fx:id="emptyLabel" text="Aucun post dans ce forum"
+                   style="-fx-font-size: 16px; -fx-text-fill: #7c7c7c; -fx-padding: 40 0;" 
+                   visible="false" managed="false"/>
+
+            <!-- Liste des posts -->
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS"
+                        style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-width: 0;">
+                <ListView fx:id="postList" 
+                          style="-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0; -fx-border-width: 0;"/>
+            </ScrollPane>
+        </VBox>
+    </VBox>
+
+</VBox>

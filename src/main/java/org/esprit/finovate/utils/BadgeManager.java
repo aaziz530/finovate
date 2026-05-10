@@ -24,7 +24,7 @@ public class BadgeManager {
     /**
      * Vérifie et attribue les badges après un vote
      */
-    public static void checkVoteBadges(int userId, int forumId) {
+    public static void checkVoteBadges(long userId, long forumId) {
         try {
             // Compter les votes de l'utilisateur dans ce forum
             int voteCount = countUserVotesInForum(userId, forumId);
@@ -58,7 +58,7 @@ public class BadgeManager {
     /**
      * Compte les votes d'un utilisateur dans un forum spécifique
      */
-    private static int countUserVotesInForum(int userId, int forumId) throws SQLException {
+    private static int countUserVotesInForum(long userId, long forumId) throws SQLException {
         String query = "SELECT COUNT(DISTINCT v.post_id) as vote_count " +
                 "FROM votes v " +
                 "INNER JOIN posts p ON v.post_id = p.id " +
@@ -67,8 +67,8 @@ public class BadgeManager {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             
-            stmt.setInt(1, userId);
-            stmt.setInt(2, forumId);
+            stmt.setLong(1, userId);
+            stmt.setLong(2, forumId);
             ResultSet rs = stmt.executeQuery();
             
             if (rs.next()) {
@@ -81,13 +81,13 @@ public class BadgeManager {
     /**
      * Compte le total des votes d'un utilisateur
      */
-    private static int countUserTotalVotes(int userId) throws SQLException {
+    private static int countUserTotalVotes(long userId) throws SQLException {
         String query = "SELECT COUNT(DISTINCT post_id) as vote_count FROM votes WHERE user_id = ?";
         
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             
-            stmt.setInt(1, userId);
+            stmt.setLong(1, userId);
             ResultSet rs = stmt.executeQuery();
             
             if (rs.next()) {
@@ -100,7 +100,7 @@ public class BadgeManager {
     /**
      * Attribue un badge à un utilisateur
      */
-    private static void awardBadge(int userId, String badgeName, Integer forumId) throws SQLException {
+    private static void awardBadge(long userId, String badgeName, Long forumId) throws SQLException {
         System.out.println("=== awardBadge DEBUT ===");
         System.out.println("userId: " + userId + ", badgeName: " + badgeName + ", forumId: " + forumId);
         
@@ -130,12 +130,12 @@ public class BadgeManager {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(insertQuery, Statement.RETURN_GENERATED_KEYS)) {
             
-            stmt.setInt(1, userId);
+            stmt.setLong(1, userId);
             stmt.setInt(2, badgeTypeId);
             if (forumId != null) {
-                stmt.setInt(3, forumId);
+                stmt.setLong(3, forumId);
             } else {
-                stmt.setNull(3, Types.INTEGER);
+                stmt.setNull(3, Types.BIGINT);
             }
             
             System.out.println("Exécution de la requête INSERT...");
@@ -195,7 +195,7 @@ public class BadgeManager {
     /**
      * Vérifie si un utilisateur possède déjà un badge
      */
-    private static boolean userHasBadge(int userId, int badgeTypeId, Integer forumId) throws SQLException {
+    private static boolean userHasBadge(long userId, int badgeTypeId, Long forumId) throws SQLException {
         String query;
         if (forumId != null) {
             query = "SELECT 1 FROM user_badges WHERE user_id = ? AND badge_type_id = ? AND forum_id = ?";
@@ -206,10 +206,10 @@ public class BadgeManager {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             
-            stmt.setInt(1, userId);
+            stmt.setLong(1, userId);
             stmt.setInt(2, badgeTypeId);
             if (forumId != null) {
-                stmt.setInt(3, forumId);
+                stmt.setLong(3, forumId);
             }
             
             ResultSet rs = stmt.executeQuery();
@@ -220,7 +220,7 @@ public class BadgeManager {
     /**
      * Affiche une notification de badge gagné
      */
-    private static void showBadgeNotification(int userId, String badgeName, Integer forumId) {
+    private static void showBadgeNotification(long userId, String badgeName, Long forumId) {
         try {
             // Récupérer les détails du badge
             String query = "SELECT bt.icon, bt.description, f.title as forum_name " +
@@ -232,9 +232,9 @@ public class BadgeManager {
                  PreparedStatement stmt = conn.prepareStatement(query)) {
                 
                 if (forumId != null) {
-                    stmt.setInt(1, forumId);
+                    stmt.setLong(1, forumId);
                 } else {
-                    stmt.setNull(1, Types.INTEGER);
+                    stmt.setNull(1, Types.BIGINT);
                 }
                 stmt.setString(2, badgeName);
                 
@@ -316,7 +316,7 @@ public class BadgeManager {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             
-            stmt.setInt(1, userId);
+            stmt.setLong(1, userId);
             ResultSet rs = stmt.executeQuery();
             
             while (rs.next()) {
@@ -345,7 +345,7 @@ public class BadgeManager {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
             
-            stmt.setInt(1, userId);
+            stmt.setLong(1, userId);
             ResultSet rs = stmt.executeQuery();
             
             if (rs.next()) {
@@ -361,7 +361,7 @@ public class BadgeManager {
     /**
      * Vérifie les badges après création de post
      */
-    public static void checkPostBadges(int userId) {
+    public static void checkPostBadges(long userId) {
         try {
             int postCount = countUserPosts(userId);
             
@@ -398,7 +398,7 @@ public class BadgeManager {
     /**
      * Vérifie les badges après création de commentaire
      */
-    public static void checkCommentBadges(int userId) {
+    public static void checkCommentBadges(long userId) {
         try {
             int commentCount = countUserComments(userId);
             
@@ -415,7 +415,7 @@ public class BadgeManager {
     /**
      * Vérifie les badges après partage de post
      */
-    public static void checkShareBadges(int userId) {
+    public static void checkShareBadges(long userId) {
         try {
             int shareCount = countUserShares(userId);
             
@@ -429,31 +429,31 @@ public class BadgeManager {
         }
     }
 
-    private static int countUserPosts(int userId) throws SQLException {
+    private static int countUserPosts(long userId) throws SQLException {
         String query = "SELECT COUNT(*) as post_count FROM posts WHERE author_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, userId);
+            stmt.setLong(1, userId);
             ResultSet rs = stmt.executeQuery();
             return rs.next() ? rs.getInt("post_count") : 0;
         }
     }
 
-    private static int countUserComments(int userId) throws SQLException {
+    private static int countUserComments(long userId) throws SQLException {
         String query = "SELECT COUNT(*) as comment_count FROM comments WHERE author_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, userId);
+            stmt.setLong(1, userId);
             ResultSet rs = stmt.executeQuery();
             return rs.next() ? rs.getInt("comment_count") : 0;
         }
     }
 
-    private static int countUserShares(int userId) throws SQLException {
+    private static int countUserShares(long userId) throws SQLException {
         String query = "SELECT COUNT(*) as share_count FROM shared_posts WHERE user_id = ?";
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, userId);
+            stmt.setLong(1, userId);
             ResultSet rs = stmt.executeQuery();
             return rs.next() ? rs.getInt("share_count") : 0;
         }

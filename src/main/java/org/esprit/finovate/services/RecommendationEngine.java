@@ -16,7 +16,7 @@ public class RecommendationEngine {
     /**
      * Enregistre une interaction utilisateur
      */
-    public static void trackInteraction(int userId, int forumId, InteractionType type) {
+    public static void trackInteraction(long userId, long forumId, InteractionType type) {
         String query = "INSERT INTO user_interactions (user_id, forum_id, interaction_type, interaction_count) " +
                 "VALUES (?, ?, ?, 1) " +
                 "ON DUPLICATE KEY UPDATE " +
@@ -26,8 +26,8 @@ public class RecommendationEngine {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, userId);
-            stmt.setInt(2, forumId);
+            stmt.setLong(1, userId);
+            stmt.setLong(2, forumId);
             stmt.setString(3, type.name().toLowerCase());
             stmt.executeUpdate();
 
@@ -49,18 +49,18 @@ public class RecommendationEngine {
      * 5. Similarité textuelle des descriptions (NOUVEAU)
      * 6. Votes (upvotes/downvotes) (NOUVEAU)
      */
-    public static void calculateRecommendations(int userId) {
+    public static void calculateRecommendations(long userId) {
         try (Connection conn = getConnection()) {
 
             // Nettoyer les anciennes recommandations
             String deleteQuery = "DELETE FROM forum_recommendations WHERE user_id = ?";
             try (PreparedStatement stmt = conn.prepareStatement(deleteQuery)) {
-                stmt.setInt(1, userId);
+                stmt.setLong(1, userId);
                 stmt.executeUpdate();
             }
 
             // Calculer les scores pour chaque forum
-            Map<Integer, RecommendationScore> scores = new HashMap<>();
+            Map<Long, RecommendationScore> scores = new HashMap<>();
 
             // 1. Score basé sur les interactions directes
             calculateDirectInteractionScore(conn, userId, scores);
@@ -91,18 +91,18 @@ public class RecommendationEngine {
     /**
      * Score basé sur les interactions directes de l'utilisateur
      */
-    private static void calculateDirectInteractionScore(Connection conn, int userId,
-                                                        Map<Integer, RecommendationScore> scores) throws SQLException {
+    private static void calculateDirectInteractionScore(Connection conn, long userId,
+                                                        Map<Long, RecommendationScore> scores) throws SQLException {
         String query = "SELECT forum_id, interaction_type, interaction_count " +
                 "FROM user_interactions " +
                 "WHERE user_id = ?";
 
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, userId);
+            stmt.setLong(1, userId);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                int forumId = rs.getInt("forum_id");
+                long forumId = rs.getLong("forum_id");
                 String type = rs.getString("interaction_type");
                 int count = rs.getInt("interaction_count");
 
@@ -120,8 +120,8 @@ public class RecommendationEngine {
      * Score basé sur le filtrage collaboratif
      * "Les utilisateurs qui aiment X aiment aussi Y"
      */
-    private static void calculateCollaborativeFilteringScore(Connection conn, int userId,
-                                                             Map<Integer, RecommendationScore> scores) throws SQLException {
+    private static void calculateCollaborativeFilteringScore(Connection conn, long userId,
+                                                             Map<Long, RecommendationScore> scores) throws SQLException {
         // Trouver les utilisateurs similaires
         String query = "SELECT ui2.forum_id, COUNT(*) as similarity_score " +
                 "FROM user_interactions ui1 " +
@@ -135,13 +135,13 @@ public class RecommendationEngine {
                 "LIMIT 10";
 
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, userId);
-            stmt.setInt(2, userId);
-            stmt.setInt(3, userId);
+            stmt.setLong(1, userId);
+            stmt.setLong(2, userId);
+            stmt.setLong(3, userId);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                int forumId = rs.getInt("forum_id");
+                long forumId = rs.getLong("forum_id");
                 int similarityScore = rs.getInt("similarity_score");
 
                 scores.putIfAbsent(forumId, new RecommendationScore(forumId));
@@ -154,8 +154,8 @@ public class RecommendationEngine {
     /**
      * Score basé sur la popularité et l'activité récente
      */
-    private static void calculatePopularityScore(Connection conn, int userId,
-                                                 Map<Integer, RecommendationScore> scores) throws SQLException {
+    private static void calculatePopularityScore(Connection conn, long userId,
+                                                 Map<Long, RecommendationScore> scores) throws SQLException {
         String query = "SELECT f.id, " +
                 "(SELECT COUNT(*) FROM user_forum WHERE forum_id = f.id) as member_count, " +
                 "(SELECT COUNT(*) FROM posts WHERE forum_id = f.id AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)) as recent_posts " +
@@ -163,11 +163,11 @@ public class RecommendationEngine {
                 "WHERE f.id NOT IN (SELECT forum_id FROM user_forum WHERE user_id = ?)";
 
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, userId);
+            stmt.setLong(1, userId);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                int forumId = rs.getInt("id");
+                long forumId = rs.getLong("id");
                 int memberCount = rs.getInt("member_count");
                 int recentPosts = rs.getInt("recent_posts");
 
@@ -187,8 +187,8 @@ public class RecommendationEngine {
      * Analyse les mots-clés communs entre les forums que l'utilisateur aime
      * et les autres forums disponibles
      */
-    private static void calculateTextSimilarityScore(Connection conn, int userId,
-                                                     Map<Integer, RecommendationScore> scores) throws SQLException {
+    private static void calculateTextSimilarityScore(Connection conn, long userId,
+                                                     Map<Long, RecommendationScore> scores) throws SQLException {
         // Récupérer les descriptions des forums avec lesquels l'utilisateur a interagi
         String userForumsQuery = "SELECT DISTINCT f.id, f.title, f.description " +
                 "FROM forums f " +
@@ -198,11 +198,11 @@ public class RecommendationEngine {
 
         List<ForumText> userForums = new ArrayList<>();
         try (PreparedStatement stmt = conn.prepareStatement(userForumsQuery)) {
-            stmt.setInt(1, userId);
+            stmt.setLong(1, userId);
             ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 userForums.add(new ForumText(
-                        rs.getInt("id"),
+                        rs.getLong("id"),
                         rs.getString("title"),
                         rs.getString("description")
                 ));
@@ -217,11 +217,11 @@ public class RecommendationEngine {
                 "WHERE f.id NOT IN (SELECT forum_id FROM user_forum WHERE user_id = ?)";
 
         try (PreparedStatement stmt = conn.prepareStatement(otherForumsQuery)) {
-            stmt.setInt(1, userId);
+            stmt.setLong(1, userId);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                int forumId = rs.getInt("id");
+                long forumId = rs.getLong("id");
                 String name = rs.getString("title");
                 String description = rs.getString("description");
 
@@ -256,8 +256,8 @@ public class RecommendationEngine {
      * Score basé sur les votes (upvotes/downvotes) (NOUVEAU)
      * Cette méthode est optionnelle et ne cause pas d'erreur si la table votes n'existe pas
      */
-    private static void calculateVoteScore(Connection conn, int userId,
-                                           Map<Integer, RecommendationScore> scores) throws SQLException {
+    private static void calculateVoteScore(Connection conn, long userId,
+                                           Map<Long, RecommendationScore> scores) throws SQLException {
         try {
             // Vérifier si la table votes existe et a la colonne forum_id
             DatabaseMetaData metaData = conn.getMetaData();
@@ -277,13 +277,13 @@ public class RecommendationEngine {
 
             // Récupérer les forums que l'utilisateur a upvoté
             String upvotedQuery = "SELECT forum_id FROM votes WHERE user_id = ? AND vote_type = 'upvote'";
-            List<Integer> upvotedForums = new ArrayList<>();
+            List<Long> upvotedForums = new ArrayList<>();
 
             try (PreparedStatement stmt = conn.prepareStatement(upvotedQuery)) {
-                stmt.setInt(1, userId);
+                stmt.setLong(1, userId);
                 ResultSet rs = stmt.executeQuery();
                 while (rs.next()) {
-                    upvotedForums.add(rs.getInt("forum_id"));
+                    upvotedForums.add(rs.getLong("forum_id"));
                 }
             }
 
@@ -296,11 +296,11 @@ public class RecommendationEngine {
                     "AND f.id NOT IN (" + String.join(",", upvotedForums.stream().map(String::valueOf).toArray(String[]::new)) + ")";
 
             try (PreparedStatement stmt = conn.prepareStatement(similarForumsQuery)) {
-                stmt.setInt(1, userId);
+                stmt.setLong(1, userId);
                 ResultSet rs = stmt.executeQuery();
 
                 while (rs.next()) {
-                    int forumId = rs.getInt("id");
+                    long forumId = rs.getLong("id");
 
                     scores.putIfAbsent(forumId, new RecommendationScore(forumId));
                     scores.get(forumId).addScore(5, "Basé sur vos votes positifs");
@@ -361,16 +361,16 @@ public class RecommendationEngine {
     /**
      * Exclure les forums déjà rejoints (optionnel)
      */
-    private static void excludeJoinedForums(Connection conn, int userId,
-                                            Map<Integer, RecommendationScore> scores) throws SQLException {
+    private static void excludeJoinedForums(Connection conn, long userId,
+                                            Map<Long, RecommendationScore> scores) throws SQLException {
         String query = "SELECT forum_id FROM user_forum WHERE user_id = ?";
 
         try (PreparedStatement stmt = conn.prepareStatement(query)) {
-            stmt.setInt(1, userId);
+            stmt.setLong(1, userId);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                int forumId = rs.getInt("forum_id");
+                long forumId = rs.getLong("forum_id");
                 scores.remove(forumId); // Retirer les forums déjà rejoints
             }
         }
@@ -379,8 +379,8 @@ public class RecommendationEngine {
     /**
      * Sauvegarder les recommandations dans la base de données
      */
-    private static void saveRecommendations(Connection conn, int userId,
-                                            Map<Integer, RecommendationScore> scores) throws SQLException {
+    private static void saveRecommendations(Connection conn, long userId,
+                                            Map<Long, RecommendationScore> scores) throws SQLException {
         String query = "INSERT INTO forum_recommendations (user_id, forum_id, score, reason) " +
                 "VALUES (?, ?, ?, ?)";
 
@@ -395,8 +395,8 @@ public class RecommendationEngine {
                 if (count >= 20) break;
                 if (score.totalScore < 1) continue; // Score minimum
 
-                stmt.setInt(1, userId);
-                stmt.setInt(2, score.forumId);
+                stmt.setLong(1, userId);
+                stmt.setLong(2, score.forumId);
                 stmt.setDouble(3, score.totalScore);
                 stmt.setString(4, score.getReason());
                 stmt.addBatch();
@@ -411,7 +411,7 @@ public class RecommendationEngine {
     /**
      * Récupère les forums recommandés pour un utilisateur
      */
-    public static List<RecommendedForum> getRecommendations(int userId, int limit) {
+    public static List<RecommendedForum> getRecommendations(long userId, int limit) {
         List<RecommendedForum> recommendations = new ArrayList<>();
 
         String query = "SELECT fr.forum_id, fr.score, fr.reason, f.title, f.description, " +
@@ -426,13 +426,13 @@ public class RecommendationEngine {
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, userId);
+            stmt.setLong(1, userId);
             stmt.setInt(2, limit);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
                 recommendations.add(new RecommendedForum(
-                        rs.getInt("forum_id"),
+                        rs.getLong("forum_id"),
                         rs.getString("title"),
                         rs.getString("description"),
                         rs.getDouble("score"),
@@ -479,11 +479,11 @@ public class RecommendationEngine {
      * Classe pour stocker le score de recommandation
      */
     private static class RecommendationScore {
-        int forumId;
+        long forumId;
         double totalScore = 0;
         List<String> reasons = new ArrayList<>();
 
-        RecommendationScore(int forumId) {
+        RecommendationScore(long forumId) {
             this.forumId = forumId;
         }
 
@@ -503,7 +503,7 @@ public class RecommendationEngine {
      * Classe pour représenter un forum recommandé
      */
     public static class RecommendedForum {
-        public int id;
+        public long id;
         public String name;
         public String description;
         public double score;
@@ -511,7 +511,7 @@ public class RecommendationEngine {
         public int memberCount;
         public int recentPosts;
 
-        public RecommendedForum(int id, String name, String description, double score,
+        public RecommendedForum(long id, String name, String description, double score,
                                 String reason, int memberCount, int recentPosts) {
             this.id = id;
             this.name = name;
@@ -527,11 +527,11 @@ public class RecommendationEngine {
      * Classe pour stocker le texte d'un forum
      */
     private static class ForumText {
-        int id;
+        long id;
         String name;
         String description;
 
-        ForumText(int id, String name, String description) {
+        ForumText(long id, String name, String description) {
             this.id = id;
             this.name = name;
             this.description = description != null ? description : "";
@@ -541,13 +541,13 @@ public class RecommendationEngine {
     /**
      * Supprime toutes les recommandations pour un utilisateur
      */
-    public static void clearAllRecommendations(int userId) {
+    public static void clearAllRecommendations(long userId) {
         String query = "DELETE FROM forum_recommendations WHERE user_id = ?";
 
         try (Connection conn = getConnection();
              PreparedStatement stmt = conn.prepareStatement(query)) {
 
-            stmt.setInt(1, userId);
+            stmt.setLong(1, userId);
             stmt.executeUpdate();
 
         } catch (SQLException e) {
